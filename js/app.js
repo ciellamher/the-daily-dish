@@ -758,7 +758,9 @@ function renderUI(state) {
 
   // 2. Render matching/filtered recipes grid
   const filteredRecipes = store.getFilteredRecipes();
-  elements.resultsCount.innerText = filteredRecipes.length;
+  if (elements.resultsCount) {
+    elements.resultsCount.innerText = filteredRecipes.length;
+  }
 
   if (state.searchMode === "ingredients" && state.selectedIngredients.length > 0) {
     elements.resultsFilterInfo.innerHTML = `Matching recipes for ingredient tags: <span>${escapeHtml(state.selectedIngredients.join(", "))}</span>`;

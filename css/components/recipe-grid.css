@@ -22,6 +22,26 @@
   color: var(--text-primary);
 }
 
+.heading-with-count {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.results-count-badge {
+  background: var(--accent-primary);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  margin-top: 6px;
+}
+
 .results-filter-info {
   font-size: 0.95rem;
   color: var(--text-secondary);
