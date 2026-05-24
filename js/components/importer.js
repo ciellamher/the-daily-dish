@@ -190,10 +190,10 @@ export function simulateRecipeImport(url, onStepChange, onComplete) {
           
           // Complete
           onComplete(importedRecipe);
-        }, 600);
-      }, 1000);
-    }, 1000);
-  }, 1000);
+        }, 100);
+      }, 150);
+    }, 150);
+  }, 150);
 }
 
 /**

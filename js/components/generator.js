@@ -438,8 +438,8 @@ export function generateRecipeOnSpot(query, onStepChange, onComplete) {
           // Store the generated recipe in local database
           store.addRecipe(recipe);
           onComplete(recipe);
-        }, 500);
-      }, 800);
-    }, 800);
-  }, 800);
+        }, 100);
+      }, 150);
+    }, 150);
+  }, 150);
 }
