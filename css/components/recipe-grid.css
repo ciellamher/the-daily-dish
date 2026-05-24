@@ -352,3 +352,65 @@
   width: 15px;
   height: 15px;
 }
+
+/* Card Floating Actions (Save and Delete) */
+.card-float-actions {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+}
+
+.card-float-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  padding: 0;
+}
+
+.card-float-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.2px;
+}
+
+.card-float-btn:hover {
+  transform: scale(1.1);
+  background: var(--bg-tertiary);
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.card-float-btn.btn-save-recipe.saved {
+  background: var(--accent-primary);
+  color: #fff;
+  border-color: var(--accent-primary);
+}
+
+.card-float-btn.btn-save-recipe.saved svg {
+  fill: #fff;
+}
+
+.card-float-btn.btn-save-recipe.saved:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.card-float-btn.btn-delete-default:hover,
+.card-float-btn.btn-delete-saved:hover {
+  background: #fdf2f2;
+  color: #c53030;
+  border-color: #feb2b2;
+}

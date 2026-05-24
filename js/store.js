@@ -2,21 +2,49 @@
 
 import { RECIPES as INITIAL_RECIPES } from "./database.js";
 
+// Seed-based week selection helpers
+function getWeekSeed() {
+  const now = new Date();
+  const oneJan = new Date(now.getFullYear(), 0, 1);
+  const numberOfDays = Math.floor((now - oneJan) / (24 * 60 * 60 * 1000));
+  const weekNumber = Math.ceil((now.getDay() + 1 + numberOfDays) / 7);
+  return now.getFullYear() * 100 + weekNumber;
+}
+
+function getWeeklyDefaultRecipes(allRecipes, seed) {
+  const pool = [...allRecipes];
+  const selected = [];
+  let tempSeed = seed;
+  for (let i = 0; i < 3; i++) {
+    tempSeed = (tempSeed * 1664525 + 1013904223) % 4294967296;
+    if (pool.length === 0) break;
+    const index = tempSeed % pool.length;
+    selected.push(pool.splice(index, 1)[0]);
+  }
+  return selected;
+}
+
 class Store {
   constructor() {
     this.listeners = [];
     
-    // Load initial data or load from LocalStorage
     this.state = {
-      recipes: this.loadRecipes(),
+      myRecipes: this.loadMyRecipes(),
+      deletedDefaultIds: this.loadDeletedDefaultIds(),
+      activeTab: "home", // "home" or "my-recipes"
+      weeklySeed: getWeekSeed(),
+      defaultRecipes: [], // Populated in updateCombinedRecipes
+      recipes: [],        // Populated in updateCombinedRecipes
       selectedRecipeId: null,
       customServings: {}, // Map of recipeId -> current serving size
       searchQuery: "",
       searchMode: "ingredients", // 'name' or 'ingredients'
       selectedIngredients: this.loadSelectedIngredients(),
       shoppingList: this.loadShoppingList(),
-      activeSteps: {} // Map of recipeId -> active step index (for beginner guide step progress)
+      activeSteps: {} // Map of recipeId -> active step index
     };
+
+    this.updateCombinedRecipes();
   }
 
   // Pub-Sub Mechanism
@@ -32,17 +60,30 @@ class Store {
   }
 
   // Loaders
-  loadRecipes() {
+  loadMyRecipes() {
     try {
-      const stored = localStorage.getItem("cookbook_recipes");
+      const stored = localStorage.getItem("cookbook_my_recipes");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {
-      console.error("Failed to parse stored recipes, resetting", e);
+      console.error("Failed to parse stored myRecipes", e);
     }
-    return INITIAL_RECIPES;
+    return [];
+  }
+
+  loadDeletedDefaultIds() {
+    try {
+      const stored = localStorage.getItem("cookbook_deleted_defaults");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.error("Failed to parse stored deleted defaults", e);
+    }
+    return [];
   }
 
   loadSelectedIngredients() {
@@ -72,8 +113,12 @@ class Store {
   }
 
   // Persisters
-  saveRecipes() {
-    localStorage.setItem("cookbook_recipes", JSON.stringify(this.state.recipes));
+  saveMyRecipes() {
+    localStorage.setItem("cookbook_my_recipes", JSON.stringify(this.state.myRecipes));
+  }
+
+  saveDeletedDefaultIds() {
+    localStorage.setItem("cookbook_deleted_defaults", JSON.stringify(this.state.deletedDefaultIds));
   }
 
   saveSelectedIngredients() {
@@ -84,16 +129,62 @@ class Store {
     localStorage.setItem("cookbook_shopping_list", JSON.stringify(this.state.shoppingList));
   }
 
+  updateCombinedRecipes() {
+    // 1. Get weekly defaults
+    const rawDefaults = getWeeklyDefaultRecipes(INITIAL_RECIPES, this.state.weeklySeed);
+    
+    // 2. Filter out deleted defaults
+    this.state.defaultRecipes = rawDefaults.filter(
+      r => !this.state.deletedDefaultIds.includes(r.id)
+    );
+    
+    // 3. Combine defaults and myRecipes to avoid breaking lookups
+    const map = new Map();
+    this.state.defaultRecipes.forEach(r => map.set(r.id, r));
+    this.state.myRecipes.forEach(r => map.set(r.id, r));
+    this.state.recipes = Array.from(map.values());
+  }
+
   // Actions
   addRecipe(recipe) {
-    this.state.recipes.unshift(recipe);
-    this.saveRecipes();
+    // Generated recipes go directly into My Recipes
+    this.state.myRecipes.unshift(recipe);
+    this.saveMyRecipes();
+    this.updateCombinedRecipes();
     this.notify();
   }
 
   deleteRecipe(recipeId) {
-    this.state.recipes = this.state.recipes.filter(r => r.id !== recipeId);
-    this.saveRecipes();
+    if (this.state.activeTab === "my-recipes") {
+      this.removeRecipeFromMyRecipes(recipeId);
+    } else {
+      // Deleting from defaults on Home page
+      this.state.deletedDefaultIds.push(recipeId);
+      this.saveDeletedDefaultIds();
+      this.updateCombinedRecipes();
+      this.notify();
+    }
+  }
+
+  saveRecipeToMyRecipes(recipeId) {
+    const recipe = this.state.recipes.find(r => r.id === recipeId);
+    if (recipe && !this.state.myRecipes.some(r => r.id === recipeId)) {
+      this.state.myRecipes.unshift(recipe);
+      this.saveMyRecipes();
+      this.updateCombinedRecipes();
+      this.notify();
+    }
+  }
+
+  removeRecipeFromMyRecipes(recipeId) {
+    this.state.myRecipes = this.state.myRecipes.filter(r => r.id !== recipeId);
+    this.saveMyRecipes();
+    this.updateCombinedRecipes();
+    this.notify();
+  }
+
+  setActiveTab(tab) {
+    this.state.activeTab = tab;
     this.notify();
   }
 
@@ -215,10 +306,10 @@ class Store {
 
   // Getters & Matching Algorithm
   getFilteredRecipes() {
-    const { recipes, searchQuery, searchMode, selectedIngredients } = this.state;
+    const { activeTab, defaultRecipes, myRecipes, searchQuery, searchMode, selectedIngredients } = this.state;
     
     // Filter by name query if present
-    let filtered = recipes || [];
+    let filtered = activeTab === "my-recipes" ? myRecipes : defaultRecipes;
     
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();

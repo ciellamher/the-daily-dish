@@ -5,7 +5,7 @@ import { escapeHtml, ICONS, getGourmetFoodImage } from "../utils.js";
 /**
  * Returns the HTML string representation of a recipe card styled like the FOODEAT menu.
  */
-export function renderRecipeCard(recipe) {
+export function renderRecipeCard(recipe, isSaved = false, activeTab = "home") {
   const { id, title, description, image, prepTime, cookTime, difficulty, category, tags, matchStats } = recipe;
   
   // Robust image sourcing: If image is empty or invalid, pull dynamically from Unsplash helper
@@ -56,8 +56,32 @@ export function renderRecipeCard(recipe) {
 
   const totalTime = prepTime + cookTime;
 
+  // Render floating save/delete icons
+  let floatActionsHtml = "";
+  if (activeTab === "home") {
+    floatActionsHtml = `
+      <div class="card-float-actions">
+        <button class="card-float-btn btn-save-recipe ${isSaved ? 'saved' : ''}" data-id="${id}" title="${isSaved ? 'Saved to My Recipes' : 'Save to My Recipes'}" aria-label="Save Recipe">
+          ${isSaved ? ICONS.heartFilled : ICONS.heart}
+        </button>
+        <button class="card-float-btn btn-delete-default" data-id="${id}" title="Remove from defaults" aria-label="Remove default recipe">
+          ${ICONS.trash}
+        </button>
+      </div>
+    `;
+  } else {
+    floatActionsHtml = `
+      <div class="card-float-actions">
+        <button class="card-float-btn btn-delete-saved" data-id="${id}" title="Delete from My Recipes" aria-label="Delete saved recipe">
+          ${ICONS.trash}
+        </button>
+      </div>
+    `;
+  }
+
   return `
     <div class="recipe-card" data-recipe-id="${id}">
+      ${floatActionsHtml}
       <div class="card-image-wrapper">
         ${imageHtml}
         <span class="card-category-badge">${escapeHtml(category)}</span>

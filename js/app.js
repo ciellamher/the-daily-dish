@@ -23,7 +23,6 @@ const elements = {
   btnHeroMenu: document.getElementById("btn-hero-menu"),
   btnHeroGenerate: document.getElementById("btn-hero-generate"),
   searchGenerateBtn: document.getElementById("search-generate-btn"),
-  btnFriesRecipe: document.getElementById("btn-fries-recipe"),
   
   // Fridge Panel
   fridgePickerPanel: document.getElementById("fridge-picker-panel"),
@@ -40,7 +39,10 @@ const elements = {
   
   // Modals & Triggers
   btnShowImport: document.getElementById("btn-show-import"),
-  btnShowFridge: document.getElementById("btn-show-fridge"),
+  btnShowMyRecipes: document.getElementById("btn-show-my-recipes"),
+  heroBanner: document.querySelector(".hero-banner"),
+  heroSection: document.getElementById("search-section-anchor"),
+  resultsHeading: document.querySelector(".results-heading"),
   
   // Recipe Detail Modal
   recipeDetailModal: document.getElementById("recipe-detail-modal"),
@@ -128,8 +130,7 @@ function bindGlobalEvents() {
     window.scrollTo({ top: 0, behavior: "smooth" });
     
     // Reset active nav state
-    elements.btnShowHome.classList.add("active");
-    elements.btnShowFridge.classList.remove("active");
+    store.setActiveTab("home");
   };
 
   if (elements.btnShowHome) elements.btnShowHome.addEventListener("click", handleHomeReset);
@@ -138,30 +139,26 @@ function bindGlobalEvents() {
   /* --- 2. Hero Banner smooth scroll scroll bindings --- */
   if (elements.btnHeroMenu) {
     elements.btnHeroMenu.addEventListener("click", () => {
-      const target = document.getElementById("search-section-anchor");
-      if (target) target.scrollIntoView({ behavior: "smooth" });
-      elements.btnShowHome.classList.remove("active");
-      elements.btnShowFridge.classList.add("active");
+      store.setActiveTab("home");
+      setTimeout(() => {
+        const target = document.getElementById("search-section-anchor");
+        if (target) target.scrollIntoView({ behavior: "smooth" });
+      }, 50);
     });
   }
 
   if (elements.btnHeroGenerate) {
     elements.btnHeroGenerate.addEventListener("click", () => {
-      const target = document.getElementById("search-section-anchor");
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth" });
-        setTimeout(() => {
-          elements.recipeSearchInput.focus();
-        }, 600);
-      }
-    });
-  }
-
-  /* --- 3. Best Potatoes for French Fries trigger --- */
-  if (elements.btnFriesRecipe) {
-    elements.btnFriesRecipe.addEventListener("click", () => {
-      // Instantly trigger AI recipe generation for Crispy French Fries
-      triggerAiRecipeGeneration("Crispy French Fries");
+      store.setActiveTab("home");
+      setTimeout(() => {
+        const target = document.getElementById("search-section-anchor");
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth" });
+          setTimeout(() => {
+            elements.recipeSearchInput.focus();
+          }, 600);
+        }
+      }, 50);
     });
   }
 
@@ -255,13 +252,12 @@ function bindGlobalEvents() {
     resetImporterState();
   });
 
-  // Menu navigation smooth scroll
-  if (elements.btnShowFridge) {
-    elements.btnShowFridge.addEventListener("click", () => {
-      const target = document.getElementById("search-section-anchor");
-      if (target) target.scrollIntoView({ behavior: "smooth" });
-      elements.btnShowHome.classList.remove("active");
-      elements.btnShowFridge.classList.add("active");
+  // My Recipes navigation trigger
+  if (elements.btnShowMyRecipes) {
+    elements.btnShowMyRecipes.addEventListener("click", (e) => {
+      e.preventDefault();
+      store.setActiveTab("my-recipes");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
 
@@ -300,6 +296,26 @@ function bindGlobalEvents() {
 
   /* --- 9. Recipe Grid Events (Delegated) --- */
   elements.recipesGrid.addEventListener("click", (e) => {
+    // 0. Floating Save/Delete Actions
+    const saveBtn = e.target.closest(".btn-save-recipe");
+    if (saveBtn) {
+      const id = saveBtn.getAttribute("data-id");
+      const isSaved = store.state.myRecipes.some(r => r.id === id);
+      if (isSaved) {
+        store.removeRecipeFromMyRecipes(id);
+      } else {
+        store.saveRecipeToMyRecipes(id);
+      }
+      return;
+    }
+
+    const delBtn = e.target.closest(".btn-delete-default, .btn-delete-saved");
+    if (delBtn) {
+      const id = delBtn.getAttribute("data-id");
+      store.deleteRecipe(id);
+      return;
+    }
+
     // A. View Details
     const viewBtn = e.target.closest(".btn-view-details");
     if (viewBtn) {
@@ -423,9 +439,9 @@ function bindGlobalEvents() {
   /* --- 12. URL Importer --- */
   elements.btnSubmitImport.addEventListener("click", handleRecipeImport);
   elements.btnViewImported.addEventListener("click", () => {
-    const currentRecipes = store.state.recipes;
-    if (currentRecipes.length > 0) {
-      const latestRecipeId = currentRecipes[0].id; // Newly added is unshifted to start
+    if (store.state.myRecipes.length > 0) {
+      const latestRecipeId = store.state.myRecipes[0].id;
+      store.setActiveTab("my-recipes");
       store.setSelectedRecipe(latestRecipeId);
       closeModal(elements.importerModal);
       resetImporterState();
@@ -439,9 +455,9 @@ function bindGlobalEvents() {
     resetGeneratorState();
   });
   elements.btnViewGenerated.addEventListener("click", () => {
-    const currentRecipes = store.state.recipes;
-    if (currentRecipes.length > 0) {
-      const latestRecipeId = currentRecipes[0].id;
+    if (store.state.myRecipes.length > 0) {
+      const latestRecipeId = store.state.myRecipes[0].id;
+      store.setActiveTab("my-recipes");
       store.setSelectedRecipe(latestRecipeId);
       closeModal(elements.generatorModal);
       resetGeneratorState();
@@ -680,6 +696,21 @@ function resetImporterState() {
    ========================================================================== */
 
 function renderUI(state) {
+  // 0. Toggle active tab visual styling and sections
+  if (state.activeTab === "home") {
+    if (elements.btnShowHome) elements.btnShowHome.classList.add("active");
+    if (elements.btnShowMyRecipes) elements.btnShowMyRecipes.classList.remove("active");
+    if (elements.heroBanner) elements.heroBanner.classList.remove("hidden");
+    if (elements.heroSection) elements.heroSection.classList.remove("hidden");
+    if (elements.resultsHeading) elements.resultsHeading.innerHTML = "Weekly Default Recipes";
+  } else if (state.activeTab === "my-recipes") {
+    if (elements.btnShowHome) elements.btnShowHome.classList.remove("active");
+    if (elements.btnShowMyRecipes) elements.btnShowMyRecipes.classList.add("active");
+    if (elements.heroBanner) elements.heroBanner.classList.add("hidden");
+    if (elements.heroSection) elements.heroSection.classList.add("hidden");
+    if (elements.resultsHeading) elements.resultsHeading.innerHTML = "My Saved Recipes";
+  }
+
   // 1. Render active fridge ingredient chips
   const fridgeContainer = elements.activeIngredientsContainer;
   const statusPanel = elements.fridgeStatusBar;
@@ -734,28 +765,39 @@ function renderUI(state) {
   } else if (state.searchQuery.trim()) {
     elements.resultsFilterInfo.innerHTML = `Search results for query: <span>"${escapeHtml(state.searchQuery)}"</span>`;
   } else {
-    elements.resultsFilterInfo.innerHTML = `Browse all available gourmet ideas`;
+    elements.resultsFilterInfo.innerHTML = state.activeTab === "my-recipes" ? `Browse your saved and generated collection` : `Browse this week's handpicked default recipes`;
   }
 
   if (filteredRecipes.length === 0) {
-    const queryStr = state.searchQuery.trim() ? state.searchQuery : state.selectedIngredients.join(", ");
-    const hasQuery = queryStr.length > 0;
-    
-    elements.recipesGrid.innerHTML = `
-      <div class="recipes-empty-state">
-        <span class="empty-icon">${ICONS.cooking}</span>
-        <h4>No recipes match your search</h4>
-        <p>Try adding simpler ingredients or typing another dish name.</p>
-        ${hasQuery ? `
-          <button class="btn-card-secondary action-generate-spot" data-query="${escapeHtml(queryStr)}" style="margin-top: 20px; width: auto; padding: 12px 24px; font-size: 0.95rem; border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(255, 126, 103, 0.05); border-radius: var(--radius-md); font-weight: 600;">
-            <span class="btn-action-icon-svg" style="margin-right: 6px;">${ICONS.wand}</span>
-            <span>Generate custom "${escapeHtml(queryStr)}" recipe on the spot!</span>
-          </button>
-        ` : ""}
-      </div>
-    `;
+    if (state.activeTab === "my-recipes") {
+      elements.recipesGrid.innerHTML = `
+        <div class="recipes-empty-state">
+          <span class="empty-icon">${ICONS.cooking}</span>
+          <h4>Your cookbook is empty</h4>
+          <p>You haven't saved any recipes yet! Go back to Home and save some default recipes, or generate new ones using AI.</p>
+        </div>
+      `;
+    } else {
+      const queryStr = state.searchQuery.trim() ? state.searchQuery : state.selectedIngredients.join(", ");
+      const hasQuery = queryStr.length > 0;
+      elements.recipesGrid.innerHTML = `
+        <div class="recipes-empty-state">
+          <span class="empty-icon">${ICONS.cooking}</span>
+          <h4>No recipes match your search</h4>
+          <p>Try adding simpler ingredients or typing another dish name.</p>
+          ${hasQuery ? `
+            <button class="btn-card-secondary action-generate-spot" data-query="${escapeHtml(queryStr)}" style="margin-top: 20px; width: auto; padding: 12px 24px; font-size: 0.95rem; border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(255, 126, 103, 0.05); border-radius: var(--radius-md); font-weight: 600;">
+              <span class="btn-action-icon-svg" style="margin-right: 6px;">${ICONS.wand}</span>
+              <span>Generate custom "${escapeHtml(queryStr)}" recipe on the spot!</span>
+            </button>
+          ` : ""}
+        </div>
+      `;
+    }
   } else {
-    elements.recipesGrid.innerHTML = filteredRecipes.map(recipe => renderRecipeCard(recipe)).join("");
+    elements.recipesGrid.innerHTML = filteredRecipes.map(recipe => 
+      renderRecipeCard(recipe, state.myRecipes.some(mr => mr.id === recipe.id), state.activeTab)
+    ).join("");
   }
 
   // 3. Render Shopping Cart Drawer & Badge Count
