@@ -1,0 +1,261 @@
+/* ==========================================================================
+   Recipe URL Importer & AI Generator Modal Styling (FOODEAT style)
+   ========================================================================== */
+
+.importer-container {
+  max-width: 550px !important;
+}
+
+.importer-content {
+  padding: 35px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.importer-header {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.importer-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--accent-primary);
+  background-color: rgba(231, 111, 81, 0.06);
+  padding: 20px;
+  border-radius: var(--radius-full);
+  margin-bottom: 16px;
+  animation: float-icon 4s ease-in-out infinite;
+}
+
+.importer-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+@keyframes float-icon {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.importer-header h2 {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.importer-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Form inputs styling */
+.importer-form-group {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+#import-url-input {
+  flex-grow: 1;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  transition: var(--transition-fast);
+}
+
+#import-url-input:focus {
+  border-color: var(--accent-primary);
+  background: var(--bg-secondary);
+}
+
+.import-submit-btn {
+  background: var(--accent-primary);
+  color: white;
+  padding: 0 26px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.import-submit-btn:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 4px 12px rgba(231, 111, 81, 0.2);
+}
+
+/* Simulated Loader Animations */
+.importer-loader {
+  width: 100%;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+.loader-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  border-top-color: var(--accent-primary);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loader-status {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--accent-primary);
+}
+
+.loader-progress-bar {
+  width: 80%;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--color-success));
+  width: 0%;
+  transition: width 0.4s ease;
+  border-radius: var(--radius-full);
+}
+
+.loader-steps {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.loader-step {
+  transition: var(--transition-fast);
+}
+
+.loader-step.active {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.loader-step.done {
+  color: var(--color-success);
+}
+
+/* Success View Animations */
+.importer-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.success-checkmark {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+}
+
+.checkmark-circle {
+  width: 64px;
+  height: 64px;
+  background: var(--color-success-glass);
+  border: 2px solid var(--color-success);
+  border-radius: var(--radius-full);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.checkmark-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-success);
+  animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s both;
+}
+
+.checkmark-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+.importer-success h3 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.recipe-preview-title {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.view-imported-btn {
+  background: var(--color-success);
+  color: white;
+  font-weight: 700;
+  padding: 12px 30px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(77, 124, 91, 0.2);
+  transition: var(--transition-fast);
+}
+
+.view-imported-btn:hover {
+  background: #5a8e69;
+  box-shadow: 0 6px 16px rgba(77, 124, 91, 0.3);
+  transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Mobile responsive */
+@media (max-width: 500px) {
+  .importer-form-group {
+    flex-direction: column;
+  }
+  .import-submit-btn {
+    padding: 14px;
+  }
+}
