@@ -81,7 +81,13 @@ const elements = {
   generatorProgressFill: document.getElementById("generator-progress-fill"),
   generatorSuccessState: document.getElementById("generator-success-state"),
   generatedRecipeTitlePreview: document.getElementById("generated-recipe-title-preview"),
-  btnViewGenerated: document.getElementById("btn-view-generated")
+  btnViewGenerated: document.getElementById("btn-view-generated"),
+  
+  // Floating Action Button
+  fabContainer: document.getElementById("fab-container"),
+  fabMainBtn: document.getElementById("fab-main-btn"),
+  fabBtnGenerate: document.getElementById("fab-btn-generate"),
+  fabBtnImport: document.getElementById("fab-btn-import")
 };
 
 // Global Staple Ingredients for Fridge Picker Quick-Add
@@ -464,6 +470,38 @@ function bindGlobalEvents() {
       openModal(elements.recipeDetailModal);
     }
   });
+
+  /* --- 14. Floating Action Button Speed Dial --- */
+  if (elements.fabMainBtn) {
+    elements.fabMainBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      elements.fabContainer.classList.toggle("active");
+    });
+  }
+
+  // Close speed dial if clicking anywhere else
+  document.addEventListener("click", (e) => {
+    if (elements.fabContainer && !elements.fabContainer.contains(e.target)) {
+      elements.fabContainer.classList.remove("active");
+    }
+  });
+
+  if (elements.fabBtnGenerate) {
+    elements.fabBtnGenerate.addEventListener("click", () => {
+      elements.fabContainer.classList.remove("active");
+      const query = prompt("What dish would you like The Daily Dish to generate? (e.g. Garlic Butter Chicken, Tacos, Chocolate Lava Cake)");
+      if (query && query.trim()) {
+        triggerAiRecipeGeneration(query);
+      }
+    });
+  }
+
+  if (elements.fabBtnImport) {
+    elements.fabBtnImport.addEventListener("click", () => {
+      elements.fabContainer.classList.remove("active");
+      openModal(elements.importerModal);
+    });
+  }
 }
 
 /* ==========================================================================
