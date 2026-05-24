@@ -60,6 +60,109 @@
   gap: 35px;
 }
 
+/* Carousel / Sliding View Layout */
+.carousel-wrapper {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.carousel-track-container {
+  overflow: hidden;
+  width: 100%;
+  padding: 10px 0 25px 0; /* Padding for card hover scale and shadows */
+}
+
+.carousel-track {
+  display: flex;
+  gap: 30px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE/Edge */
+  padding: 0 10px;
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.carousel-track .recipe-card {
+  flex: 0 0 calc(33.333% - 20px);
+  min-width: 320px;
+  scroll-snap-align: start;
+}
+
+/* Carousel Navigation Buttons */
+.carousel-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-full);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  z-index: 10;
+  transition: all var(--transition-fast);
+}
+
+.carousel-nav-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.5px;
+}
+
+.carousel-nav-btn:hover {
+  background: var(--accent-primary);
+  color: #fff;
+  border-color: var(--accent-primary);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.carousel-nav-btn.prev {
+  left: -27px;
+}
+
+.carousel-nav-btn.next {
+  right: -27px;
+}
+
+.carousel-nav-btn.disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Responsive Overrides */
+@media (max-width: 1024px) {
+  .carousel-track .recipe-card {
+    flex: 0 0 calc(50% - 15px);
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-track .recipe-card {
+    flex: 0 0 100%;
+  }
+  .carousel-nav-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .carousel-nav-btn.prev {
+    left: -10px;
+  }
+  .carousel-nav-btn.next {
+    right: -10px;
+  }
+}
+
 /* Card Styling (Highly Rounded Cream Box) */
 .recipe-card {
   background: var(--bg-secondary);

@@ -809,6 +809,7 @@ function renderUI(state) {
   }
 
   if (filteredRecipes.length === 0) {
+    elements.recipesGrid.className = "recipes-grid";
     if (state.activeTab === "my-recipes") {
       elements.recipesGrid.innerHTML = `
         <div class="recipes-empty-state">
@@ -835,9 +836,30 @@ function renderUI(state) {
       `;
     }
   } else {
-    elements.recipesGrid.innerHTML = filteredRecipes.map(recipe => 
-      renderRecipeCard(recipe, state.myRecipes.some(mr => mr.id === recipe.id), state.activeTab)
-    ).join("");
+    if (state.activeTab === "home") {
+      elements.recipesGrid.className = "carousel-wrapper";
+      elements.recipesGrid.innerHTML = `
+        <button class="carousel-nav-btn prev" id="carousel-prev" aria-label="Previous Recipes">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="carousel-track-container">
+          <div class="carousel-track" id="carousel-track">
+            ${filteredRecipes.map(recipe => 
+              renderRecipeCard(recipe, state.myRecipes.some(mr => mr.id === recipe.id), state.activeTab)
+            ).join("")}
+          </div>
+        </div>
+        <button class="carousel-nav-btn next" id="carousel-next" aria-label="Next Recipes">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      `;
+      bindCarouselEvents();
+    } else {
+      elements.recipesGrid.className = "recipes-grid";
+      elements.recipesGrid.innerHTML = filteredRecipes.map(recipe => 
+        renderRecipeCard(recipe, state.myRecipes.some(mr => mr.id === recipe.id), state.activeTab)
+      ).join("");
+    }
   }
 
   // 3. Render Shopping Cart Drawer & Badge Count
@@ -928,4 +950,51 @@ function resetGeneratorState() {
   elements.generatorLoadingState.classList.add("hidden");
   elements.generatorSuccessState.classList.add("hidden");
   resetGeneratorStepsUI();
+}
+
+/* ==========================================================================
+   CAROUSEL/SLIDING VIEW EVENT BINDINGS
+   ========================================================================== */
+
+function bindCarouselEvents() {
+  const track = document.getElementById("carousel-track");
+  const prevBtn = document.getElementById("carousel-prev");
+  const nextBtn = document.getElementById("carousel-next");
+  
+  if (!track || !prevBtn || !nextBtn) return;
+  
+  const updateButtons = () => {
+    // Disable prev button if scrolled to the left
+    if (track.scrollLeft <= 5) {
+      prevBtn.classList.add("disabled");
+    } else {
+      prevBtn.classList.remove("disabled");
+    }
+    
+    // Disable next button if scrolled to the right end
+    const maxScroll = track.scrollWidth - track.clientWidth;
+    if (track.scrollLeft >= maxScroll - 5) {
+      nextBtn.classList.add("disabled");
+    } else {
+      nextBtn.classList.remove("disabled");
+    }
+  };
+  
+  prevBtn.addEventListener("click", () => {
+    const cardWidth = track.querySelector(".recipe-card")?.clientWidth || 320;
+    track.scrollBy({ left: -(cardWidth + 30), behavior: "smooth" });
+    setTimeout(updateButtons, 350);
+  });
+  
+  nextBtn.addEventListener("click", () => {
+    const cardWidth = track.querySelector(".recipe-card")?.clientWidth || 320;
+    track.scrollBy({ left: cardWidth + 30, behavior: "smooth" });
+    setTimeout(updateButtons, 350);
+  });
+  
+  track.addEventListener("scroll", updateButtons);
+  window.addEventListener("resize", updateButtons);
+  
+  // Initial check
+  updateButtons();
 }
