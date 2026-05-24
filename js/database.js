@@ -229,5 +229,172 @@ export const RECIPES = [
       { step: 4, text: "Remove the pot from heat. Add the fresh basil leaves. Use an immersion blender to puree the soup until completely smooth and creamy.", tip: "Be careful! Hot soup can splash. If using a stand blender, blend in batches and remove the center cap to let steam escape." },
       { step: 5, text: "Stir in the heavy cream. Taste and adjust seasoning with extra salt and pepper. Return to low heat for 2 minutes to heat through.", tip: "Serve hot with a crispy grilled cheese sandwich for the ultimate pairing!" }
     ]
+  },
+  {
+    id: "classic-burger",
+    title: "Classic Beef Cheeseburger",
+    description: "Juicy pan-seared ground beef patty topped with melted cheddar cheese, fresh lettuce, tomato slice, and house burger sauce in a brioche bun.",
+    image: "",
+    prepTime: 10,
+    cookTime: 10,
+    servings: 2,
+    difficulty: "Easy",
+    category: "Burgers",
+    tags: ["Quick", "Comfort Food", "American"],
+    equipment: [
+      { name: "Cast Iron Skillet", icon: "pan" },
+      { name: "Cooking Spatula", icon: "spatula" },
+      { name: "Cutting Board", icon: "board" },
+      { name: "Chef's Knife", icon: "knife" }
+    ],
+    ingredients: [
+      { name: "ground beef (80/20 blend)", quantity: 340, unit: "g", category: "Meat" },
+      { name: "cheddar cheese slices", quantity: 2, unit: "pcs", category: "Dairy" },
+      { name: "brioche hamburger buns", quantity: 2, unit: "pcs", category: "Pantry" },
+      { name: "tomato, sliced", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "butter lettuce leaves", quantity: 2, unit: "pcs", category: "Produce" },
+      { name: "mayonnaise", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "ketchup", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "sweet pickle relish", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "salt and pepper", quantity: 0.5, unit: "tsp", category: "Pantry" }
+    ],
+    instructions: [
+      { step: 1, text: "Divide ground beef into two equal portions and shape into flat patties, slightly wider than the buns. Press a small indent in the center of each patty.", tip: "Patty indents prevent the burgers from bulging in the middle during cooking." },
+      { step: 2, text: "Mix the mayonnaise, ketchup, and sweet pickle relish in a small bowl to make the house burger sauce. Set aside.", tip: "A dash of hot sauce or Worcestershire adds extra depth!" },
+      { step: 3, text: "Heat a skillet over medium-high heat. Toast the split brioche buns face-down until golden, then set aside. Season patties generously with salt and pepper.", tip: "Toasting the buns creates a barrier that prevents them from getting soggy." },
+      { step: 4, text: "Add patties to the hot skillet. Cook for 3-4 minutes until a deep brown crust forms. Flip, immediately top each with cheddar cheese, and cook for 3 minutes.", tip: "Covering the skillet with a lid helps melt the cheese quickly." },
+      { step: 5, text: "Spread burger sauce on the bottom buns. Layer lettuce, cheese-topped patty, tomato slice, and top bun. Serve warm.", tip: "Let the patty rest for 1 minute before assembling so the juices stay locked in!" }
+    ]
+  },
+  {
+    id: "crispy-fries",
+    title: "Crispy Garlic Herb French Fries",
+    description: "Crispy baked potato fries tossed in extra virgin olive oil, minced garlic, fresh parsley, and freshly grated parmesan cheese.",
+    image: "",
+    prepTime: 15,
+    cookTime: 25,
+    servings: 4,
+    difficulty: "Easy",
+    category: "Sides",
+    tags: ["Quick", "Snack", "Vegetarian"],
+    equipment: [
+      { name: "Baking Sheet", icon: "sheet" },
+      { name: "Chef's Knife", icon: "knife" },
+      { name: "Large Bowl", icon: "bowl" }
+    ],
+    ingredients: [
+      { name: "russet potatoes, scrubbed", quantity: 4, unit: "pcs", category: "Produce" },
+      { name: "olive oil", quantity: 3, unit: "tbsp", category: "Pantry" },
+      { name: "garlic powder", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "garlic cloves, minced", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "fresh parsley, chopped", quantity: 2, unit: "tbsp", category: "Produce" },
+      { name: "parmesan cheese, grated", quantity: 3, unit: "tbsp", category: "Dairy" },
+      { name: "sea salt", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "black pepper", quantity: 0.5, unit: "tsp", category: "Pantry" }
+    ],
+    instructions: [
+      { step: 1, text: "Slice potatoes into 1/4-inch thick sticks. Soak in a large bowl of cold water for 30 minutes, then drain and pat completely dry with paper towels.", tip: "Soaking removes excess starch, making the fries much crispier when baked." },
+      { step: 2, text: "Preheat oven to 425°F (220°C). Toss dried potatoes in olive oil, garlic powder, salt, and black pepper in a dry bowl.", tip: "Avoid adding minced garlic before baking as it will burn at high temperatures." },
+      { step: 3, text: "Spread potatoes in a single layer on a lined baking sheet. Bake for 20-25 minutes, flipping halfway through, until golden brown and crispy.", tip: "Ensure the fries do not overlap on the sheet, or they will steam instead of baking." },
+      { step: 4, text: "Immediately toss hot fries with minced garlic, parsley, and parmesan cheese in a bowl, then serve.", tip: "The residual heat of the fries will soften the raw garlic and melt the parmesan!" }
+    ]
+  },
+  {
+    id: "garlic-parm-pasta",
+    title: "Creamy Garlic Parmesan Pasta",
+    description: "Rich, velvety fettuccine pasta coated in a luxurious cream sauce made with fresh garlic, butter, heavy cream, and lots of grated parmesan.",
+    image: "",
+    prepTime: 5,
+    cookTime: 15,
+    servings: 4,
+    difficulty: "Easy",
+    category: "Pasta",
+    tags: ["Vegetarian", "Quick", "Comfort Food"],
+    equipment: [
+      { name: "Large Pot", icon: "pot" },
+      { name: "Large Skillet", icon: "pan" },
+      { name: "Tongs", icon: "tongs" }
+    ],
+    ingredients: [
+      { name: "fettuccine pasta", quantity: 400, unit: "g", category: "Pantry" },
+      { name: "butter", quantity: 4, unit: "tbsp", category: "Dairy" },
+      { name: "garlic cloves, minced", quantity: 4, unit: "pcs", category: "Produce" },
+      { name: "heavy cream", quantity: 1.5, unit: "cups", category: "Dairy" },
+      { name: "parmesan cheese, grated", quantity: 1, unit: "cup", category: "Dairy" },
+      { name: "salt and black pepper", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "fresh parsley, chopped", quantity: 2, unit: "tbsp", category: "Produce" }
+    ],
+    instructions: [
+      { step: 1, text: "Boil fettuccine pasta in salted water until al dente. Reserve 1/2 cup of pasta water, then drain.", tip: "Always salt your pasta boiling water generously!" },
+      { step: 2, text: "Melt butter in a skillet over medium heat. Add garlic and cook for 1 minute until fragrant.", tip: "Do not let the garlic brown or it will turn bitter." },
+      { step: 3, text: "Pour in the heavy cream and let simmer for 3 minutes to reduce slightly. Whisk in grated parmesan cheese until smooth.", tip: "Add the cheese in small handfuls, whisking constantly to prevent clumping." },
+      { step: 4, text: "Add pasta and reserved water to skillet. Toss for 1-2 minutes until sauce coats noodles. Garnish with parsley and black pepper.", tip: "Pasta starch in the reserved water helps thin and emulsify the rich cream sauce." }
+    ]
+  },
+  {
+    id: "blueberry-pancakes",
+    title: "Fluffy Blueberry Pancakes",
+    description: "Light and airy homemade pancakes bursting with fresh blueberries, served with butter and warm maple syrup.",
+    image: "",
+    prepTime: 10,
+    cookTime: 15,
+    servings: 3,
+    difficulty: "Easy",
+    category: "Breakfast",
+    tags: ["Breakfast", "Classic", "Sweet"],
+    equipment: [
+      { name: "Large Bowl", icon: "bowl" },
+      { name: "Whisk", icon: "pan" },
+      { name: "Griddle or Skillet", icon: "pan" },
+      { name: "Spatula", icon: "spatula" }
+    ],
+    ingredients: [
+      { name: "all-purpose flour", quantity: 1.5, unit: "cups", category: "Pantry" },
+      { name: "baking powder", quantity: 3.5, unit: "tsp", category: "Pantry" },
+      { name: "sugar", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "salt", quantity: 0.25, unit: "tsp", category: "Pantry" },
+      { name: "milk", quantity: 1.25, unit: "cups", category: "Dairy" },
+      { name: "egg", quantity: 1, unit: "pc", category: "Dairy" },
+      { name: "butter, melted", quantity: 3, unit: "tbsp", category: "Dairy" },
+      { name: "fresh blueberries", quantity: 1, unit: "cup", category: "Produce" }
+    ],
+    instructions: [
+      { step: 1, text: "In a large bowl, whisk together the flour, baking powder, sugar, and salt.", tip: "Sifting or whisking helps combine the dry leavening agents evenly." },
+      { step: 2, text: "Make a well in the center and pour in the milk, egg, and melted butter. Whisk until smooth, but do not overmix.", tip: "A few small lumps in pancake batter are completely fine and help make them fluffier!" },
+      { step: 3, text: "Heat a lightly oiled griddle or frying pan over medium-high heat. Pour or scoop batter onto the griddle, using approximately 1/4 cup for each pancake. Drop fresh blueberries onto the batter.", tip: "Dropping berries directly onto the cooking batter ensures even distribution." },
+      { step: 4, text: "Cook until bubbles pop on the surface, then flip with a spatula and cook until browned on the other side. Serve hot.", tip: "Flip only once to keep the pancakes high and fluffy!" }
+    ]
+  },
+  {
+    id: "margherita-pizza",
+    title: "Classic Margherita Pizza",
+    description: "Traditional Italian thin-crust pizza topped with rich tomato sauce, fresh mozzarella cheese, ripe tomatoes, and fragrant basil leaves.",
+    image: "",
+    prepTime: 20,
+    cookTime: 12,
+    servings: 2,
+    difficulty: "Medium",
+    category: "Pizza",
+    tags: ["Classic", "Italian", "Vegetarian"],
+    equipment: [
+      { name: "Pizza Stone or Sheet", icon: "sheet" },
+      { name: "Pizza Cutter", icon: "cutter" },
+      { name: "Large Bowl", icon: "bowl" }
+    ],
+    ingredients: [
+      { name: "pizza dough", quantity: 1, unit: "pc", category: "Pantry" },
+      { name: "canned crushed tomatoes", quantity: 0.5, unit: "cup", category: "Pantry" },
+      { name: "fresh mozzarella cheese, sliced", quantity: 150, unit: "g", category: "Dairy" },
+      { name: "fresh basil leaves", quantity: 8, unit: "pcs", category: "Produce" },
+      { name: "extra virgin olive oil", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "salt", quantity: 0.25, unit: "tsp", category: "Pantry" }
+    ],
+    instructions: [
+      { step: 1, text: "Preheat your oven to 500°F (260°C). If using a pizza stone, place it in the oven while preheating.", tip: "A piping hot oven is essential for a crispy thin crust pizza." },
+      { step: 2, text: "Stretch pizza dough on a floured surface to form a 12-inch circle. Place on parchment paper or a pizza peel.", tip: "Avoid using a rolling pin if you want a bubbly, airy crust border." },
+      { step: 3, text: "Spread crushed tomatoes thinly over the dough. Season with a pinch of salt. Arrange mozzarella cheese slices on top.", tip: "Do not overload the pizza with sauce or cheese, or the crust will become soggy." },
+      { step: 4, text: "Bake for 10-12 minutes until crust is dark golden and cheese is bubbly and browned in spots.", tip: "Watch it closely - it bakes very fast at high heat!" },
+      { step: 5, text: "Remove from oven. Top immediately with fresh basil leaves and a drizzle of olive oil, slice, and serve.", tip: "Adding basil right after baking keeps it bright green and aromatic." }
+    ]
   }
 ];

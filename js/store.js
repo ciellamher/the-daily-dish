@@ -15,7 +15,7 @@ function getWeeklyDefaultRecipes(allRecipes, seed) {
   const pool = [...allRecipes];
   const selected = [];
   let tempSeed = seed;
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 7; i++) {
     tempSeed = (tempSeed * 1664525 + 1013904223) % 4294967296;
     if (pool.length === 0) break;
     const index = tempSeed % pool.length;
