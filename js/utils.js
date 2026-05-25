@@ -9,6 +9,42 @@ export function scaleQuantity(quantity, baseServings, targetServings) {
 }
 
 /**
+ * Accurately determines if a recipe ingredient matches a selected fridge ingredient.
+ * Handles singular/plural matches and avoids false positives like "egg" in "eggplant".
+ */
+export function isIngredientMatch(ingName, selectedIng) {
+  if (!ingName || !selectedIng) return false;
+  
+  const cleanIng = ingName.toLowerCase().trim();
+  const cleanSel = selectedIng.toLowerCase().trim();
+  
+  // 1. Direct substring match if it's a multi-word phrase (like "olive oil")
+  if (cleanSel.includes(" ") && cleanIng.includes(cleanSel)) {
+    return true;
+  }
+  
+  // 2. Word boundary check
+  const singularSel = cleanSel.replace(/ies$/, "berry").replace(/es$/, "").replace(/s$/, "");
+  const escapedSel = singularSel.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  
+  const pattern = new RegExp(`\\b${escapedSel}(s|es|ies)?\\b`, 'i');
+  if (pattern.test(cleanIng)) {
+    return true;
+  }
+  
+  // 3. Fallback check with explicit false-positive guards
+  if (cleanIng.includes(cleanSel)) {
+    // Avoid false positive: egg matching eggplant
+    if (cleanSel === "egg" && cleanIng.includes("eggplant")) {
+      return false;
+    }
+    return true;
+  }
+  
+  return false;
+}
+
+/**
  * Formats a decimal quantity into a readable kitchen fraction (e.g. 1 1/2, 1/3, 0.75).
  */
 export function formatQuantity(qty) {

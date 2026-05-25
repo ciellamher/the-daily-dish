@@ -1,6 +1,7 @@
 // State Management Store for Cookbook
 
 import { RECIPES as INITIAL_RECIPES } from "./database.js";
+import { isIngredientMatch } from "./utils.js";
 
 // Seed-based week selection helpers
 function getWeekSeed() {
@@ -328,20 +329,13 @@ class Store {
         if (!recipe || !recipe.ingredients) return { ...recipe, matchStats: null };
         
         // Calculate matching stats
-        const recipeIngredients = recipe.ingredients
-          .filter(i => i && i.name)
-          .map(i => i.name.toLowerCase());
-        
-        // Find which selected ingredients are in the recipe
         const matched = [];
         const missing = [];
         
         recipe.ingredients.forEach(ing => {
           if (!ing || !ing.name) return;
-          const ingName = ing.name.toLowerCase();
-          // Check if any selected ingredient is a substring of the recipe ingredient, or vice versa
           const isMatched = selectedIngredients.some(sel => 
-            ingName.includes(sel) || sel.includes(ingName)
+            isIngredientMatch(ing.name, sel)
           );
           
           if (isMatched) {
@@ -365,7 +359,9 @@ class Store {
             missingIngredients: missing
           }
         };
-      }).sort((a, b) => {
+      })
+      .filter(r => r.matchStats && r.matchStats.matchedCount > 0) // Only keep recipes that have at least one matching ingredient
+      .sort((a, b) => {
         if (!a.matchStats || !b.matchStats) return 0;
         // Sort perfect matches (missing count = 0) first, then by match percentage
         if (a.matchStats.missingCount === 0 && b.matchStats.missingCount > 0) return -1;

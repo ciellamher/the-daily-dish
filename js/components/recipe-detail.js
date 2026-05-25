@@ -1,7 +1,7 @@
 // Recipe Detail Modal Component (FOODEAT style)
 
 import { store } from "../store.js";
-import { formatQuantity, scaleQuantity, escapeHtml, ICONS, getGourmetFoodImage } from "../utils.js";
+import { formatQuantity, scaleQuantity, escapeHtml, ICONS, getGourmetFoodImage, isIngredientMatch } from "../utils.js";
 
 /**
  * Renders the detailed contents of a recipe into the modal container.
@@ -22,9 +22,8 @@ export function renderRecipeDetail(recipe, state) {
     // Check if ingredient is matched
     let isMatched = false;
     if (isMatchingMode) {
-      const ingName = ing.name.toLowerCase();
       isMatched = state.selectedIngredients.some(sel => 
-        ingName.includes(sel) || sel.includes(ingName)
+        isIngredientMatch(ing.name, sel)
       );
     }
     

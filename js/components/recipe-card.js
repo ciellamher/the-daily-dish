@@ -51,9 +51,6 @@ export function renderRecipeCard(recipe, isSaved = false, activeTab = "home") {
     }
   }
 
-  // Generate a mock price ($10 - $22) based on prepTime and difficulty
-  const mockPrice = 10 + ((prepTime + cookTime) % 13);
-
   const totalTime = prepTime + cookTime;
 
   // Render floating save/delete icons
@@ -97,12 +94,11 @@ export function renderRecipeCard(recipe, isSaved = false, activeTab = "home") {
 
         <p class="card-desc">${escapeHtml(description)}</p>
         
-        <!-- Stars & Price Row (Mockup style) -->
+        <!-- Stars Row (Mockup style) -->
         <div class="card-stars-price-row">
           <div class="card-stars-container">
             ${starsHtml}
           </div>
-          <span class="card-price-label">$${mockPrice}</span>
         </div>
 
         <div class="card-meta">
