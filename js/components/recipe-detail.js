@@ -203,6 +203,13 @@ export function renderRecipeDetail(recipe, state) {
     <div class="modal-recipe-body">
       <p class="modal-recipe-desc">${escapeHtml(recipe.description)}</p>
 
+      ${recipe.sourceUrl ? `
+        <div class="recipe-source-reference">
+          <span style="display: inline-flex; align-items: center; color: var(--accent-primary);">${ICONS.externalLink || ''}</span>
+          <span>Recipe Reference: <a href="${escapeHtml(recipe.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(recipe.sourceName || 'Original Source')}</a></span>
+        </div>
+      ` : ''}
+
       <!-- Stats Bar & Servings Adjuster -->
       <div class="recipe-metadata-bar">
         <div class="meta-stats">

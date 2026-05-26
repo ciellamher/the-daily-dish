@@ -782,3 +782,51 @@
     gap: 16px;
   }
 }
+
+/* ==========================================================================
+   Header Actions Alignments & Mood Theme Selector
+   ========================================================================== */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.theme-mood-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.theme-mood-selector:focus-within {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--border-focus);
+}
+
+.mood-icon-svg {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.mood-icon-svg svg {
+  width: 16px;
+  height: 16px;
+}
+
+.mood-select {
+  border: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+  padding-right: 4px;
+}

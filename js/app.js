@@ -82,6 +82,9 @@ const elements = {
   generatorSuccessState: document.getElementById("generator-success-state"),
   generatedRecipeTitlePreview: document.getElementById("generated-recipe-title-preview"),
   btnViewGenerated: document.getElementById("btn-view-generated"),
+  generatorFailureState: document.getElementById("generator-failure-state"),
+  generatorFailureMessage: document.getElementById("generator-failure-message"),
+  btnSearchExternalLink: document.getElementById("btn-search-external-link"),
   
   // Floating Action Button
   fabContainer: document.getElementById("fab-container"),
@@ -944,6 +947,9 @@ function triggerAiRecipeGeneration(query) {
   openModal(elements.generatorModal);
   elements.generatorLoadingState.classList.remove("hidden");
   elements.generatorSuccessState.classList.add("hidden");
+  if (elements.generatorFailureState) {
+    elements.generatorFailureState.classList.add("hidden");
+  }
   
   resetGeneratorStepsUI();
 
@@ -973,8 +979,21 @@ function triggerAiRecipeGeneration(query) {
     },
     // Complete callback
     (generatedRecipe) => {
+      if (!generatedRecipe) {
+        elements.generatorLoadingState.classList.add("hidden");
+        elements.generatorSuccessState.classList.add("hidden");
+        if (elements.generatorFailureState) {
+          elements.generatorFailureState.classList.remove("hidden");
+          elements.generatorFailureMessage.innerText = `We couldn't find a verified recipe for "${query}" online.`;
+          elements.btnSearchExternalLink.href = `https://www.google.com/search?q=${encodeURIComponent(query)}+recipe`;
+        }
+        return;
+      }
       elements.generatorLoadingState.classList.add("hidden");
       elements.generatorSuccessState.classList.remove("hidden");
+      if (elements.generatorFailureState) {
+        elements.generatorFailureState.classList.add("hidden");
+      }
       elements.generatedRecipeTitlePreview.innerText = generatedRecipe.title;
       
       // Force scroll to grid result so they can see the generated card easily when closed
@@ -1000,6 +1019,9 @@ function resetGeneratorStepsUI() {
 function resetGeneratorState() {
   elements.generatorLoadingState.classList.add("hidden");
   elements.generatorSuccessState.classList.add("hidden");
+  if (elements.generatorFailureState) {
+    elements.generatorFailureState.classList.add("hidden");
+  }
   resetGeneratorStepsUI();
 }
 

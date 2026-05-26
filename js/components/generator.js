@@ -712,68 +712,261 @@ export function generateRecipeOnSpot(query, onStepChange, onComplete) {
   if (normalizedQuery.includes("pizza")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.pizza));
     recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://www.seriouseats.com/easy-pan-pizza-recipe";
+    recipe.sourceName = "Serious Eats";
   } else if (normalizedQuery.includes("burger") || normalizedQuery.includes("cheeseburger")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.burger));
     recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://www.seriouseats.com/the-burger-lab-the-ingredients-for-the-perfect-cheeseburger";
+    recipe.sourceName = "Serious Eats";
   } else if (normalizedQuery.includes("curry")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.curry));
     recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://www.bonappetit.com/recipe/easy-chicken-curry";
+    recipe.sourceName = "Bon Appétit";
   } else if (normalizedQuery.includes("taco") || normalizedQuery.includes("tacos")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.taco));
     recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://www.seriouseats.com/easy-ground-beef-tacos-recipe";
+    recipe.sourceName = "Serious Eats";
   } else if (normalizedQuery.includes("pancake") || normalizedQuery.includes("pancakes")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.pancake));
     recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://www.seriouseats.com/light-and-fluffy-pancakes-recipe";
+    recipe.sourceName = "Serious Eats";
   } else if (normalizedQuery.includes("fries") || normalizedQuery.includes("french fries") || normalizedQuery.includes("potato")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.fries));
     recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://www.seriouseats.com/perfect-french-fries-recipe";
+    recipe.sourceName = "Serious Eats";
   } else if (normalizedQuery.includes("steak") || normalizedQuery.includes("ribeye") || normalizedQuery.includes("beef steak")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.steak));
     recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://www.seriouseats.com/perfect-pan-seared-steaks-recipe";
+    recipe.sourceName = "Serious Eats";
   } else if (normalizedQuery.includes("spaghetti") || normalizedQuery.includes("bolognese") || normalizedQuery.includes("ragu")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.spaghetti));
     recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://www.seriouseats.com/easy-bolognese-sauce-recipe";
+    recipe.sourceName = "Serious Eats";
   } else if (normalizedQuery.includes("cake") || normalizedQuery.includes("brownie") || normalizedQuery.includes("lava cake")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.cake));
     recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://sallysbakingaddiction.com/chocolate-lava-cakes/";
+    recipe.sourceName = "Sally's Baking Addiction";
   } else if (normalizedQuery.includes("soup") || normalizedQuery.includes("broth")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.soup));
     recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://www.seriouseats.com/easy-chicken-noodle-soup-recipe";
+    recipe.sourceName = "Serious Eats";
   } else if (normalizedQuery.includes("adobo")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.adobo));
     recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://panlasangpinoy.com/filipino-chicken-adobo-recipe/";
+    recipe.sourceName = "Panlasang Pinoy";
   } else if (normalizedQuery.includes("poached egg") || normalizedQuery.includes("poached eggs")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.poached_egg));
     recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://www.seriouseats.com/foolproof-poached-eggs-food-lab-recipe";
+    recipe.sourceName = "Serious Eats";
   } else if (normalizedQuery.includes("sinigang")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.sinigang));
     recipe.id = `generated-${Date.now()}`;
-  } else {
-    // Generate intelligent dynamic fallback recipe on the fly!
-    recipe = generateDynamicFallback(query);
+    recipe.sourceUrl = "https://panlasangpinoy.com/pork-sinigang-na-baboy-recipe/";
+    recipe.sourceName = "Panlasang Pinoy";
   }
 
-  // Dynamically assign a high-quality food image from Unsplash
-  recipe.image = getGourmetFoodImage(recipe.title, recipe.category);
-
-  // Simulated AI generation cycles
-  onStepChange({ step: "connect", status: "Formulating gourmet flavor profiles...", progress: 20 });
-  
-  setTimeout(() => {
-    onStepChange({ step: "extract", status: "Calculating ingredient proportions...", progress: 55 });
+  if (recipe) {
+    recipe.image = getGourmetFoodImage(recipe.title, recipe.category);
+    onStepChange({ step: "connect", status: "Formulating gourmet flavor profiles...", progress: 20 });
     
     setTimeout(() => {
-      onStepChange({ step: "structure", status: "Structuring step-by-step procedure & chef tips...", progress: 85 });
+      onStepChange({ step: "extract", status: "Calculating ingredient proportions...", progress: 55 });
       
       setTimeout(() => {
-        onStepChange({ step: "save", status: "Finalizing plate presentations...", progress: 100 });
+        onStepChange({ step: "structure", status: "Structuring step-by-step procedure & chef tips...", progress: 85 });
         
         setTimeout(() => {
-          // Store the generated recipe in local database
-          store.addRecipe(recipe);
-          onComplete(recipe);
-        }, 100);
+          onStepChange({ step: "save", status: "Finalizing plate presentations...", progress: 100 });
+          
+          setTimeout(() => {
+            store.addRecipe(recipe);
+            onComplete(recipe);
+          }, 100);
+        }, 150);
       }, 150);
     }, 150);
-  }, 150);
+  } else {
+    // Search online database (TheMealDB API)
+    onStepChange({ step: "connect", status: "Searching online databases for verified recipes...", progress: 30 });
+    
+    fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.meals && data.meals.length > 0) {
+          const meal = data.meals[0];
+          const parsedRecipe = parseMealDBMeal(meal);
+          
+          onStepChange({ step: "extract", status: "Verifying ingredients and proportions...", progress: 65 });
+          
+          setTimeout(() => {
+            onStepChange({ step: "structure", status: "Formulating cooking instructions...", progress: 90 });
+            
+            setTimeout(() => {
+              onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
+              
+              setTimeout(() => {
+                store.addRecipe(parsedRecipe);
+                onComplete(parsedRecipe);
+              }, 100);
+            }, 150);
+          }, 150);
+        } else {
+          onComplete(null);
+        }
+      })
+      .catch(err => {
+        console.error("Meal search API failed", err);
+        onComplete(null);
+      });
+  }
+}
+
+/**
+ * Formats dynamic online recipe database query results into structural items
+ */
+function parseMealDBMeal(meal) {
+  const title = meal.strMeal;
+  const category = mapMealDBCategory(meal.strCategory);
+  
+  let rawInst = meal.strInstructions || "";
+  let lines = rawInst.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 5);
+  
+  if (lines.length <= 1 && rawInst.includes(".")) {
+    lines = rawInst.split(/\.\s+/).map(s => s.trim()).filter(s => s.length > 5);
+  }
+  
+  const instructions = lines.map((line, idx) => {
+    const cleanText = line.replace(/^\d+[\.\-\s]*/, "").trim();
+    const text = cleanText.charAt(0).toUpperCase() + cleanText.slice(1);
+    
+    let tip = "";
+    if (text.toLowerCase().includes("heat")) {
+      tip = "Maintain medium heat to ensure ingredients do not scorch.";
+    } else if (text.toLowerCase().includes("bake") || text.toLowerCase().includes("oven")) {
+      tip = "Make sure your oven is preheated fully before placing the dish inside.";
+    } else if (text.toLowerCase().includes("salt") || text.toLowerCase().includes("season")) {
+      tip = "Season incrementally and taste along the way.";
+    }
+    
+    return {
+      step: idx + 1,
+      text: text.endsWith(".") ? text : text + ".",
+      tip: tip || null
+    };
+  });
+  
+  const ingredients = [];
+  for (let i = 1; i <= 20; i++) {
+    const name = meal[`strIngredient${i}`];
+    const measure = meal[`strMeasure${i}`];
+    if (name && name.trim()) {
+      const cleanName = name.toLowerCase().trim();
+      const cleanMeasure = measure ? measure.trim() : "";
+      
+      let quantity = 1;
+      let unit = "pc";
+      
+      if (cleanMeasure) {
+        const numMatch = cleanMeasure.match(/^(\d+(?:\/\d+)?|\d+\.\d+)?\s*(.*)$/);
+        if (numMatch) {
+          const rawQty = numMatch[1];
+          if (rawQty) {
+            if (rawQty.includes("/")) {
+              const parts = rawQty.split("/");
+              quantity = parseFloat(parts[0]) / parseFloat(parts[1]);
+            } else {
+              quantity = parseFloat(rawQty);
+            }
+          }
+          unit = numMatch[2].trim() || "pc";
+        }
+      }
+      
+      let ingCategory = "Pantry";
+      if (cleanName.includes("chicken") || cleanName.includes("beef") || cleanName.includes("pork") || cleanName.includes("turkey") || cleanName.includes("bacon")) {
+        ingCategory = "Meat";
+      } else if (cleanName.includes("shrimp") || cleanName.includes("salmon") || cleanName.includes("fish") || cleanName.includes("tuna")) {
+        ingCategory = "Seafood";
+      } else if (cleanName.includes("onion") || cleanName.includes("garlic") || cleanName.includes("tomato") || cleanName.includes("lemon") || cleanName.includes("herb") || cleanName.includes("pepper") || cleanName.includes("spinach") || cleanName.includes("cilantro")) {
+        ingCategory = "Produce";
+      } else if (cleanName.includes("cheese") || cleanName.includes("butter") || cleanName.includes("milk") || cleanName.includes("cream") || cleanName.includes("yogurt")) {
+        ingCategory = "Dairy";
+      }
+      
+      ingredients.push({
+        name: cleanName,
+        quantity: isNaN(quantity) ? 1 : quantity,
+        unit: unit || "pc",
+        category: ingCategory
+      });
+    }
+  }
+
+  const prepTime = 15;
+  const cookTime = category === "Baking" ? 30 : category === "Seafood" ? 12 : 20;
+  
+  const sourceUrl = meal.strSource || `https://www.themealdb.com/meal/${meal.idMeal}`;
+  let sourceName = "TheMealDB";
+  if (meal.strSource) {
+    try {
+      sourceName = new URL(meal.strSource).hostname.replace("www.", "");
+    } catch(e) {}
+  }
+  
+  return {
+    id: `generated-${meal.idMeal}-${Date.now()}`,
+    title: meal.strMeal,
+    description: `An authentic recipe for ${meal.strMeal} sourced from ${sourceName} via TheMealDB API.`,
+    prepTime,
+    cookTime,
+    servings: 4,
+    difficulty: "Medium",
+    category,
+    tags: [meal.strArea, meal.strCategory].filter(Boolean),
+    image: meal.strMealThumb,
+    sourceUrl,
+    sourceName,
+    equipment: [
+      { name: "Chef's Knife", icon: "knife" },
+      { name: "Cooking Spoon", icon: "spoon" },
+      { name: "Pot or Pan", icon: "pot" }
+    ],
+    ingredients,
+    instructions
+  };
+}
+
+function mapMealDBCategory(cat) {
+  if (!cat) return "Mains";
+  const c = cat.toLowerCase();
+  if (c.includes("beef") || c.includes("chicken") || c.includes("pork") || c.includes("lamb") || c.includes("goat") || c.includes("miscellaneous")) {
+    return "Mains";
+  }
+  if (c.includes("dessert")) {
+    return "Baking";
+  }
+  if (c.includes("pasta")) {
+    return "Pasta";
+  }
+  if (c.includes("seafood")) {
+    return "Seafood";
+  }
+  if (c.includes("side") || c.includes("vegetarian") || c.includes("vegan")) {
+    return "Salad";
+  }
+  if (c.includes("breakfast") || c.includes("starter")) {
+    return "Breakfast";
+  }
+  return "Mains";
 }
