@@ -383,6 +383,73 @@ const PREDEFINED_AI_TEMPLATES = {
       { step: 5, text: "Add vinegar and simmer uncovered for 10 minutes without stirring, allowing the harsh acid taste to cook off.", tip: "Resisting the urge to stir helps the vinegar mellow out naturally." },
       { step: 6, text: "Stir in brown sugar and simmer for another 5 minutes until the sauce reduces and thickens. Serve hot over steamed white rice.", tip: "Adobo tastes even better the next day as the chicken absorbs more sauce!" }
     ]
+  },
+  poached_egg: {
+    title: "Perfect Poached Egg",
+    description: "A masterclass in egg cookery: a single fresh egg gently poached in simmering water until the whites are delicately set and the yolk is warm, rich, and molten.",
+    prepTime: 5,
+    cookTime: 4,
+    servings: 1,
+    difficulty: "Medium",
+    category: "Breakfast",
+    tags: ["Eggs", "Breakfast", "Quick", "Technique"],
+    equipment: [
+      { name: "Small Saucepan", icon: "pot" },
+      { name: "Slotted Spoon", icon: "spoon" },
+      { name: "Small Ramekin or Bowl", icon: "bowl" }
+    ],
+    ingredients: [
+      { name: "fresh large egg", quantity: 1, unit: "pc", category: "Dairy" },
+      { name: "water (for poaching)", quantity: 4, unit: "cups", category: "Pantry" },
+      { name: "white vinegar", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "salt and black pepper", quantity: 0.25, unit: "tsp", category: "Pantry" }
+    ],
+    instructions: [
+      { step: 1, text: "Crack the fresh egg into a small bowl or ramekin. This makes it easier to slide it gently into the water.", tip: "Using farm-fresh eggs is key; older eggs have thinner whites that will disperse in the water." },
+      { step: 2, text: "Bring water in a saucepan to a gentle simmer (about 180°F to 190°F). The water should have tiny bubbles on the bottom, not a rolling boil.", tip: "A rapid boil will tear the delicate egg white apart." },
+      { step: 3, text: "Stir in white vinegar. The acid helps the egg white coagulate faster, wrapping itself around the yolk.", tip: "Don't worry, the egg won't taste like vinegar in such a diluted amount." },
+      { step: 4, text: "Use a spoon to swirl the water in a circular motion to create a gentle whirlpool in the center of the pot.", tip: "The whirlpool helps center the white around the yolk as it cooks." },
+      { step: 5, text: "Gently slide the cracked egg from the bowl directly into the center of the whirlpool. Cook for 3 to 4 minutes.", tip: "Do not touch the egg while it cooks; let the water currents do the work." },
+      { step: 6, text: "Retrieve with a slotted spoon. Drain on a paper towel, season with salt and pepper, and serve immediately.", tip: "Perfect when served on toasted sourdough bread or alongside avocado." }
+    ]
+  },
+  sinigang: {
+    title: "Filipino Pork Sinigang",
+    description: "An authentic, comforting Filipino sour soup featuring tender pork ribs simmered in a tangy tamarind broth with eggplant, radish, okra, and green beans.",
+    prepTime: 15,
+    cookTime: 45,
+    servings: 4,
+    difficulty: "Medium",
+    category: "Soup",
+    tags: ["Filipino", "Soup", "Pork", "Sour", "Comfort Food"],
+    equipment: [
+      { name: "Large Soup Pot", icon: "pot" },
+      { name: "Chef's Knife", icon: "knife" },
+      { name: "Cutting Board", icon: "board" },
+      { name: "Soup Ladle", icon: "pot" }
+    ],
+    ingredients: [
+      { name: "pork ribs or pork belly, cut into chunks", quantity: 750, unit: "g", category: "Meat" },
+      { name: "tamarind soup base mix (Sinigang mix)", quantity: 1, unit: "pack", category: "Pantry" },
+      { name: "roma tomatoes, quartered", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "yellow onion, quartered", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "daikon radish, sliced into rounds", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "okra, ends trimmed", quantity: 6, unit: "pcs", category: "Produce" },
+      { name: "eggplant, sliced", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "string beans (sitaw), cut into 2-inch lengths", quantity: 1, unit: "cup", category: "Produce" },
+      { name: "water spinach (kang kong) or baby spinach", quantity: 2, unit: "cups", category: "Produce" },
+      { name: "long green chili peppers (siling haba)", quantity: 2, unit: "pcs", category: "Produce" },
+      { name: "fish sauce (patis)", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "water", quantity: 6, unit: "cups", category: "Pantry" }
+    ],
+    instructions: [
+      { step: 1, text: "In a large soup pot, combine pork ribs, onions, tomatoes, and water. Bring to a boil, then lower heat to simmer for 35-40 minutes.", tip: "Skim off any foam or scum that rises to the top to keep the broth clear." },
+      { step: 2, text: "Stir in the tamarind soup base mix and fish sauce to taste. Simmer for 3 minutes to dissolve completely.", tip: "Adjust fish sauce and sour mix according to your preference for tanginess." },
+      { step: 3, text: "Add the sliced daikon radish and siling haba green chilies. Simmer for 5 minutes.", tip: "Siling haba adds a mild heat and signature aroma without making it overly spicy." },
+      { step: 4, text: "Add okra, eggplant, and string beans. Simmer for another 5 minutes until all vegetables are tender-crisp.", tip: "Adding veggies in stages prevents the softer ones from becoming mushy." },
+      { step: 5, text: "Stir in the water spinach (kang kong) or baby spinach leaves. Turn off the heat and cover the pot.", tip: "Let the residual heat wilt the greens for 2 minutes to keep them vibrant green." },
+      { step: 6, text: "Ladle the steaming sour soup and pork into bowls. Serve hot with white steamed rice.", tip: "Pork Sinigang goes beautifully with a side dip of fish sauce and crushed red chili!" }
+    ]
   }
 };
 
@@ -674,6 +741,12 @@ export function generateRecipeOnSpot(query, onStepChange, onComplete) {
     recipe.id = `generated-${Date.now()}`;
   } else if (normalizedQuery.includes("adobo")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.adobo));
+    recipe.id = `generated-${Date.now()}`;
+  } else if (normalizedQuery.includes("poached egg") || normalizedQuery.includes("poached eggs")) {
+    recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.poached_egg));
+    recipe.id = `generated-${Date.now()}`;
+  } else if (normalizedQuery.includes("sinigang")) {
+    recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.sinigang));
     recipe.id = `generated-${Date.now()}`;
   } else {
     // Generate intelligent dynamic fallback recipe on the fly!
