@@ -139,66 +139,509 @@ const MOCK_IMPORTED_RECIPES = {
 };
 
 /**
- * Simulates importing a recipe from a URL.
- * Takes the URL, triggers a multi-step callback, saves the recipe to store, and returns the imported recipe.
+ * Simulates importing a recipe from a URL by fetching its HTML via a CORS proxy,
+ * extracting Recipe schema metadata (JSON-LD), or falling back to search API / stubs.
  */
 export function simulateRecipeImport(url, onStepChange, onComplete) {
-  const lowercaseUrl = url.toLowerCase();
+  onStepChange({ step: "connect", status: "Connecting to recipe server...", progress: 15 });
   
-  // Decide which recipe to mock based on URL keywords
-  let selectedRecipeKey = "default";
-  if (lowercaseUrl.includes("carbonara") || lowercaseUrl.includes("pasta") || lowercaseUrl.includes("spaghetti")) {
-    selectedRecipeKey = "carbonara";
-  } else if (lowercaseUrl.includes("salmon") || lowercaseUrl.includes("fish") || lowercaseUrl.includes("seafood")) {
-    selectedRecipeKey = "salmon";
-  } else if (lowercaseUrl.includes("brownie") || lowercaseUrl.includes("chocolate") || lowercaseUrl.includes("cookie") || lowercaseUrl.includes("sweet")) {
-    selectedRecipeKey = "brownie";
+  // Clean URL to ensure it starts with http
+  let targetUrl = url.trim();
+  if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+    targetUrl = "https://" + targetUrl;
   }
-
-  // Deep copy the template
-  const recipeTemplate = MOCK_IMPORTED_RECIPES[selectedRecipeKey];
-  const importedRecipe = JSON.parse(JSON.stringify(recipeTemplate));
   
-  // Customize the ID based on timestamp
-  importedRecipe.id = `imported-${Date.now()}`;
-  // Add metadata
-  importedRecipe.image = getGourmetFoodImage(importedRecipe.title, importedRecipe.category);
-  importedRecipe.tags.push("Imported");
-  importedRecipe.description = `[Imported from ${extractDomain(url)}] ${importedRecipe.description}`;
-
-  // Run the multi-step simulator
-  let progress = 0;
-  
-  // Step 1: Connecting
-  onStepChange({ step: "connect", status: "Connecting to server...", progress: 20 });
-  
-  setTimeout(() => {
-    // Step 2: Extracting
-    onStepChange({ step: "extract", status: "Downloading HTML & finding recipe cards...", progress: 55 });
-    
-    setTimeout(() => {
-      // Step 3: Structuring
-      onStepChange({ step: "structure", status: "AI Extracting ingredients list and preparation procedures...", progress: 85 });
+  // Use public CORS proxy to fetch the HTML
+  fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`)
+    .then(res => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    })
+    .then(data => {
+      const html = data.contents;
+      onStepChange({ step: "extract", status: "Downloading HTML & searching metadata...", progress: 50 });
       
-      setTimeout(() => {
-        // Step 4: Saving
-        onStepChange({ step: "save", status: "Formatting quantities and baking instructions...", progress: 100 });
+      const schemaRecipe = extractRecipeSchema(html);
+      const meta = extractMetaFallbacks(html);
+      
+      let importedRecipe = null;
+      
+      if (schemaRecipe) {
+        let title = schemaRecipe.name || meta.title || "Scraped Recipe";
+        let desc = schemaRecipe.description || meta.description || `Sourced from online article.`;
         
+        let imageUrl = "";
+        if (schemaRecipe.image) {
+          if (typeof schemaRecipe.image === "string") imageUrl = schemaRecipe.image;
+          else if (Array.isArray(schemaRecipe.image) && schemaRecipe.image.length > 0) {
+            imageUrl = typeof schemaRecipe.image[0] === "string" ? schemaRecipe.image[0] : schemaRecipe.image[0].url;
+          }
+          else if (schemaRecipe.image.url) imageUrl = schemaRecipe.image.url;
+        }
+        if (!imageUrl) imageUrl = meta.image || getGourmetFoodImage(title, schemaRecipe.recipeCategory || "Mains");
+        
+        let servings = 4;
+        if (schemaRecipe.recipeYield) {
+          const yieldStr = String(schemaRecipe.recipeYield);
+          const yieldMatch = yieldStr.match(/\d+/);
+          if (yieldMatch) servings = parseInt(yieldMatch[0], 10);
+        }
+        
+        const prepTime = parseISO8601Duration(schemaRecipe.prepTime);
+        const cookTime = parseISO8601Duration(schemaRecipe.cookTime);
+        
+        let category = "Mains";
+        if (schemaRecipe.recipeCategory) {
+          const catStr = String(schemaRecipe.recipeCategory).toLowerCase();
+          if (catStr.includes("dessert") || catStr.includes("bake")) category = "Baking";
+          else if (catStr.includes("pasta")) category = "Pasta";
+          else if (catStr.includes("seafood")) category = "Seafood";
+          else if (catStr.includes("salad") || catStr.includes("veg")) category = "Salad";
+          else if (catStr.includes("breakfast")) category = "Breakfast";
+          else if (catStr.includes("soup")) category = "Soup";
+        }
+        
+        importedRecipe = {
+          id: `imported-${Date.now()}`,
+          title: title,
+          description: desc,
+          prepTime,
+          cookTime,
+          servings,
+          difficulty: prepTime + cookTime > 45 ? "Medium" : "Easy",
+          category,
+          tags: ["Imported", category].filter(Boolean),
+          image: imageUrl,
+          sourceUrl: targetUrl,
+          sourceName: extractDomain(targetUrl),
+          equipment: [
+            { name: "Chef's Knife", icon: "knife" },
+            { name: "Cooking Spoon", icon: "spoon" },
+            { name: "Pot or Pan", icon: "pot" }
+          ],
+          ingredients: parseSchemaIngredients(schemaRecipe.recipeIngredient),
+          instructions: parseSchemaInstructions(schemaRecipe.recipeInstructions)
+        };
+      }
+      
+      // Fallback 1: Keyword template match if schema fails
+      if (!importedRecipe) {
+        let matchedTemplate = null;
+        const lowercaseUrl = targetUrl.toLowerCase();
+        
+        if (lowercaseUrl.includes("carbonara") || lowercaseUrl.includes("pasta")) {
+          matchedTemplate = MOCK_IMPORTED_RECIPES.carbonara;
+        } else if (lowercaseUrl.includes("salmon") || lowercaseUrl.includes("fish")) {
+          matchedTemplate = MOCK_IMPORTED_RECIPES.salmon;
+        } else if (lowercaseUrl.includes("brownie") || lowercaseUrl.includes("chocolate")) {
+          matchedTemplate = MOCK_IMPORTED_RECIPES.brownie;
+        }
+        
+        if (matchedTemplate) {
+          importedRecipe = JSON.parse(JSON.stringify(matchedTemplate));
+          importedRecipe.id = `imported-${Date.now()}`;
+          importedRecipe.image = meta.image || getGourmetFoodImage(importedRecipe.title, importedRecipe.category);
+          importedRecipe.sourceUrl = targetUrl;
+          importedRecipe.sourceName = extractDomain(targetUrl);
+        }
+      }
+      
+      // Fallback 2: Query Online Database using clean URL words
+      if (!importedRecipe) {
+        const keyword = cleanPathQuery(targetUrl);
+        onStepChange({ step: "structure", status: `Searching online databases for "${keyword}"...`, progress: 75 });
+        
+        fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(keyword)}`)
+          .then(res => res.json())
+          .then(dbData => {
+            if (dbData && dbData.meals && dbData.meals.length > 0) {
+              const meal = dbData.meals[0];
+              const parsedRecipe = parseMealDBMealScraped(meal, targetUrl);
+              
+              onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
+              setTimeout(() => {
+                store.addRecipe(parsedRecipe);
+                onComplete(parsedRecipe);
+              }, 100);
+            } else {
+              serveFinalMetaFallback(meta, targetUrl, onStepChange, onComplete);
+            }
+          })
+          .catch(() => {
+            serveFinalMetaFallback(meta, targetUrl, onStepChange, onComplete);
+          });
+      } else {
+        onStepChange({ step: "structure", status: "Formulating cooking instructions...", progress: 90 });
         setTimeout(() => {
-          // Add to store database
-          store.addRecipe(importedRecipe);
-          
-          // Complete
-          onComplete(importedRecipe);
-        }, 100);
-      }, 150);
-    }, 150);
-  }, 150);
+          onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
+          setTimeout(() => {
+            store.addRecipe(importedRecipe);
+            onComplete(importedRecipe);
+          }, 100);
+        }, 150);
+      }
+    })
+    .catch(err => {
+      console.error("Scraping failed, serving final metadata card", err);
+      const domain = extractDomain(targetUrl);
+      const fallbackMeta = {
+        title: `Recipe from ${domain}`,
+        description: `Imported recipe from ${targetUrl}`,
+        image: getGourmetFoodImage(domain, "Mains")
+      };
+      serveFinalMetaFallback(fallbackMeta, targetUrl, onStepChange, onComplete);
+    });
 }
 
-/**
- * Extracts domain name from a URL.
- */
+function extractRecipeSchema(html) {
+  try {
+    const regex = /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+    let match;
+    while ((match = regex.exec(html)) !== null) {
+      try {
+        const json = JSON.parse(match[1]);
+        const recipe = findRecipeObject(json);
+        if (recipe) return recipe;
+      } catch (e) {
+        // Skip invalid blocks
+      }
+    }
+  } catch (e) {
+    console.error("Failed to parse schema", e);
+  }
+  return null;
+}
+
+function findRecipeObject(obj) {
+  if (!obj) return null;
+  if (obj["@type"] === "Recipe") {
+    return obj;
+  }
+  if (obj["@graph"] && Array.isArray(obj["@graph"])) {
+    for (const item of obj["@graph"]) {
+      if (item["@type"] === "Recipe") return item;
+    }
+  }
+  if (Array.isArray(obj)) {
+    for (const item of obj) {
+      const found = findRecipeObject(item);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function parseSchemaIngredients(ingredients) {
+  if (!ingredients || !Array.isArray(ingredients)) return [];
+  return ingredients.map(ingStr => {
+    const str = ingStr.replace(/<[^>]*>/g, "").trim();
+    let quantity = 1;
+    let unit = "pc";
+    let name = str;
+    
+    const match = str.match(/^(\d+(?:\s+\d+\/\d+)?|\d+\/\d+|\d+(?:\.\d+)?)\s*([a-zA-Z\.\s]+?)(?:\s+of\s+|\s+)(.*)$/i);
+    if (match) {
+      const rawQty = match[1].trim();
+      const rawUnit = match[2].trim();
+      const rawName = match[3].trim();
+      
+      if (rawQty.includes("/")) {
+        const parts = rawQty.split(/\s+/);
+        if (parts.length > 1) {
+          const whole = parseFloat(parts[0]);
+          const fracParts = parts[1].split("/");
+          quantity = whole + parseFloat(fracParts[0]) / parseFloat(fracParts[1]);
+        } else {
+          const fracParts = parts[0].split("/");
+          quantity = parseFloat(fracParts[0]) / parseFloat(fracParts[1]);
+        }
+      } else {
+        quantity = parseFloat(rawQty);
+      }
+      
+      unit = rawUnit;
+      name = rawName;
+    } else {
+      const simpleMatch = str.match(/^(\d+)\s+(.*)$/);
+      if (simpleMatch) {
+        quantity = parseInt(simpleMatch[1], 10);
+        unit = "pc";
+        name = simpleMatch[2];
+      }
+    }
+    
+    let category = "Pantry";
+    const nameLower = name.toLowerCase();
+    if (nameLower.includes("chicken") || nameLower.includes("beef") || nameLower.includes("pork") || nameLower.includes("turkey") || nameLower.includes("meat") || nameLower.includes("steak")) {
+      category = "Meat";
+    } else if (nameLower.includes("shrimp") || nameLower.includes("salmon") || nameLower.includes("fish") || nameLower.includes("seafood") || nameLower.includes("tuna")) {
+      category = "Seafood";
+    } else if (nameLower.includes("onion") || nameLower.includes("garlic") || nameLower.includes("tomato") || nameLower.includes("lemon") || nameLower.includes("spinach") || nameLower.includes("pepper") || nameLower.includes("ginger") || nameLower.includes("cilantro")) {
+      category = "Produce";
+    } else if (nameLower.includes("cheese") || nameLower.includes("butter") || nameLower.includes("milk") || nameLower.includes("cream") || nameLower.includes("yogurt")) {
+      category = "Dairy";
+    }
+    
+    return {
+      name: name.toLowerCase().trim(),
+      quantity: isNaN(quantity) ? 1 : quantity,
+      unit: unit.toLowerCase().trim() || "pc",
+      category
+    };
+  });
+}
+
+function parseSchemaInstructions(instructions) {
+  if (!instructions) return [];
+  if (typeof instructions === "string") {
+    return [{ step: 1, text: instructions, tip: "" }];
+  }
+  if (Array.isArray(instructions)) {
+    return instructions.map((inst, idx) => {
+      let text = "";
+      if (typeof inst === "string") {
+        text = inst;
+      } else if (inst && typeof inst === "object") {
+        text = inst.text || inst.name || "";
+      }
+      text = text.replace(/<[^>]*>/g, "").trim();
+      return {
+        step: idx + 1,
+        text: text,
+        tip: ""
+      };
+    }).filter(item => item.text.length > 5);
+  }
+  return [];
+}
+
+function parseISO8601Duration(duration) {
+  if (!duration) return 15;
+  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+  if (match) {
+    const hours = parseInt(match[1] || "0", 10);
+    const minutes = parseInt(match[2] || "0", 10);
+    return hours * 60 + minutes || 15;
+  }
+  return 15;
+}
+
+function extractMetaFallbacks(html) {
+  const meta = { title: "", image: "", description: "" };
+  
+  const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
+  if (titleMatch) meta.title = titleMatch[1].trim();
+  
+  const ogTitle = html.match(/<meta\b[^>]*property=["']og:title["'][^>]*content=["']([\s\S]*?)["']/i);
+  if (ogTitle) meta.title = ogTitle[1].trim();
+  
+  const ogImage = html.match(/<meta\b[^>]*property=["']og:image["'][^>]*content=["']([\s\S]*?)["']/i);
+  if (ogImage) meta.image = ogImage[1].trim();
+  
+  const ogDesc = html.match(/<meta\b[^>]*property=["']og:description["'][^>]*content=["']([\s\S]*?)["']/i);
+  if (ogDesc) meta.description = ogDesc[1].trim();
+  
+  const metaDesc = html.match(/<meta\b[^>]*name=["']description["'][^>]*content=["']([\s\S]*?)["']/i);
+  if (metaDesc && !meta.description) meta.description = metaDesc[1].trim();
+  
+  return meta;
+}
+
+function cleanPathQuery(url) {
+  try {
+    const parsed = new URL(url);
+    const path = parsed.pathname;
+    const lastSegment = path.split("/").filter(Boolean).pop() || "";
+    
+    const cleanSegment = lastSegment
+      .replace(/[\-_]/g, " ")
+      .replace(/\.html?$/i, "")
+      .replace(/\d+/g, "")
+      .trim();
+      
+    const commonWords = [
+      "easy", "recipe", "cook", "quick", "healthy", "classic", 
+      "homemade", "best", "authentic", "style", "step", "by"
+    ];
+    
+    let words = cleanSegment.split(/\s+/);
+    words = words.filter(w => !commonWords.includes(w.toLowerCase()) && w.length > 2);
+    
+    return words.slice(0, 3).join(" ") || "chicken";
+  } catch(e) {
+    return "chicken";
+  }
+}
+
+function serveFinalMetaFallback(meta, url, onStepChange, onComplete) {
+  const title = meta.title || `Recipe from ${extractDomain(url)}`;
+  const finalRecipe = {
+    id: `imported-${Date.now()}`,
+    title: title,
+    description: meta.description || `Imported recipe from ${url}.`,
+    prepTime: 15,
+    cookTime: 20,
+    servings: 4,
+    difficulty: "Easy",
+    category: "Mains",
+    tags: ["Imported"],
+    image: meta.image || getGourmetFoodImage(title, "Mains"),
+    sourceUrl: url,
+    sourceName: extractDomain(url),
+    equipment: [
+      { name: "Cooking Spoon", icon: "spoon" },
+      { name: "Pot or Pan", icon: "pot" }
+    ],
+    ingredients: [
+      { name: "refer to original link for ingredients", quantity: 1, unit: "pc", category: "Pantry" }
+    ],
+    instructions: [
+      { step: 1, text: "Click the reference link above to view full cooking procedures on the original website.", tip: "This page does not support direct extraction for this domain." }
+    ]
+  };
+  onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
+  setTimeout(() => {
+    store.addRecipe(finalRecipe);
+    onComplete(finalRecipe);
+  }, 100);
+}
+
+function parseMealDBMealScraped(meal, url) {
+  const title = meal.strMeal;
+  const category = mapMealDBCategoryScraped(meal.strCategory);
+  
+  let rawInst = meal.strInstructions || "";
+  let lines = rawInst.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 5);
+  
+  if (lines.length <= 1 && rawInst.includes(".")) {
+    lines = rawInst.split(/\.\s+/).map(s => s.trim()).filter(s => s.length > 5);
+  }
+  
+  const instructions = lines.map((line, idx) => {
+    const cleanText = line.replace(/^\d+[\.\-\s]*/, "").trim();
+    const text = cleanText.charAt(0).toUpperCase() + cleanText.slice(1);
+    
+    let tip = "";
+    if (text.toLowerCase().includes("heat")) {
+      tip = "Maintain medium heat to ensure ingredients do not scorch.";
+    } else if (text.toLowerCase().includes("bake") || text.toLowerCase().includes("oven")) {
+      tip = "Make sure your oven is preheated fully before placing the dish inside.";
+    } else if (text.toLowerCase().includes("salt") || text.toLowerCase().includes("season")) {
+      tip = "Season incrementally and taste along the way.";
+    }
+    
+    return {
+      step: idx + 1,
+      text: text.endsWith(".") ? text : text + ".",
+      tip: tip || null
+    };
+  });
+  
+  const ingredients = [];
+  for (let i = 1; i <= 20; i++) {
+    const name = meal[`strIngredient${i}`];
+    const measure = meal[`strMeasure${i}`];
+    if (name && name.trim()) {
+      const cleanName = name.toLowerCase().trim();
+      const cleanMeasure = measure ? measure.trim() : "";
+      
+      let quantity = 1;
+      let unit = "pc";
+      
+      if (cleanMeasure) {
+        const numMatch = cleanMeasure.match(/^(\d+(?:\/\d+)?|\d+\.\d+)?\s*(.*)$/);
+        if (numMatch) {
+          const rawQty = numMatch[1];
+          if (rawQty) {
+            if (rawQty.includes("/")) {
+              const parts = rawQty.split("/");
+              quantity = parseFloat(parts[0]) / parseFloat(parts[1]);
+            } else {
+              quantity = parseFloat(rawQty);
+            }
+          }
+          unit = numMatch[2].trim() || "pc";
+        }
+      }
+      
+      let ingCategory = "Pantry";
+      if (cleanName.includes("chicken") || cleanName.includes("beef") || cleanName.includes("pork") || cleanName.includes("turkey") || cleanName.includes("bacon")) {
+        ingCategory = "Meat";
+      } else if (cleanName.includes("shrimp") || cleanName.includes("salmon") || cleanName.includes("fish") || cleanName.includes("tuna")) {
+        ingCategory = "Seafood";
+      } else if (cleanName.includes("onion") || cleanName.includes("garlic") || cleanName.includes("tomato") || cleanName.includes("lemon") || cleanName.includes("spinach") || cleanName.includes("pepper") || cleanName.includes("ginger") || cleanName.includes("cilantro")) {
+        ingCategory = "Produce";
+      } else if (cleanName.includes("cheese") || cleanName.includes("butter") || cleanName.includes("milk") || cleanName.includes("cream") || cleanName.includes("yogurt")) {
+        ingCategory = "Dairy";
+      }
+      
+      ingredients.push({
+        name: cleanName,
+        quantity: isNaN(quantity) ? 1 : quantity,
+        unit: unit || "pc",
+        category: ingCategory
+      });
+    }
+  }
+
+  const prepTime = 15;
+  const cookTime = category === "Baking" ? 30 : category === "Seafood" ? 12 : 20;
+  
+  const sourceUrl = meal.strSource || `https://www.themealdb.com/meal/${meal.idMeal}`;
+  let sourceName = "TheMealDB";
+  if (meal.strSource) {
+    try {
+      sourceName = new URL(meal.strSource).hostname.replace("www.", "");
+    } catch(e) {}
+  }
+  
+  return {
+    id: `generated-${meal.idMeal}-${Date.now()}`,
+    title: meal.strMeal,
+    description: `An authentic recipe for ${meal.strMeal} sourced from ${sourceName} via TheMealDB API.`,
+    prepTime,
+    cookTime,
+    servings: 4,
+    difficulty: "Medium",
+    category,
+    tags: [meal.strArea, meal.strCategory].filter(Boolean),
+    image: meal.strMealThumb,
+    sourceUrl: url,
+    sourceName: extractDomain(url),
+    equipment: [
+      { name: "Chef's Knife", icon: "knife" },
+      { name: "Cooking Spoon", icon: "spoon" },
+      { name: "Pot or Pan", icon: "pot" }
+    ],
+    ingredients,
+    instructions
+  };
+}
+
+function mapMealDBCategoryScraped(cat) {
+  if (!cat) return "Mains";
+  const c = cat.toLowerCase();
+  if (c.includes("beef") || c.includes("chicken") || c.includes("pork") || c.includes("lamb") || c.includes("goat") || c.includes("miscellaneous")) {
+    return "Mains";
+  }
+  if (c.includes("dessert")) {
+    return "Baking";
+  }
+  if (c.includes("pasta")) {
+    return "Pasta";
+  }
+  if (c.includes("seafood")) {
+    return "Seafood";
+  }
+  if (c.includes("side") || c.includes("vegetarian") || c.includes("vegan")) {
+    return "Salad";
+  }
+  if (c.includes("breakfast") || c.includes("starter")) {
+    return "Breakfast";
+  }
+  return "Mains";
+}
+
 function extractDomain(url) {
   try {
     const parsed = new URL(url);
