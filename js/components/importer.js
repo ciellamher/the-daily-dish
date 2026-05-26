@@ -151,14 +151,16 @@ export function simulateRecipeImport(url, onStepChange, onComplete) {
     targetUrl = "https://" + targetUrl;
   }
   
-  // Use public CORS proxy to fetch the HTML
-  fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`)
+  // Use public CORS proxy to fetch the HTML (using codetabs to bypass Cloudflare 522 errors)
+  fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`)
     .then(res => {
       if (!res.ok) throw new Error("Network response was not ok");
-      return res.json();
+      return res.text();
     })
-    .then(data => {
-      const html = data.contents;
+    .then(html => {
+      if (!html || html.trim().startsWith("Error") || html.length < 100) {
+        throw new Error("Invalid or empty response from proxy");
+      }
       onStepChange({ step: "extract", status: "Downloading HTML & searching metadata...", progress: 50 });
       
       const schemaRecipe = extractRecipeSchema(html);
@@ -170,14 +172,7 @@ export function simulateRecipeImport(url, onStepChange, onComplete) {
         let title = schemaRecipe.name || meta.title || "Scraped Recipe";
         let desc = schemaRecipe.description || meta.description || `Sourced from online article.`;
         
-        let imageUrl = "";
-        if (schemaRecipe.image) {
-          if (typeof schemaRecipe.image === "string") imageUrl = schemaRecipe.image;
-          else if (Array.isArray(schemaRecipe.image) && schemaRecipe.image.length > 0) {
-            imageUrl = typeof schemaRecipe.image[0] === "string" ? schemaRecipe.image[0] : schemaRecipe.image[0].url;
-          }
-          else if (schemaRecipe.image.url) imageUrl = schemaRecipe.image.url;
-        }
+        let imageUrl = extractImage(schemaRecipe.image);
         if (!imageUrl) imageUrl = meta.image || getGourmetFoodImage(title, schemaRecipe.recipeCategory || "Mains");
         
         let servings = 4;
@@ -201,27 +196,35 @@ export function simulateRecipeImport(url, onStepChange, onComplete) {
           else if (catStr.includes("soup")) category = "Soup";
         }
         
-        importedRecipe = {
-          id: `imported-${Date.now()}`,
-          title: title,
-          description: desc,
-          prepTime,
-          cookTime,
-          servings,
-          difficulty: prepTime + cookTime > 45 ? "Medium" : "Easy",
-          category,
-          tags: ["Imported", category].filter(Boolean),
-          image: imageUrl,
-          sourceUrl: targetUrl,
-          sourceName: extractDomain(targetUrl),
-          equipment: [
-            { name: "Chef's Knife", icon: "knife" },
-            { name: "Cooking Spoon", icon: "spoon" },
-            { name: "Pot or Pan", icon: "pot" }
-          ],
-          ingredients: parseSchemaIngredients(schemaRecipe.recipeIngredient),
-          instructions: parseSchemaInstructions(schemaRecipe.recipeInstructions)
-        };
+        const parsedIngredients = parseSchemaIngredients(schemaRecipe.recipeIngredient);
+        const parsedInstructions = parseSchemaInstructions(schemaRecipe.recipeInstructions);
+        
+        // Only accept the scraped recipe if we successfully got ingredients
+        if (parsedIngredients && parsedIngredients.length > 0) {
+          importedRecipe = {
+            id: `imported-${Date.now()}`,
+            title: decodeHTMLEntities(title),
+            description: decodeHTMLEntities(desc),
+            prepTime,
+            cookTime,
+            servings,
+            difficulty: prepTime + cookTime > 45 ? "Medium" : "Easy",
+            category,
+            tags: ["Imported", category].filter(Boolean),
+            image: imageUrl,
+            sourceUrl: targetUrl,
+            sourceName: extractDomain(targetUrl),
+            equipment: [
+              { name: "Chef's Knife", icon: "knife" },
+              { name: "Cooking Spoon", icon: "spoon" },
+              { name: "Pot or Pan", icon: "pot" }
+            ],
+            ingredients: parsedIngredients,
+            instructions: parsedInstructions.length > 0 ? parsedInstructions : [
+              { step: 1, text: "Click the reference link above to view full cooking procedures on the original website.", tip: "Detailed steps were not found in structured metadata." }
+            ]
+          };
+        }
       }
       
       // Fallback 1: Keyword template match if schema fails
@@ -314,37 +317,75 @@ function extractRecipeSchema(html) {
 
 function findRecipeObject(obj) {
   if (!obj) return null;
-  if (obj["@type"] === "Recipe") {
+  
+  // If this object itself is a Recipe
+  const type = obj["@type"];
+  if (type === "Recipe" || (Array.isArray(type) && type.includes("Recipe"))) {
     return obj;
   }
-  if (obj["@graph"] && Array.isArray(obj["@graph"])) {
-    for (const item of obj["@graph"]) {
-      if (item["@type"] === "Recipe") return item;
-    }
-  }
+  
+  // If it's an array, search its elements
   if (Array.isArray(obj)) {
     for (const item of obj) {
       const found = findRecipeObject(item);
       if (found) return found;
     }
+  } 
+  // If it's an object, search all its properties
+  else if (typeof obj === "object") {
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const found = findRecipeObject(obj[key]);
+        if (found) return found;
+      }
+    }
   }
+  
   return null;
+}
+
+function extractImage(imageField) {
+  if (!imageField) return "";
+  if (typeof imageField === "string") return imageField;
+  if (Array.isArray(imageField)) {
+    for (const img of imageField) {
+      const res = extractImage(img);
+      if (res) return res;
+    }
+  }
+  if (typeof imageField === "object") {
+    return imageField.url || imageField.contentUrl || "";
+  }
+  return "";
 }
 
 function parseSchemaIngredients(ingredients) {
   if (!ingredients || !Array.isArray(ingredients)) return [];
-  return ingredients.map(ingStr => {
+  
+  const COMMON_UNITS = new Set([
+    "cup", "cups", "c", "tbsp", "tablespoon", "tablespoons", "tsp", "teaspoon", "teaspoons",
+    "oz", "ounce", "ounces", "g", "gram", "grams", "kg", "kilogram", "kilograms", "ml", "milliliter", "milliliters",
+    "l", "liter", "liters", "pound", "pounds", "lb", "lbs", "pkg", "package", "packages", "can", "cans",
+    "clove", "cloves", "slice", "slices", "piece", "pieces", "pinch", "pinches", "sprig", "sprigs", "head", "heads",
+    "bunch", "bunches", "container", "containers", "bag", "bags", "bottle", "bottles", "jar", "jars"
+  ]);
+
+  return ingredients.map(ing => {
+    if (!ing) return null;
+    const ingStr = typeof ing === "string" ? ing : (ing.name || String(ing));
     const str = ingStr.replace(/<[^>]*>/g, "").trim();
+    if (!str) return null;
+    
     let quantity = 1;
     let unit = "pc";
     let name = str;
     
-    const match = str.match(/^(\d+(?:\s+\d+\/\d+)?|\d+\/\d+|\d+(?:\.\d+)?)\s*([a-zA-Z\.\s]+?)(?:\s+of\s+|\s+)(.*)$/i);
-    if (match) {
-      const rawQty = match[1].trim();
-      const rawUnit = match[2].trim();
-      const rawName = match[3].trim();
+    // Extract leading number (integer, decimal, fraction, or mixed number)
+    const numMatch = str.match(/^(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?)/);
+    if (numMatch) {
+      const rawQty = numMatch[1].trim();
       
+      // Parse the quantity value
       if (rawQty.includes("/")) {
         const parts = rawQty.split(/\s+/);
         if (parts.length > 1) {
@@ -359,14 +400,28 @@ function parseSchemaIngredients(ingredients) {
         quantity = parseFloat(rawQty);
       }
       
-      unit = rawUnit;
-      name = rawName;
-    } else {
-      const simpleMatch = str.match(/^(\d+)\s+(.*)$/);
-      if (simpleMatch) {
-        quantity = parseInt(simpleMatch[1], 10);
+      // The rest of the string after the number
+      let rest = str.substring(numMatch[0].length).trim();
+      
+      // Remove leading "of" if it exists, e.g. "1/2 of an onion" -> "an onion"
+      if (rest.toLowerCase().startsWith("of ")) {
+        rest = rest.substring(3).trim();
+      }
+      
+      // Get the first word of the rest string to see if it's a unit
+      const restWords = rest.split(/\s+/);
+      const firstWord = restWords[0].replace(/[^a-zA-Z]/g, ""); // clean word punctuation e.g. "cups." -> "cups"
+      
+      if (COMMON_UNITS.has(firstWord.toLowerCase())) {
+        unit = firstWord;
+        name = restWords.slice(1).join(" ");
+        // If there was an "of" after unit, e.g. "1 cup of milk", remove the "of"
+        if (name.toLowerCase().startsWith("of ")) {
+          name = name.substring(3).trim();
+        }
+      } else {
         unit = "pc";
-        name = simpleMatch[2];
+        name = rest;
       }
     }
     
@@ -378,7 +433,7 @@ function parseSchemaIngredients(ingredients) {
       category = "Seafood";
     } else if (nameLower.includes("onion") || nameLower.includes("garlic") || nameLower.includes("tomato") || nameLower.includes("lemon") || nameLower.includes("spinach") || nameLower.includes("pepper") || nameLower.includes("ginger") || nameLower.includes("cilantro")) {
       category = "Produce";
-    } else if (nameLower.includes("cheese") || nameLower.includes("butter") || nameLower.includes("milk") || nameLower.includes("cream") || nameLower.includes("yogurt")) {
+    } else if (nameLower.includes("cheese") || nameLower.includes("butter") || nameLower.includes("milk") || nameLower.includes("cream") || nameLower.includes("yogurt") || nameLower.includes("mascarpone")) {
       category = "Dairy";
     }
     
@@ -388,31 +443,41 @@ function parseSchemaIngredients(ingredients) {
       unit: unit.toLowerCase().trim() || "pc",
       category
     };
-  });
+  }).filter(Boolean);
 }
 
 function parseSchemaInstructions(instructions) {
   if (!instructions) return [];
-  if (typeof instructions === "string") {
-    return [{ step: 1, text: instructions, tip: "" }];
-  }
-  if (Array.isArray(instructions)) {
-    return instructions.map((inst, idx) => {
-      let text = "";
-      if (typeof inst === "string") {
-        text = inst;
-      } else if (inst && typeof inst === "object") {
-        text = inst.text || inst.name || "";
+  
+  const steps = [];
+  
+  function traverse(item) {
+    if (!item) return;
+    if (typeof item === "string") {
+      steps.push(item);
+    } else if (Array.isArray(item)) {
+      item.forEach(traverse);
+    } else if (typeof item === "object") {
+      if (item["@type"] === "HowToStep" || item.text) {
+        steps.push(item.text || item.name || "");
+      } else if (item["@type"] === "HowToSection" || item.itemListElement) {
+        traverse(item.itemListElement);
+      } else if (item.name && !item.text) {
+        steps.push(item.name);
       }
-      text = text.replace(/<[^>]*>/g, "").trim();
-      return {
-        step: idx + 1,
-        text: text,
-        tip: ""
-      };
-    }).filter(item => item.text.length > 5);
+    }
   }
-  return [];
+  
+  traverse(instructions);
+  
+  return steps
+    .map(text => text.replace(/<[^>]*>/g, "").trim())
+    .filter(text => text.length > 5)
+    .map((text, idx) => ({
+      step: idx + 1,
+      text: text,
+      tip: ""
+    }));
 }
 
 function parseISO8601Duration(duration) {
@@ -429,22 +494,55 @@ function parseISO8601Duration(duration) {
 function extractMetaFallbacks(html) {
   const meta = { title: "", image: "", description: "" };
   
+  // Extract <title>
   const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
   if (titleMatch) meta.title = titleMatch[1].trim();
   
-  const ogTitle = html.match(/<meta\b[^>]*property=["']og:title["'][^>]*content=["']([\s\S]*?)["']/i);
-  if (ogTitle) meta.title = ogTitle[1].trim();
+  // Helper to extract content from meta tags in any attribute order
+  function getMetaTagContent(html, propertyOrName) {
+    const regexes = [
+      new RegExp(`<meta\\b[^>]*?(?:property|name)=["']${propertyOrName}["'][^>]*?content=["']([^"']+)["']`, "i"),
+      new RegExp(`<meta\\b[^>]*?content=["']([^"']+)["'][^>]*?(?:property|name)=["']${propertyOrName}["']`, "i")
+    ];
+    for (const regex of regexes) {
+      const match = html.match(regex);
+      if (match) return match[1].trim();
+    }
+    return "";
+  }
   
-  const ogImage = html.match(/<meta\b[^>]*property=["']og:image["'][^>]*content=["']([\s\S]*?)["']/i);
-  if (ogImage) meta.image = ogImage[1].trim();
+  const ogTitle = getMetaTagContent(html, "og:title");
+  if (ogTitle) meta.title = ogTitle;
   
-  const ogDesc = html.match(/<meta\b[^>]*property=["']og:description["'][^>]*content=["']([\s\S]*?)["']/i);
-  if (ogDesc) meta.description = ogDesc[1].trim();
+  const ogImage = getMetaTagContent(html, "og:image");
+  if (ogImage) meta.image = ogImage;
   
-  const metaDesc = html.match(/<meta\b[^>]*name=["']description["'][^>]*content=["']([\s\S]*?)["']/i);
-  if (metaDesc && !meta.description) meta.description = metaDesc[1].trim();
+  const ogDesc = getMetaTagContent(html, "og:description");
+  if (ogDesc) meta.description = ogDesc;
+  
+  const metaDesc = getMetaTagContent(html, "description");
+  if (metaDesc && !meta.description) meta.description = metaDesc;
+  
+  if (meta.title) meta.title = decodeHTMLEntities(meta.title);
+  if (meta.description) meta.description = decodeHTMLEntities(meta.description);
   
   return meta;
+}
+
+function decodeHTMLEntities(text) {
+  if (!text) return "";
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&rsquo;/g, "'")
+    .replace(/&ldquo;/g, '"')
+    .replace(/&rdquo;/g, '"')
+    .replace(/&ndash;/g, "-")
+    .replace(/&mdash;/g, "-");
 }
 
 function cleanPathQuery(url) {
@@ -474,11 +572,11 @@ function cleanPathQuery(url) {
 }
 
 function serveFinalMetaFallback(meta, url, onStepChange, onComplete) {
-  const title = meta.title || `Recipe from ${extractDomain(url)}`;
+  const title = decodeHTMLEntities(meta.title) || `Recipe from ${extractDomain(url)}`;
   const finalRecipe = {
     id: `imported-${Date.now()}`,
     title: title,
-    description: meta.description || `Imported recipe from ${url}.`,
+    description: decodeHTMLEntities(meta.description) || `Imported recipe from ${url}.`,
     prepTime: 15,
     cookTime: 20,
     servings: 4,
