@@ -349,6 +349,40 @@ const PREDEFINED_AI_TEMPLATES = {
       { step: 5, text: "Stir in the shredded chicken and simmer for 2 minutes until chicken is hot and heated through.", tip: "Using pre-cooked rotisserie chicken is a great time-saving trick!" },
       { step: 6, text: "Remove the pot from the heat, stir in the chopped fresh parsley, ladle into deep bowls, and serve warm.", tip: "Serve with crusty bread or crackers for the perfect comfort meal." }
     ]
+  },
+  adobo: {
+    title: "Filipino Chicken Adobo",
+    description: "The quintessential Filipino comfort food: tender chicken pieces simmered in a savory, tangy sauce of soy sauce, vinegar, garlic, bay leaves, and black peppercorns.",
+    prepTime: 10,
+    cookTime: 30,
+    servings: 4,
+    difficulty: "Easy",
+    category: "Mains",
+    tags: ["Filipino", "Chicken", "Comfort Food", "Tangy"],
+    equipment: [
+      { name: "Large Pot or Dutch Oven", icon: "pot" },
+      { name: "Chef's Knife", icon: "knife" },
+      { name: "Mixing Bowl", icon: "bowl" }
+    ],
+    ingredients: [
+      { name: "chicken drumsticks and thighs", quantity: 1, unit: "kg", category: "Meat" },
+      { name: "soy sauce", quantity: 0.5, unit: "cup", category: "Pantry" },
+      { name: "white vinegar or cane vinegar", quantity: 0.33, unit: "cup", category: "Pantry" },
+      { name: "garlic cloves, crushed", quantity: 8, unit: "pcs", category: "Produce" },
+      { name: "dried bay leaves", quantity: 3, unit: "pcs", category: "Pantry" },
+      { name: "whole black peppercorns", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "cooking oil", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "water", quantity: 1, unit: "cup", category: "Pantry" },
+      { name: "brown sugar", quantity: 1, unit: "tsp", category: "Pantry" }
+    ],
+    instructions: [
+      { step: 1, text: "In a mixing bowl, combine chicken, soy sauce, half of the crushed garlic, and black peppercorns. Marinate for 30 minutes.", tip: "Marinating overnight yields the deepest flavor profile." },
+      { step: 2, text: "Heat cooking oil in a large pot over medium-high heat. Sauté the remaining garlic until fragrant and light golden brown.", tip: "Watch closely so the garlic does not burn." },
+      { step: 3, text: "Remove chicken pieces from marinade (save the marinade) and sear in the pot for 3-4 minutes per side until browned.", tip: "Searing locks in the juices and creates a beautiful caramelized skin." },
+      { step: 4, text: "Pour in the reserved marinade, water, and add dried bay leaves. Bring to a boil, then cover and simmer on low for 20 minutes.", tip: "Ensure the chicken is submerged in the braising liquid." },
+      { step: 5, text: "Add vinegar and simmer uncovered for 10 minutes without stirring, allowing the harsh acid taste to cook off.", tip: "Resisting the urge to stir helps the vinegar mellow out naturally." },
+      { step: 6, text: "Stir in brown sugar and simmer for another 5 minutes until the sauce reduces and thickens. Serve hot over steamed white rice.", tip: "Adobo tastes even better the next day as the chicken absorbs more sauce!" }
+    ]
   }
 };
 
@@ -637,6 +671,9 @@ export function generateRecipeOnSpot(query, onStepChange, onComplete) {
     recipe.id = `generated-${Date.now()}`;
   } else if (normalizedQuery.includes("soup") || normalizedQuery.includes("broth")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.soup));
+    recipe.id = `generated-${Date.now()}`;
+  } else if (normalizedQuery.includes("adobo")) {
+    recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.adobo));
     recipe.id = `generated-${Date.now()}`;
   } else {
     // Generate intelligent dynamic fallback recipe on the fly!

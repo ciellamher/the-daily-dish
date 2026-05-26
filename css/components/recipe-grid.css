@@ -82,6 +82,7 @@
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;  /* IE/Edge */
   padding: 0 10px;
+  align-items: stretch; /* Stretch cards to equal height */
 }
 
 .carousel-track::-webkit-scrollbar {
@@ -92,6 +93,7 @@
   flex: 0 0 calc(33.333% - 20px);
   min-width: 320px;
   scroll-snap-align: start;
+  height: auto; /* Let flexbox stretch control card height */
 }
 
 /* Carousel Navigation Buttons */
@@ -196,14 +198,29 @@
 }
 
 .card-circle-plate-wrapper {
+  position: relative;
   width: 180px;
   height: 180px;
   border-radius: var(--radius-full);
   overflow: hidden;
-  box-shadow: 0 10px 25px rgba(62, 39, 35, 0.1);
-  border: 4px solid var(--bg-secondary);
-  background-color: var(--bg-tertiary);
+  box-shadow: 0 12px 28px rgba(62, 39, 35, 0.15), 0 2px 5px rgba(62, 39, 35, 0.08);
+  border: 12px solid #ffffff; /* Thick white plate rim */
+  background-color: #ffffff;
   transition: transform var(--transition-slow);
+}
+
+.card-circle-plate-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  /* Inset shadow to create a 3D plate depth over the food image */
+  box-shadow: inset 0 8px 12px rgba(0, 0, 0, 0.15), inset 0 -4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(62, 39, 35, 0.08); /* Rim divider line */
+  pointer-events: none;
 }
 
 .card-circle-plate-img {
