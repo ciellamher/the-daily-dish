@@ -173,6 +173,182 @@ const PREDEFINED_AI_TEMPLATES = {
       { step: 5, text: "Pour 1/4 cup of batter per pancake. Cook for 2-3 minutes until bubbles form on the surface and the edges look set. Flip and cook for 1-2 minutes until golden on the other side.", tip: "Flip when bubbles pop and leave open holes - that's the sign they're ready." },
       { step: 6, text: "Stack on plates, top with butter and maple syrup, and serve warm.", tip: "Add fresh blueberries or chocolate chips to the batter in the pan before flipping!" }
     ]
+  },
+  fries: {
+    title: "Crispy Garlic Herb French Fries",
+    description: "Golden brown, oven-baked french fries tossed in aromatic garlic butter, fresh parsley, and grated parmesan cheese.",
+    prepTime: 15,
+    cookTime: 25,
+    servings: 3,
+    difficulty: "Easy",
+    category: "Sides",
+    tags: ["Fries", "Baking", "Snacks"],
+    equipment: [
+      { name: "Chef's Knife", icon: "knife" },
+      { name: "Cutting Board", icon: "board" },
+      { name: "Mixing Bowl", icon: "bowl" },
+      { name: "Baking Sheet", icon: "sheet" }
+    ],
+    ingredients: [
+      { name: "large russet potatoes", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "olive oil", quantity: 3, unit: "tbsp", category: "Pantry" },
+      { name: "garlic powder", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "kosher salt", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "black pepper", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "fresh flat-leaf parsley, chopped", quantity: 2, unit: "tbsp", category: "Produce" },
+      { name: "parmesan cheese, grated", quantity: 0.25, unit: "cup", category: "Dairy" }
+    ],
+    instructions: [
+      { step: 1, text: "Preheat oven to 425°F (220°C) and grease a large baking sheet with olive oil.", tip: "A hot, well-oiled baking sheet is crucial to prevent the fries from sticking!" },
+      { step: 2, text: "Scrub the potatoes clean. Cut them lengthwise into 1/4-inch slices, then cut those slices into matchstick fries. Soak them in cold water for 30 minutes.", tip: "Soaking removes excess potato starch, which is the secret to achieving maximum crispiness in the oven." },
+      { step: 3, text: "Drain the potatoes and thoroughly pat them dry with paper towels or a clean kitchen cloth.", tip: "Water is the enemy of crispiness. If the potatoes are wet, they will steam instead of baking." },
+      { step: 4, text: "Toss the dried potatoes in a large bowl with olive oil, garlic powder, salt, and black pepper until evenly coated.", tip: "Ensure every single fry has a thin coating of oil and seasonings." },
+      { step: 5, text: "Spread the fries in a single layer on the prepared baking sheet. Bake for 20-25 minutes, flipping them halfway through, until crispy and golden brown.", tip: "Avoid overcrowding the sheet. If the fries are piled on top of each other, they won't get crispy." },
+      { step: 6, text: "Transfer hot fries to a bowl. Toss with chopped fresh parsley and grated parmesan cheese. Serve immediately.", tip: "The cheese will melt slightly onto the fries if tossed while they are piping hot!" }
+    ]
+  },
+  steak: {
+    title: "Garlic Butter Pan-Seared Ribeye",
+    description: "A perfectly seared, juicy ribeye steak basted with foaming garlic butter, fresh rosemary, and thyme in a cast-iron skillet.",
+    prepTime: 10,
+    cookTime: 10,
+    servings: 2,
+    difficulty: "Medium",
+    category: "Mains",
+    tags: ["Steak", "Meat", "Dinner"],
+    equipment: [
+      { name: "Cast Iron Skillet", icon: "pan" },
+      { name: "Tongs", icon: "tongs" },
+      { name: "Meat Thermometer", icon: "knife" },
+      { name: "Cutting Board", icon: "board" }
+    ],
+    ingredients: [
+      { name: "ribeye steaks, thick-cut", quantity: 2, unit: "pcs", category: "Meat" },
+      { name: "olive oil", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "unsalted butter", quantity: 3, unit: "tbsp", category: "Dairy" },
+      { name: "garlic cloves, smashed", quantity: 4, unit: "pcs", category: "Produce" },
+      { name: "fresh rosemary sprigs", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "fresh thyme sprigs", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "kosher salt", quantity: 1.5, unit: "tsp", category: "Pantry" },
+      { name: "coarse black pepper", quantity: 1, unit: "tsp", category: "Pantry" }
+    ],
+    instructions: [
+      { step: 1, text: "Remove the steaks from the refrigerator 30 minutes before cooking to bring them to room temperature.", tip: "Cooking cold steaks will result in an uneven cook - cold inside, overcooked outside." },
+      { step: 2, text: "Pat the steaks completely dry with paper towels and season generously on all sides with kosher salt and coarse black pepper.", tip: "Don't be shy with the salt; thick steaks need plenty of seasoning to flavor the meat." },
+      { step: 3, text: "Heat olive oil in a heavy cast iron skillet over high heat until it just begins to smoke. Place the steaks in the skillet.", tip: "A cast iron skillet holds heat better than other pans, creating a greater dark crust." },
+      { step: 4, text: "Sear the steaks for 2-3 minutes without moving them to develop a deep golden crust, then flip and sear the other side for 2 minutes.", tip: "Flip the steaks only once for a consistent, beautiful crust." },
+      { step: 5, text: "Reduce heat to medium. Add butter, smashed garlic, rosemary, and thyme to the skillet. Tilt the pan and spoon the foaming butter over the steaks continuously for 2 minutes.", tip: "Basting cooks the steaks more evenly and infuses them with rich herb and garlic flavors." },
+      { step: 6, text: "Transfer the steaks to a warm plate or cutting board and let them rest for 5-7 minutes before slicing.", tip: "Resting allows the juices to redistribute back through the meat instead of spilling out onto the board." }
+    ]
+  },
+  spaghetti: {
+    title: "Classic Spaghetti Bolognese",
+    description: "A rich, slow-simmered beef ragu sauce seasoned with Italian herbs, served over a bed of al dente spaghetti pasta.",
+    prepTime: 15,
+    cookTime: 30,
+    servings: 4,
+    difficulty: "Medium",
+    category: "Pasta",
+    tags: ["Pasta", "Italian", "Comfort Food"],
+    equipment: [
+      { name: "Large Skillet or Dutch Oven", icon: "pan" },
+      { name: "Large Pasta Pot", icon: "pot" },
+      { name: "Wooden Spoon", icon: "spoon" },
+      { name: "Colander", icon: "pot" }
+    ],
+    ingredients: [
+      { name: "spaghetti pasta", quantity: 400, unit: "g", category: "Pantry" },
+      { name: "lean ground beef", quantity: 500, unit: "g", category: "Meat" },
+      { name: "yellow onion, finely chopped", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "garlic cloves, minced", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "canned crushed tomatoes", quantity: 800, unit: "g", category: "Pantry" },
+      { name: "tomato paste", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "olive oil", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "Italian seasoning", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "kosher salt", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "black pepper", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "parmesan cheese, grated", quantity: 0.5, unit: "cup", category: "Dairy" }
+    ],
+    instructions: [
+      { step: 1, text: "Heat olive oil in a large skillet or Dutch oven over medium heat. Sauté the chopped onion and minced garlic for 3-4 minutes until translucent and aromatic.", tip: "Cook the onions slowly so they release their natural sweetness." },
+      { step: 2, text: "Add ground beef to the skillet. Cook for 6-8 minutes, breaking it up with a wooden spoon, until browned. Drain any excess fat from the pan.", tip: "Draining fat keeps the sauce rich and meaty without feeling greasy." },
+      { step: 3, text: "Stir in the tomato paste, coating the meat, and cook for 1 minute. Add the crushed tomatoes, Italian seasoning, salt, and black pepper. Stir well.", tip: "Cooking the tomato paste for a minute caramelizes the sugars and deepens the flavor." },
+      { step: 4, text: "Reduce heat to low, cover, and simmer the sauce gently for 25-30 minutes, stirring occasionally.", tip: "A slow simmer breaks down the tomatoes and allows the meat to become tender." },
+      { step: 5, text: "While the sauce simmers, boil spaghetti in a large pot of salted water according to package instructions until al dente. Drain, reserving 1/2 cup of pasta water.", tip: "Do not rinse the pasta! The starch on the noodles helps the sauce cling to them." },
+      { step: 6, text: "Toss the spaghetti with the meat sauce, adding pasta water to loosen if needed. Serve hot topped with freshly grated parmesan cheese.", tip: "Tossing the pasta in the sauce before plating ensures every noodle is coated." }
+    ]
+  },
+  cake: {
+    title: "Warm Chocolate Lava Cake",
+    description: "Decadent individual chocolate cakes with firm, cakey borders and a warm, molten liquid chocolate center.",
+    prepTime: 15,
+    cookTime: 12,
+    servings: 2,
+    difficulty: "Medium",
+    category: "Baking",
+    tags: ["Chocolate", "Dessert", "Baking"],
+    equipment: [
+      { name: "Ramekins (6 oz)", icon: "bowl" },
+      { name: "Mixing Bowls", icon: "bowl" },
+      { name: "Whisk", icon: "bowl" },
+      { name: "Baking Sheet", icon: "sheet" }
+    ],
+    ingredients: [
+      { name: "high-quality dark chocolate chips", quantity: 100, unit: "g", category: "Pantry" },
+      { name: "unsalted butter", quantity: 4, unit: "tbsp", category: "Dairy" },
+      { name: "powdered sugar", quantity: 0.5, unit: "cup", category: "Pantry" },
+      { name: "large egg", quantity: 1, unit: "pc", category: "Dairy" },
+      { name: "large egg yolk", quantity: 1, unit: "pc", category: "Dairy" },
+      { name: "all-purpose flour", quantity: 3, unit: "tbsp", category: "Pantry" },
+      { name: "vanilla extract", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "fine sea salt", quantity: 0.12, unit: "tsp", category: "Pantry" }
+    ],
+    instructions: [
+      { step: 1, text: "Preheat your oven to 425°F (220°C). Generously butter two 6-ounce ramekins and dust them lightly with cocoa powder or flour.", tip: "Properly prepping the ramekins ensures the cakes slide out easily without tearing the delicate outer walls." },
+      { step: 2, text: "In a microwave-safe bowl, melt the dark chocolate and butter together in 30-second increments, stirring in between until completely smooth.", tip: "Chocolate burns easily - melt slowly and stir often." },
+      { step: 3, text: "Whisk the powdered sugar, whole egg, egg yolk, vanilla extract, and salt into the melted chocolate mixture until fully incorporated and glossy.", tip: "The extra egg yolk adds richness and helps create the gooey molten center." },
+      { step: 4, text: "Gently fold in the flour with a spatula or wooden spoon just until the flour disappears. Do not overmix.", tip: "Overmixing will develop gluten, turning your soft cake chewy." },
+      { step: 5, text: "Divide the batter evenly between the prepared ramekins. Place ramekins on a baking sheet and bake for 11-13 minutes.", tip: "The edges should be firm and set, but the center circle should still jiggle slightly when shaken." },
+      { step: 6, text: "Let cool for 1 minute. Place a plate over a ramekin and invert it carefully. Lift the ramekin, dust the cake with powdered sugar, and serve warm.", tip: "The cake is best enjoyed immediately while the center is still warm and liquid!" }
+    ]
+  },
+  soup: {
+    title: "Cozy Chicken Noodle Soup",
+    description: "A comforting bowl of soup loaded with tender shredded chicken, egg noodles, sliced carrots, celery, and onions simmered in a savory broth.",
+    prepTime: 15,
+    cookTime: 25,
+    servings: 4,
+    difficulty: "Easy",
+    category: "Soup",
+    tags: ["Soup", "Comfort Food", "Healthy"],
+    equipment: [
+      { name: "Large Soup Pot", icon: "pot" },
+      { name: "Chef's Knife", icon: "knife" },
+      { name: "Cutting Board", icon: "board" },
+      { name: "Ladle", icon: "pot" }
+    ],
+    ingredients: [
+      { name: "cooked shredded chicken breast", quantity: 2, unit: "cups", category: "Meat" },
+      { name: "chicken broth", quantity: 6, unit: "cups", category: "Pantry" },
+      { name: "dried wide egg noodles", quantity: 2, unit: "cups", category: "Pantry" },
+      { name: "olive oil", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "yellow onion, chopped", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "carrots, sliced", quantity: 2, unit: "pcs", category: "Produce" },
+      { name: "celery ribs, sliced", quantity: 2, unit: "pcs", category: "Produce" },
+      { name: "garlic cloves, minced", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "dried thyme", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "kosher salt", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "black pepper", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "fresh flat-leaf parsley, chopped", quantity: 2, unit: "tbsp", category: "Produce" }
+    ],
+    instructions: [
+      { step: 1, text: "Heat olive oil in a large soup pot over medium heat. Sauté the chopped onion, carrots, and celery for 5-6 minutes until vegetables begin to soften.", tip: "Sweating the mirepoix (onions, carrots, celery) forms the flavor foundation of the soup." },
+      { step: 2, text: "Add minced garlic and dried thyme; cook for 1 minute until highly fragrant.", tip: "Cooking the garlic briefly before adding liquids prevents it from tasting boiled." },
+      { step: 3, text: "Pour in the chicken broth, kosher salt, and black pepper. Bring to a boil, then reduce heat to low and simmer uncovered for 10 minutes.", tip: "Simmering lets the vegetable flavors infuse into the broth." },
+      { step: 4, text: "Stir in the wide egg noodles and cook for 6-8 minutes until tender.", tip: "Check package instructions for the noodles to avoid overcooking them into mush." },
+      { step: 5, text: "Stir in the shredded chicken and simmer for 2 minutes until chicken is hot and heated through.", tip: "Using pre-cooked rotisserie chicken is a great time-saving trick!" },
+      { step: 6, text: "Remove the pot from the heat, stir in the chopped fresh parsley, ladle into deep bowls, and serve warm.", tip: "Serve with crusty bread or crackers for the perfect comfort meal." }
+    ]
   }
 };
 
@@ -190,185 +366,224 @@ function generateDynamicFallback(query) {
 
   const lowerQuery = cleanQuery.toLowerCase();
   
-  // Guess category
   let category = "Gourmet";
-  if (lowerQuery.includes("salad")) category = "Salads";
-  else if (lowerQuery.includes("soup") || lowerQuery.includes("stew")) category = "Soups";
-  else if (lowerQuery.includes("pasta") || lowerQuery.includes("spaghetti") || lowerQuery.includes("noodles")) category = "Pasta";
-  else if (lowerQuery.includes("cake") || lowerQuery.includes("cookie") || lowerQuery.includes("bake") || lowerQuery.includes("bread")) category = "Baking";
-  else if (lowerQuery.includes("breakfast") || lowerQuery.includes("egg") || lowerQuery.includes("toast")) category = "Breakfast";
-  else if (lowerQuery.includes("drink") || lowerQuery.includes("smoothie") || lowerQuery.includes("shake")) category = "Beverages";
-
-  // Estimates based on category
   let prepTime = 10;
   let cookTime = 15;
   let difficulty = "Easy";
-  
-  if (category === "Salads" || category === "Breakfast") {
-    cookTime = 5;
-  } else if (category === "Baking") {
-    prepTime = 15;
-    cookTime = 25;
-  } else if (lowerQuery.includes("steak") || lowerQuery.includes("chicken") || lowerQuery.includes("rice")) {
-    cookTime = 20;
-  }
-  
-  if (lowerQuery.includes("beef") || lowerQuery.includes("roast") || lowerQuery.includes("curry")) {
+  let ingredients = [];
+  let equipment = [];
+  let instructions = [];
+
+  // Match keyword-specific recipes
+  if (lowerQuery.includes("fried rice") || (lowerQuery.includes("rice") && (lowerQuery.includes("fried") || lowerQuery.includes("stir")))) {
+    category = "Mains";
+    prepTime = 10;
+    cookTime = 10;
+    difficulty = "Easy";
+    equipment = [
+      { name: "Wok or Large Skillet", icon: "pan" },
+      { name: "Cooking Spatula", icon: "spoon" },
+      { name: "Chef's Knife", icon: "knife" },
+      { name: "Cutting Board", icon: "board" }
+    ];
+    ingredients = [
+      { name: "cooked jasmine rice (preferably day-old)", quantity: 3, unit: "cups", category: "Pantry" },
+      { name: "eggs, beaten", quantity: 2, unit: "pcs", category: "Dairy" },
+      { name: "frozen peas and carrots mix", quantity: 1, unit: "cup", category: "Produce" },
+      { name: "garlic cloves, minced", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "soy sauce", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "sesame oil", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "green onions, chopped", quantity: 0.25, unit: "cup", category: "Produce" },
+      { name: "vegetable oil or butter", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "salt", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "black pepper", quantity: 0.25, unit: "tsp", category: "Pantry" }
+    ];
+    instructions = [
+      { step: 1, text: "Heat 1 tablespoon of vegetable oil or butter in a wok or large skillet over medium-high heat. Add the minced garlic and frozen peas and carrots, sautéing for 3 minutes until tender.", tip: "Using day-old cold rice is the key secret - fresh warm rice will turn sticky and mushy!" },
+      { step: 2, text: "Push the sautéed vegetables to one side of the wok. Pour the beaten eggs into the empty side and scramble them with your spatula until cooked through.", tip: "Scrambling the eggs in the same pan saves cleanup and distributes flavor." },
+      { step: 3, text: "Add the cold cooked rice to the wok, using your spatula to break up any clumps.", tip: "Press the rice flat against the bottom of the hot pan to fry it properly." },
+      { step: 4, text: "Drizzle the soy sauce and sesame oil over the rice, stirring and tossing everything vigorously for 3-4 minutes to fry the rice evenly.", tip: "High heat and rapid tossing give fried rice its characteristic smoky, seared wok flavor." },
+      { step: 5, text: "Season with salt and black pepper to taste, then stir in the chopped green onions, cooking for 1 more minute.", tip: "Green onions add a fresh onion bite - save some for raw garnish at the end." },
+      { step: 6, text: "Remove from heat, transfer to serving bowls, and serve immediately.", tip: "Add cooked chicken, shrimp, or cubed bacon during step 1 if you want protein!" }
+    ];
+  } else if (lowerQuery.includes("salmon") || lowerQuery.includes("fish") || lowerQuery.includes("tuna")) {
+    category = "Seafood";
+    prepTime = 10;
+    cookTime = 10;
     difficulty = "Medium";
-  }
-
-  // Compile ingredients based on keywords
-  const ingredients = [
-    { name: "salt", quantity: 1, unit: "tsp", category: "Pantry" },
-    { name: "black pepper", quantity: 0.5, unit: "tsp", category: "Pantry" }
-  ];
-
-  // Add cooking fats
-  if (category === "Baking") {
-    ingredients.unshift({ name: "butter, softened", quantity: 0.5, unit: "cup", category: "Dairy" });
+    equipment = [
+      { name: "Non-stick Skillet", icon: "pan" },
+      { name: "Fish Spatula", icon: "spoon" },
+      { name: "Spoon", icon: "spoon" },
+      { name: "Chef's Knife", icon: "knife" }
+    ];
+    ingredients = [
+      { name: "fresh fish fillets (like salmon or white fish)", quantity: 2, unit: "pcs", category: "Seafood" },
+      { name: "olive oil", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "unsalted butter", quantity: 2, unit: "tbsp", category: "Dairy" },
+      { name: "garlic cloves, minced", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "lemon, juiced", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "fresh parsley or dill, chopped", quantity: 1, unit: "tbsp", category: "Produce" },
+      { name: "salt", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "black pepper", quantity: 0.25, unit: "tsp", category: "Pantry" }
+    ];
+    instructions = [
+      { step: 1, text: "Pat the fish fillets completely dry with paper towels and season both sides with salt and black pepper.", tip: "Dry skin is the secret to getting a crispy, golden sear!" },
+      { step: 2, text: "Heat olive oil in a skillet over medium-high heat. Place the fillets in the skillet skin-side down.", tip: "Searing skin-side down first keeps the fillet intact and prevents breaking." },
+      { step: 3, text: "Sear for 4-5 minutes until the skin is golden and crispy. Gently flip the fillets using a fish spatula and sear the other side for 3 minutes.", tip: "Limit flipping to once to keep the fish structure perfect." },
+      { step: 4, text: "Reduce heat to medium-low. Add butter, minced garlic, and lemon juice around the fish in the skillet.", tip: "Let the butter melt and foam with the garlic for maximum aroma." },
+      { step: 5, text: "Tilt the skillet slightly and use a spoon to repeatedly baste the melted garlic lemon butter over the fish fillets for 2 minutes.", tip: "Basting keeps the fish succulent and infuses it with citrus-garlic richness." },
+      { step: 6, text: "Remove from heat, transfer to plates, garnish with fresh dill or parsley, and serve hot.", tip: "Serve alongside steamed green vegetables or garlic rice." }
+    ];
+  } else if (lowerQuery.includes("salad") || lowerQuery.includes("caesar") || lowerQuery.includes("greens")) {
+    category = "Salad";
+    prepTime = 10;
+    cookTime = 0;
+    difficulty = "Easy";
+    equipment = [
+      { name: "Large Salad Bowl", icon: "bowl" },
+      { name: "Salad Tongs", icon: "tongs" },
+      { name: "Small Bowl or Jar (for dressing)", icon: "bowl" },
+      { name: "Chef's Knife", icon: "knife" }
+    ];
+    ingredients = [
+      { name: "mixed salad greens (romaine, spinach, or arugula)", quantity: 4, unit: "cups", category: "Produce" },
+      { name: "cherry tomatoes, halved", quantity: 1, unit: "cup", category: "Produce" },
+      { name: "cucumber, sliced", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "croutons", quantity: 0.5, unit: "cup", category: "Pantry" },
+      { name: "extra virgin olive oil", quantity: 3, unit: "tbsp", category: "Pantry" },
+      { name: "fresh lemon juice or vinegar", quantity: 1, unit: "tbsp", category: "Produce" },
+      { name: "honey or maple syrup", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "parmesan cheese, grated", quantity: 0.25, unit: "cup", category: "Dairy" },
+      { name: "salt", quantity: 0.25, unit: "tsp", category: "Pantry" },
+      { name: "black pepper", quantity: 0.25, unit: "tsp", category: "Pantry" }
+    ];
+    instructions = [
+      { step: 1, text: "Wash the salad greens thoroughly and dry them completely using a salad spinner or clean towels.", tip: "If the greens are wet, the oil-based dressing will slide right off them." },
+      { step: 2, text: "In a small bowl or jar, combine the extra virgin olive oil, lemon juice, honey, salt, and black pepper. Whisk or shake vigorously until emulsified.", tip: "Whisking thoroughly blends the acid and oil into a cohesive, creamy vinaigrette." },
+      { step: 3, text: "Chop the cucumber and slice the cherry tomatoes in half.", tip: "Cutting cherry tomatoes allows their juices to mix with the dressing for extra depth." },
+      { step: 4, text: "Place the dried salad greens, tomatoes, and cucumber in a large salad bowl.", tip: "A wooden or glass bowl presents salads beautifully." },
+      { step: 5, text: "Drizzle the vinaigrette over the salad and toss gently with salad tongs until all leaves are lightly coated.", tip: "Only dress right before serving to prevent the greens from wilting." },
+      { step: 6, text: "Top with croutons and a generous sprinkle of grated parmesan cheese, and serve cold.", tip: "Add sliced grilled chicken or salmon to turn this into a high-protein meal!" }
+    ];
+  } else if (lowerQuery.includes("cookie") || lowerQuery.includes("cookies") || lowerQuery.includes("chocolate chip")) {
+    category = "Baking";
+    prepTime = 15;
+    cookTime = 10;
+    difficulty = "Easy";
+    equipment = [
+      { name: "Large Mixing Bowl", icon: "bowl" },
+      { name: "Baking Sheet", icon: "sheet" },
+      { name: "Parchment Paper", icon: "paper" },
+      { name: "Whisk", icon: "bowl" },
+      { name: "Spatula", icon: "spoon" }
+    ];
+    ingredients = [
+      { name: "all-purpose flour", quantity: 1.5, unit: "cups", category: "Pantry" },
+      { name: "baking soda", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "unsalted butter, softened", quantity: 0.5, unit: "cup", category: "Dairy" },
+      { name: "brown sugar, packed", quantity: 0.5, unit: "cup", category: "Pantry" },
+      { name: "granulated sugar", quantity: 0.25, unit: "cup", category: "Pantry" },
+      { name: "large egg", quantity: 1, unit: "pc", category: "Dairy" },
+      { name: "vanilla extract", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "chocolate chips", quantity: 1, unit: "cup", category: "Pantry" },
+      { name: "salt", quantity: 0.25, unit: "tsp", category: "Pantry" }
+    ];
+    instructions = [
+      { step: 1, text: "Preheat your oven to 350°F (175°C) and line a large baking sheet with parchment paper.", tip: "Parchment paper prevents sticking and guarantees a clean, golden bottom crust." },
+      { step: 2, text: "In a medium bowl, whisk together the flour, baking soda, and salt. Set aside.", tip: "Whisking breaks up dry clumps and distributes the leavening agent." },
+      { step: 3, text: "In a large bowl, beat the softened butter, brown sugar, and granulated sugar together until creamy and light. Beat in the egg and vanilla extract.", tip: "Beating sugar and fat incorporates air, which helps the cookies rise." },
+      { step: 4, text: "Slowly add the dry flour mixture into the wet ingredients, stirring gently with a spatula just until combined.", tip: "Do not overmix! Stirring too much creates gluten, making the cookies tough." },
+      { step: 5, text: "Gently fold in the chocolate chips. Scoop 2-tablespoon portions of dough onto the baking sheet, spacing them 2 inches apart.", tip: "Spacing prevents the cookies from merging into one giant sheet while baking." },
+      { step: 6, text: "Bake for 9-11 minutes until the edges are golden. Let cool on the baking sheet for 5 minutes before transferring to a wire rack.", tip: "Cookies are very soft when hot; letting them rest on the sheet allows them to firm up." }
+    ];
+  } else if (lowerQuery.includes("chicken") || lowerQuery.includes("breast")) {
+    category = "Chicken";
+    prepTime = 10;
+    cookTime = 15;
+    difficulty = "Easy";
+    equipment = [
+      { name: "Large Skillet", icon: "pan" },
+      { name: "Tongs", icon: "tongs" },
+      { name: "Chef's Knife", icon: "knife" },
+      { name: "Cutting Board", icon: "board" }
+    ];
+    ingredients = [
+      { name: "boneless, skinless chicken breasts", quantity: 2, unit: "pcs", category: "Meat" },
+      { name: "olive oil", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "garlic powder", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "smoked paprika", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "dried oregano", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "salt", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "black pepper", quantity: 0.25, unit: "tsp", category: "Pantry" },
+      { name: "lemon wedges", quantity: 2, unit: "pcs", category: "Produce" }
+    ];
+    instructions = [
+      { step: 1, text: "Butterfly the chicken breasts by slicing them horizontally to create 4 thinner cutlets. Pat them dry with paper towels.", tip: "Thinner cutlets cook much faster and more evenly than thick whole chicken breasts." },
+      { step: 2, text: "In a small bowl, mix garlic powder, paprika, dried oregano, salt, and black pepper. Season the chicken cutlets generously on both sides.", tip: "Patting the spice mixture onto the meat ensures it adheres during searing." },
+      { step: 3, text: "Heat olive oil in a large skillet over medium-high heat. Once hot, place the chicken in the skillet.", tip: "Wait until the oil shimmers before adding chicken to get a nice brown sear." },
+      { step: 4, text: "Cook for 5-6 minutes without moving to develop a deep golden brown crust.", tip: "Moving the chicken disrupts the searing process." },
+      { step: 5, text: "Flip the chicken using tongs. Cook the other side for 4-5 minutes, or until the internal temperature reaches 165°F (74°C).", tip: "Use a meat thermometer in the thickest part of the cutlet to ensure it is cooked safely but remains juicy." },
+      { step: 6, text: "Transfer chicken to a plate, cover loosely with foil, and let rest for 3 minutes before slicing. Serve with lemon wedges.", tip: "Resting locks the juices in. Slicing immediately will cause the juices to drain out, drying the chicken." }
+    ];
+  } else if (lowerQuery.includes("pasta") || lowerQuery.includes("spaghetti") || lowerQuery.includes("noodle") || lowerQuery.includes("macaroni")) {
+    category = "Pasta";
+    prepTime = 10;
+    cookTime = 10;
+    difficulty = "Easy";
+    equipment = [
+      { name: "Large Pasta Pot", icon: "pot" },
+      { name: "Large Skillet", icon: "pan" },
+      { name: "Colander", icon: "pot" },
+      { name: "Chef's Knife", icon: "knife" }
+    ];
+    ingredients = [
+      { name: "pasta of choice", quantity: 300, unit: "g", category: "Pantry" },
+      { name: "olive oil", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "garlic cloves, minced", quantity: 4, unit: "pcs", category: "Produce" },
+      { name: "cherry tomatoes, halved", quantity: 1, unit: "cup", category: "Produce" },
+      { name: "fresh baby spinach", quantity: 2, unit: "cups", category: "Produce" },
+      { name: "grated parmesan cheese", quantity: 0.5, unit: "cup", category: "Dairy" },
+      { name: "salt", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "black pepper", quantity: 0.25, unit: "tsp", category: "Pantry" }
+    ];
+    instructions = [
+      { step: 1, text: "Bring a large pot of salted water to a boil. Cook pasta according to package instructions until al dente.", tip: "Salting the water flavors the pasta from the inside out." },
+      { step: 2, text: "While the pasta cooks, heat olive oil in a large skillet over medium heat. Sauté minced garlic for 1 minute until fragrant.", tip: "Keep the heat moderate so the garlic doesn't burn." },
+      { step: 3, text: "Add the halved cherry tomatoes, salt, and black pepper. Cook for 4-5 minutes, stirring occasionally, until tomatoes begin to burst and release their juices.", tip: "Press down slightly on some tomatoes with a spoon to speed up sauce formation." },
+      { step: 4, text: "Drain the pasta, reserving 1/2 cup of the warm pasta water.", tip: "Starchy pasta water is the secret to emulsifying skillet sauces." },
+      { step: 5, text: "Toss the pasta and fresh baby spinach directly into the skillet with the tomatoes. Toss for 1-2 minutes until spinach is wilted, adding splashes of pasta water as needed.", tip: "Tossing binds the pasta and sauce into a cohesive dish." },
+      { step: 6, text: "Remove from heat, stir in the grated parmesan cheese, and serve hot.", tip: "Drizzle with a little extra virgin olive oil right before serving." }
+    ];
   } else {
-    ingredients.unshift({ name: "olive oil", quantity: 2, unit: "tbsp", category: "Pantry" });
-    ingredients.unshift({ name: "garlic cloves, minced", quantity: 3, unit: "pcs", category: "Produce" });
-  }
-
-  // Detect and inject proteins
-  let primaryProtein = "";
-  if (lowerQuery.includes("chicken")) {
-    primaryProtein = "chicken";
-    ingredients.push({ name: "boneless chicken breasts, diced", quantity: 500, unit: "g", category: "Meat" });
-  } else if (lowerQuery.includes("beef") || lowerQuery.includes("steak")) {
-    primaryProtein = "beef";
-    ingredients.push({ name: "sirloin beef or ground beef", quantity: 450, unit: "g", category: "Meat" });
-  } else if (lowerQuery.includes("shrimp") || lowerQuery.includes("seafood")) {
-    primaryProtein = "shrimp";
-    ingredients.push({ name: "raw shrimp, peeled and deveined", quantity: 350, unit: "g", category: "Seafood" });
-  } else if (lowerQuery.includes("tofu")) {
-    primaryProtein = "tofu";
-    ingredients.push({ name: "firm tofu, drained and cubed", quantity: 400, unit: "g", category: "Produce" });
-  } else if (lowerQuery.includes("pork") || lowerQuery.includes("bacon")) {
-    primaryProtein = "pork";
-    ingredients.push({ name: "pork chops or thick-cut bacon", quantity: 300, unit: "g", category: "Meat" });
-  }
-
-  // Detect and inject base carbohydrate
-  if (category === "Pasta") {
-    ingredients.push({ name: "tagliatelle or penne pasta", quantity: 350, unit: "g", category: "Pantry" });
-    ingredients.push({ name: "grated parmesan cheese", quantity: 0.5, unit: "cup", category: "Dairy" });
-  } else if (lowerQuery.includes("rice")) {
-    ingredients.push({ name: "long-grain white rice or jasmine rice", quantity: 1.5, unit: "cups", category: "Pantry" });
-  } else if (lowerQuery.includes("toast") || lowerQuery.includes("sandwich")) {
-    ingredients.push({ name: "crusty artisan bread slices", quantity: 4, unit: "pcs", category: "Pantry" });
-  } else if (category === "Baking") {
-    ingredients.push({ name: "all-purpose flour", quantity: 2, unit: "cups", category: "Pantry" });
-    ingredients.push({ name: "granulated sugar", quantity: 0.75, unit: "cup", category: "Pantry" });
-    ingredients.push({ name: "eggs", quantity: 2, unit: "pcs", category: "Dairy" });
-  }
-
-  // Detect custom secondary ingredients in search query
-  const keywords = ["avocado", "tomato", "basil", "pesto", "spinach", "lemon", "honey", "cheese", "cream", "mushroom", "onion", "bell pepper"];
-  keywords.forEach(word => {
-    if (lowerQuery.includes(word) && !ingredients.some(i => i.name.includes(word))) {
-      let unit = "cup";
-      let qty = 0.5;
-      let cat = "Produce";
-      
-      if (word === "lemon") { unit = "pc"; qty = 1; }
-      if (word === "honey") { unit = "tbsp"; qty = 2; cat = "Pantry"; }
-      if (word === "pesto") { unit = "cup"; qty = 0.5; cat = "Pantry"; }
-      if (word === "cheese" || word === "cream") { unit = "cup"; qty = 1; cat = "Dairy"; }
-      
-      ingredients.push({ name: `fresh ${word}`, quantity: qty, unit: unit, category: cat });
-    }
-  });
-
-  // Base equipment list
-  const equipment = [
-    { name: "Chef's Knife", icon: "knife" },
-    { name: "Cutting Board", icon: "board" }
-  ];
-  if (category === "Baking") {
-    equipment.push({ name: "Mixing Bowl", icon: "bowl" });
-    equipment.push({ name: "Baking Pan", icon: "sheet" });
-  } else {
-    equipment.push({ name: "Large Skillet or Pot", icon: "pan" });
-    equipment.push({ name: "Cooking Spatula", icon: "spoon" });
-  }
-
-  // Compile instructions
-  const instructions = [];
-  let step = 1;
-  
-  instructions.push({
-    step: step++,
-    text: `Gather all ingredients. Prep your workspace, wash any fresh vegetables, and measure out your seasonings.`,
-    tip: "Mise en place (having everything ready beforehand) makes cooking stress-free!"
-  });
-
-  if (category === "Baking") {
-    instructions.push({
-      step: step++,
-      text: `In a large bowl, whisk together the dry ingredients (flour, sugar, seasonings). In another bowl, combine the wet ingredients (melted butter, eggs, liquids).`,
-      tip: "Whisking dry ingredients first breaks up lumps and aerates the mixture."
-    });
-    instructions.push({
-      step: step++,
-      text: `Slowly fold the wet ingredients into the dry ingredients. Mix until just combined, taking care not to overmix. Fold in any secondary flavor items.`,
-      tip: "Overmixing causes gluten formation, making your bake tough rather than soft."
-    });
-    instructions.push({
-      step: step++,
-      text: `Preheat your oven. Grease a baking pan or line it with parchment paper, then pour or scoop the batter into the pan.`,
-      tip: "Parchment paper prevents sticking and makes cleaning a breeze."
-    });
-    instructions.push({
-      step: step++,
-      text: `Bake for ${cookTime} minutes, or until the center is cooked through and a toothpick inserted comes out clean. Let it cool on a cooling rack.`,
-      tip: "Don't open the oven door too early, or the center might collapse!"
-    });
-  } else {
-    // Cooking instructions
-    if (primaryProtein) {
-      instructions.push({
-        step: step++,
-        text: `Season your ${primaryProtein} with salt and pepper. Heat your skillet over medium-high heat with olive oil (or butter). Sear the protein until golden brown and cooked through. Set aside on a plate.`,
-        tip: "Searing first seals in the moisture, keeping the meat juicy."
-      });
-    }
-    
-    // Cook aromatics/veg
-    const veggiesList = ingredients.filter(i => i.category === "Produce" && i.name !== "garlic");
-    const vegText = veggiesList.length > 0 ? veggiesList.map(v => v.name).join(", ") : "onions and aromatics";
-    instructions.push({
-      step: step++,
-      text: `Turn skillet down to medium. Add minced garlic and any fresh vegetables (like ${vegText}). Sauté for 3-5 minutes until tender and fragrant.`,
-      tip: "Lowering the heat ensures your garlic doesn't burn and turn bitter."
-    });
-
-    // Make sauce / combine
-    if (category === "Pasta") {
-      instructions.push({
-        step: step++,
-        text: `While cooking, boil your pasta in salted water until al dente. Reserve a splash of pasta water, then drain.`,
-        tip: "Pasta water contains starch which acts as a thickening glue for sauces."
-      });
-      instructions.push({
-        step: step++,
-        text: `Return the cooked protein to the skillet. Toss in the cooked pasta, grated cheese, and fresh herbs. Drizzle extra olive oil or butter, tossing for 1-2 minutes until glossy.`,
-        tip: "Toss vigorously over medium heat to integrate fats and starch."
-      });
-    } else {
-      instructions.push({
-        step: step++,
-        text: `Return the cooked protein to the skillet with the sautéed ingredients. Drizzle any sauces or seasonings, and simmer for 2-3 minutes to blend the flavors.`,
-        tip: "Scrape up any browned bits at the bottom of the skillet - they hold the best flavor."
-      });
-    }
-
-    instructions.push({
-      step: step++,
-      text: `Divide into serving plates, garnish with fresh herbs, a squeeze of fresh lemon juice, or extra seasonings, and enjoy immediately!`,
-      tip: "Adjust seasoning with a tiny pinch of salt or splash of oil right before serving."
-    });
+    // Default fallback: Gourmet Garlic Herb Stir Fry Sauté
+    category = "Mains";
+    prepTime = 10;
+    cookTime = 12;
+    difficulty = "Easy";
+    equipment = [
+      { name: "Large Skillet", icon: "pan" },
+      { name: "Chef's Knife", icon: "knife" },
+      { name: "Cutting Board", icon: "board" },
+      { name: "Cooking Spatula", icon: "spoon" }
+    ];
+    ingredients = [
+      { name: "mixed fresh vegetables (bell peppers, onions, broccoli)", quantity: 3, unit: "cups", category: "Produce" },
+      { name: "olive oil or butter", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "garlic cloves, minced", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "soy sauce or seasoning sauce", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "sesame seeds (for garnish)", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "salt", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "black pepper", quantity: 0.25, unit: "tsp", category: "Pantry" }
+    ];
+    instructions = [
+      { step: 1, text: "Wash all vegetables. Slice the bell peppers, onions, and broccoli into uniform, bite-sized pieces.", tip: "Uniform cuts ensure everything cooks at the exact same rate." },
+      { step: 2, text: "Heat olive oil or butter in a large skillet over medium-high heat until hot.", tip: "A hot skillet is necessary to sear the vegetables instead of steaming them." },
+      { step: 3, text: "Add the sliced onions and broccoli to the skillet, cooking for 3 minutes, stirring occasionally.", tip: "Add hard vegetables first since they take longer to cook." },
+      { step: 4, text: "Add the bell peppers and minced garlic. Sauté for another 3 minutes until vegetables are tender-crisp.", tip: "Adding garlic later prevents it from burning and becoming bitter." },
+      { step: 5, text: "Drizzle the soy sauce over the vegetables. Season with salt and black pepper to taste, tossing to combine for 1 minute.", tip: "Let the sauce caramelize slightly on the hot pan." },
+      { step: 6, text: "Transfer to a serving plate, garnish with sesame seeds, and serve hot.", tip: "Add cubed tofu, chicken, or beef in step 2 to make it a full meal!" }
+    ];
   }
 
   return {
@@ -388,12 +603,7 @@ function generateDynamicFallback(query) {
   };
 }
 
-/**
- * Orchestrates on-the-spot AI Recipe Generation.
- * Animates the generation loader steps, registers the recipe, and triggers the callback.
- */
 export function generateRecipeOnSpot(query, onStepChange, onComplete) {
-  // 1. Choose template or compile dynamic fallback
   const normalizedQuery = query.toLowerCase().trim();
   let recipe = null;
 
@@ -407,11 +617,26 @@ export function generateRecipeOnSpot(query, onStepChange, onComplete) {
   } else if (normalizedQuery.includes("curry")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.curry));
     recipe.id = `generated-${Date.now()}`;
-  } else if (normalizedQuery.includes("taco")) {
+  } else if (normalizedQuery.includes("taco") || normalizedQuery.includes("tacos")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.taco));
     recipe.id = `generated-${Date.now()}`;
   } else if (normalizedQuery.includes("pancake") || normalizedQuery.includes("pancakes")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.pancake));
+    recipe.id = `generated-${Date.now()}`;
+  } else if (normalizedQuery.includes("fries") || normalizedQuery.includes("french fries") || normalizedQuery.includes("potato")) {
+    recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.fries));
+    recipe.id = `generated-${Date.now()}`;
+  } else if (normalizedQuery.includes("steak") || normalizedQuery.includes("ribeye") || normalizedQuery.includes("beef steak")) {
+    recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.steak));
+    recipe.id = `generated-${Date.now()}`;
+  } else if (normalizedQuery.includes("spaghetti") || normalizedQuery.includes("bolognese") || normalizedQuery.includes("ragu")) {
+    recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.spaghetti));
+    recipe.id = `generated-${Date.now()}`;
+  } else if (normalizedQuery.includes("cake") || normalizedQuery.includes("brownie") || normalizedQuery.includes("lava cake")) {
+    recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.cake));
+    recipe.id = `generated-${Date.now()}`;
+  } else if (normalizedQuery.includes("soup") || normalizedQuery.includes("broth")) {
+    recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.soup));
     recipe.id = `generated-${Date.now()}`;
   } else {
     // Generate intelligent dynamic fallback recipe on the fly!
@@ -420,7 +645,6 @@ export function generateRecipeOnSpot(query, onStepChange, onComplete) {
 
   // Dynamically assign a high-quality food image from Unsplash
   recipe.image = getGourmetFoodImage(recipe.title, recipe.category);
-
 
   // Simulated AI generation cycles
   onStepChange({ step: "connect", status: "Formulating gourmet flavor profiles...", progress: 20 });
