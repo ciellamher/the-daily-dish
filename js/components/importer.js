@@ -437,8 +437,15 @@ function parseSchemaIngredients(ingredients) {
       category = "Dairy";
     }
     
+    // Clean up double parentheticals and leading commas
+    let cleanName = name
+      .replace(/\(\((.*?)\)\)/g, "($1)")
+      .replace(/\(\s*,\s*/g, "(")
+      .replace(/\s+/g, " ")
+      .trim();
+
     return {
-      name: name.toLowerCase().trim(),
+      name: decodeHTMLEntities(cleanName).toLowerCase().trim(),
       quantity: isNaN(quantity) ? 1 : quantity,
       unit: unit.toLowerCase().trim() || "pc",
       category
@@ -475,7 +482,7 @@ function parseSchemaInstructions(instructions) {
     .filter(text => text.length > 5)
     .map((text, idx) => ({
       step: idx + 1,
-      text: text,
+      text: decodeHTMLEntities(text),
       tip: ""
     }));
 }
@@ -531,6 +538,12 @@ function extractMetaFallbacks(html) {
 
 function decodeHTMLEntities(text) {
   if (!text) return "";
+  if (typeof document !== "undefined") {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = text;
+    return txt.value;
+  }
+  // Node fallback
   return text
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
@@ -538,11 +551,14 @@ function decodeHTMLEntities(text) {
     .replace(/&quot;/g, '"')
     .replace(/&#039;/g, "'")
     .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
     .replace(/&rsquo;/g, "'")
+    .replace(/&lsquo;/g, "'")
     .replace(/&ldquo;/g, '"')
     .replace(/&rdquo;/g, '"')
     .replace(/&ndash;/g, "-")
-    .replace(/&mdash;/g, "-");
+    .replace(/&mdash;/g, "-")
+    .replace(/&nbsp;/g, " ");
 }
 
 function cleanPathQuery(url) {

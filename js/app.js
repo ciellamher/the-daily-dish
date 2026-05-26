@@ -2,7 +2,7 @@
 
 import { store } from "./store.js";
 import { renderRecipeCard } from "./components/recipe-card.js";
-import { renderRecipeDetail, handleDetailModalClick, INGREDIENT_SUBSTITUTIONS } from "./components/recipe-detail.js";
+import { renderRecipeDetail, handleDetailModalClick, INGREDIENT_SUBSTITUTIONS, renderRecipeEditForm } from "./components/recipe-detail.js";
 import { renderShoppingList, exportShoppingList } from "./components/shopping-list.js";
 import { simulateRecipeImport } from "./components/importer.js";
 import { generateRecipeOnSpot } from "./components/generator.js";
@@ -1280,6 +1280,229 @@ function bindPremiumFeatures() {
       setTimeout(() => btn.innerText = originalText, 1500);
     });
   }
+
+  // 9. Enter Edit Mode click delegation
+  elements.modalRecipeContent.addEventListener("click", (e) => {
+    const editBtn = e.target.closest("#btn-recipe-edit");
+    if (editBtn) {
+      const activeRecipe = store.state.recipes.find(r => r.id === store.state.selectedRecipeId);
+      if (activeRecipe) {
+        // Render edit form inside modal content
+        elements.modalRecipeContent.innerHTML = renderRecipeEditForm(activeRecipe);
+      }
+    }
+  });
+
+  // 10. Cancel Edit Mode
+  elements.modalRecipeContent.addEventListener("click", (e) => {
+    const cancelBtn = e.target.closest("#btn-edit-cancel");
+    if (cancelBtn) {
+      e.preventDefault();
+      const activeRecipe = store.state.recipes.find(r => r.id === store.state.selectedRecipeId);
+      if (activeRecipe) {
+        elements.modalRecipeContent.innerHTML = renderRecipeDetail(activeRecipe, store.state);
+      }
+    }
+  });
+
+  // 11. Add/Remove items inside Edit Form (delegation)
+  elements.modalRecipeContent.addEventListener("click", (e) => {
+    // Add Ingredient
+    if (e.target.closest("#btn-add-edit-ing")) {
+      e.preventDefault();
+      const list = document.getElementById("edit-ingredients-list");
+      if (list) {
+        const nextIndex = list.children.length;
+        const row = document.createElement("div");
+        row.className = "edit-ing-row";
+        row.setAttribute("data-index", nextIndex);
+        row.innerHTML = `
+          <input type="number" step="any" class="edit-ing-qty" value="1" placeholder="Qty" style="width: 70px;">
+          <input type="text" class="edit-ing-unit" value="pc" placeholder="Unit" style="width: 70px;">
+          <input type="text" class="edit-ing-name" value="" placeholder="Ingredient Name" style="flex: 1;">
+          <select class="edit-ing-cat" style="width: 100px;">
+            <option value="Pantry">Pantry</option>
+            <option value="Produce">Produce</option>
+            <option value="Dairy">Dairy</option>
+            <option value="Meat">Meat</option>
+            <option value="Seafood">Seafood</option>
+          </select>
+          <button type="button" class="btn-remove-edit-ing" title="Remove Ingredient" aria-label="Remove Ingredient">
+            ${ICONS.trash}
+          </button>
+        `;
+        list.appendChild(row);
+      }
+    }
+
+    // Remove Ingredient
+    const removeIngBtn = e.target.closest(".btn-remove-edit-ing");
+    if (removeIngBtn) {
+      e.preventDefault();
+      removeIngBtn.closest(".edit-ing-row").remove();
+      // Re-index remaining rows
+      const list = document.getElementById("edit-ingredients-list");
+      if (list) {
+        Array.from(list.children).forEach((row, idx) => row.setAttribute("data-index", idx));
+      }
+    }
+
+    // Add Gear
+    if (e.target.closest("#btn-add-edit-gear")) {
+      e.preventDefault();
+      const list = document.getElementById("edit-gear-list");
+      if (list) {
+        const nextIndex = list.children.length;
+        const gearIcons = ["pot", "pan", "bowl", "sheet", "paper", "knife", "spoon", "tongs", "cutter", "rollingPin", "spatula", "scoop", "rack", "board", "brush", "cooking"];
+        const iconOptions = gearIcons.map(iconName => `<option value="${iconName}">${iconName}</option>`).join("");
+        const row = document.createElement("div");
+        row.className = "edit-gear-row";
+        row.setAttribute("data-index", nextIndex);
+        row.innerHTML = `
+          <input type="text" class="edit-gear-name" value="" placeholder="Gear Name" style="flex: 1;">
+          <select class="edit-gear-icon" style="width: 100px;">
+            ${iconOptions}
+          </select>
+          <button type="button" class="btn-remove-edit-gear" title="Remove Gear" aria-label="Remove Gear">
+            ${ICONS.trash}
+          </button>
+        `;
+        list.appendChild(row);
+      }
+    }
+
+    // Remove Gear
+    const removeGearBtn = e.target.closest(".btn-remove-edit-gear");
+    if (removeGearBtn) {
+      e.preventDefault();
+      removeGearBtn.closest(".edit-gear-row").remove();
+      const list = document.getElementById("edit-gear-list");
+      if (list) {
+        Array.from(list.children).forEach((row, idx) => row.setAttribute("data-index", idx));
+      }
+    }
+
+    // Add Step
+    if (e.target.closest("#btn-add-edit-step")) {
+      e.preventDefault();
+      const list = document.getElementById("edit-steps-list");
+      if (list) {
+        const nextIndex = list.children.length;
+        const row = document.createElement("div");
+        row.className = "edit-step-row";
+        row.setAttribute("data-index", nextIndex);
+        row.innerHTML = `
+          <div class="edit-step-header">
+            <span class="edit-step-number">Step ${nextIndex + 1}</span>
+            <button type="button" class="btn-remove-edit-step" title="Remove Step" aria-label="Remove Step">
+              ${ICONS.trash}
+            </button>
+          </div>
+          <textarea class="edit-step-text" placeholder="Instructions step description..." rows="2" style="width: 100%; margin-bottom: 8px;"></textarea>
+          <input type="text" class="edit-step-tip" value="" placeholder="Chef's Tip (Optional)" style="width: 100%;">
+        `;
+        list.appendChild(row);
+      }
+    }
+
+    // Remove Step
+    const removeStepBtn = e.target.closest(".btn-remove-edit-step");
+    if (removeStepBtn) {
+      e.preventDefault();
+      removeStepBtn.closest(".edit-step-row").remove();
+      const list = document.getElementById("edit-steps-list");
+      if (list) {
+        Array.from(list.children).forEach((row, idx) => {
+          row.setAttribute("data-index", idx);
+          row.querySelector(".edit-step-number").innerText = `Step ${idx + 1}`;
+        });
+      }
+    }
+  });
+
+  // 12. Save Edit Form submit handler
+  elements.modalRecipeContent.addEventListener("submit", (e) => {
+    const form = e.target.closest("#recipe-edit-form");
+    if (form) {
+      e.preventDefault();
+      const recipeId = form.getAttribute("data-recipe-id");
+      
+      // Parse core fields
+      const title = document.getElementById("edit-title").value.trim();
+      const category = document.getElementById("edit-category").value;
+      const image = document.getElementById("edit-image").value.trim();
+      const description = document.getElementById("edit-description").value.trim();
+      const prepTime = parseInt(document.getElementById("edit-prep-time").value, 10) || 0;
+      const cookTime = parseInt(document.getElementById("edit-cook-time").value, 10) || 0;
+      const servings = parseInt(document.getElementById("edit-servings").value, 10) || 1;
+      const difficulty = document.getElementById("edit-difficulty").value;
+
+      // Parse ingredients
+      const ingredients = [];
+      const ingRows = form.querySelectorAll(".edit-ing-row");
+      ingRows.forEach(row => {
+        const qty = parseFloat(row.querySelector(".edit-ing-qty").value) || 0;
+        const unit = row.querySelector(".edit-ing-unit").value.trim();
+        const name = row.querySelector(".edit-ing-name").value.trim();
+        const cat = row.querySelector(".edit-ing-cat").value;
+        if (name) {
+          ingredients.push({ quantity: qty, unit, name, category: cat });
+        }
+      });
+
+      // Parse gear
+      const equipment = [];
+      const gearRows = form.querySelectorAll(".edit-gear-row");
+      gearRows.forEach(row => {
+        const name = row.querySelector(".edit-gear-name").value.trim();
+        const icon = row.querySelector(".edit-gear-icon").value;
+        if (name) {
+          equipment.push({ name, icon });
+        }
+      });
+
+      // Parse steps
+      const instructions = [];
+      const stepRows = form.querySelectorAll(".edit-step-row");
+      stepRows.forEach((row, idx) => {
+        const text = row.querySelector(".edit-step-text").value.trim();
+        const tip = row.querySelector(".edit-step-tip").value.trim();
+        if (text) {
+          instructions.push({ step: idx + 1, text, tip: tip || null });
+        }
+      });
+
+      // Retrieve source settings from existing recipe copy
+      const oldRecipe = store.state.recipes.find(r => r.id === recipeId);
+      const tags = oldRecipe ? oldRecipe.tags : ["Imported"];
+      const sourceUrl = oldRecipe ? oldRecipe.sourceUrl : null;
+      const sourceName = oldRecipe ? oldRecipe.sourceName : null;
+
+      const updatedRecipe = {
+        id: recipeId,
+        title,
+        category,
+        image,
+        description,
+        prepTime,
+        cookTime,
+        servings,
+        difficulty,
+        tags,
+        sourceUrl,
+        sourceName,
+        ingredients,
+        equipment,
+        instructions
+      };
+
+      // Update in store
+      store.updateRecipe(recipeId, updatedRecipe);
+
+      // Render updated details view
+      elements.modalRecipeContent.innerHTML = renderRecipeDetail(updatedRecipe, store.state);
+    }
+  });
 
   // 8. Mood Board filters
   elements.boardsChipsContainer.addEventListener("click", (e) => {

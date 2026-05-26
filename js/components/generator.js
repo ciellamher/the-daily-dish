@@ -352,6 +352,7 @@ const PREDEFINED_AI_TEMPLATES = {
   },
   adobo: {
     title: "Filipino Chicken Adobo",
+    image: "https://panlasangpinoy.com/wp-content/uploads/2026/05/Chicken-Adobo-in-a-Bowl.jpg",
     description: "The quintessential Filipino comfort food: tender chicken pieces simmered in a savory, tangy sauce of soy sauce, vinegar, garlic, bay leaves, and black peppercorns.",
     prepTime: 10,
     cookTime: 30,
@@ -386,6 +387,7 @@ const PREDEFINED_AI_TEMPLATES = {
   },
   poached_egg: {
     title: "Perfect Poached Egg",
+    image: "https://images.unsplash.com/photo-1608039829572-78524f79c4c7?w=600&auto=format&fit=crop&q=80",
     description: "A masterclass in egg cookery: a single fresh egg gently poached in simmering water until the whites are delicately set and the yolk is warm, rich, and molten.",
     prepTime: 5,
     cookTime: 4,
@@ -415,6 +417,7 @@ const PREDEFINED_AI_TEMPLATES = {
   },
   sinigang: {
     title: "Filipino Pork Sinigang",
+    image: "https://panlasangpinoy.com/wp-content/uploads/2018/11/Pork-Sinigang.jpg",
     description: "An authentic, comforting Filipino sour soup featuring tender pork ribs simmered in a tangy tamarind broth with eggplant, radish, okra, and green beans.",
     prepTime: 15,
     cookTime: 45,
@@ -777,7 +780,7 @@ export function generateRecipeOnSpot(query, onStepChange, onComplete) {
   }
 
   if (recipe) {
-    recipe.image = getGourmetFoodImage(recipe.title, recipe.category);
+    recipe.image = recipe.image || getGourmetFoodImage(recipe.title, recipe.category);
     onStepChange({ step: "connect", status: "Formulating gourmet flavor profiles...", progress: 20 });
     
     setTimeout(() => {

@@ -190,6 +190,11 @@ export function renderRecipeDetail(recipe, state) {
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
       </button>
 
+      <!-- Edit Recipe Button -->
+      <button class="btn-recipe-edit" id="btn-recipe-edit" title="Edit Recipe" aria-label="Edit Recipe">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+      </button>
+
       <div class="recipe-modal-overlay-info">
         <span class="modal-recipe-category">${escapeHtml(recipe.category)}</span>
         <h2 class="modal-recipe-title">${escapeHtml(recipe.title)}</h2>
@@ -392,6 +397,179 @@ export function handleDetailModalClick(event, recipe, state) {
     stepRow.classList.toggle("completed");
     return;
   }
+}
+
+export function renderRecipeEditForm(recipe) {
+  if (!recipe) return "";
+
+  const categories = ["Mains", "Salad", "Baking", "Seafood", "Soup", "Breakfast", "Flatbread", "Pasta", "Chicken"];
+  const categoryOptions = categories.map(cat => 
+    `<option value="${cat}" ${recipe.category === cat ? 'selected' : ''}>${cat}</option>`
+  ).join("");
+
+  const difficulties = ["Easy", "Medium", "Hard"];
+  const difficultyOptions = difficulties.map(diff => 
+    `<option value="${diff}" ${recipe.difficulty === diff ? 'selected' : ''}>${diff}</option>`
+  ).join("");
+
+  const ingredientsHtml = recipe.ingredients.map((ing, idx) => `
+    <div class="edit-ing-row" data-index="${idx}">
+      <input type="number" step="any" class="edit-ing-qty" value="${ing.quantity || 1}" placeholder="Qty" style="width: 70px;">
+      <input type="text" class="edit-ing-unit" value="${escapeHtml(ing.unit || '')}" placeholder="Unit" style="width: 70px;">
+      <input type="text" class="edit-ing-name" value="${escapeHtml(ing.name || '')}" placeholder="Ingredient Name" style="flex: 1;">
+      <select class="edit-ing-cat" style="width: 100px;">
+        <option value="Pantry" ${ing.category === 'Pantry' ? 'selected' : ''}>Pantry</option>
+        <option value="Produce" ${ing.category === 'Produce' ? 'selected' : ''}>Produce</option>
+        <option value="Dairy" ${ing.category === 'Dairy' ? 'selected' : ''}>Dairy</option>
+        <option value="Meat" ${ing.category === 'Meat' ? 'selected' : ''}>Meat</option>
+        <option value="Seafood" ${ing.category === 'Seafood' ? 'selected' : ''}>Seafood</option>
+      </select>
+      <button type="button" class="btn-remove-edit-ing" title="Remove Ingredient" aria-label="Remove Ingredient">
+        ${ICONS.trash}
+      </button>
+    </div>
+  `).join("");
+
+  const gearIcons = ["pot", "pan", "bowl", "sheet", "paper", "knife", "spoon", "tongs", "cutter", "rollingPin", "spatula", "scoop", "rack", "board", "brush", "cooking"];
+  const equipmentHtml = recipe.equipment.map((eq, idx) => {
+    const iconOptions = gearIcons.map(iconName => 
+      `<option value="${iconName}" ${eq.icon === iconName ? 'selected' : ''}>${iconName}</option>`
+    ).join("");
+    return `
+      <div class="edit-gear-row" data-index="${idx}">
+        <input type="text" class="edit-gear-name" value="${escapeHtml(eq.name || '')}" placeholder="Gear Name" style="flex: 1;">
+        <select class="edit-gear-icon" style="width: 100px;">
+          ${iconOptions}
+        </select>
+        <button type="button" class="btn-remove-edit-gear" title="Remove Gear" aria-label="Remove Gear">
+          ${ICONS.trash}
+        </button>
+      </div>
+    `;
+  }).join("");
+
+  const instructionsHtml = recipe.instructions.map((inst, idx) => `
+    <div class="edit-step-row" data-index="${idx}">
+      <div class="edit-step-header">
+        <span class="edit-step-number">Step ${idx + 1}</span>
+        <button type="button" class="btn-remove-edit-step" title="Remove Step" aria-label="Remove Step">
+          ${ICONS.trash}
+        </button>
+      </div>
+      <textarea class="edit-step-text" placeholder="Instructions step description..." rows="2" style="width: 100%; margin-bottom: 8px;">${escapeHtml(inst.text || '')}</textarea>
+      <input type="text" class="edit-step-tip" value="${escapeHtml(inst.tip || '')}" placeholder="Chef's Tip (Optional)" style="width: 100%;">
+    </div>
+  `).join("");
+
+  return `
+    <div class="recipe-modal-hero edit-mode-hero">
+      <div class="edit-hero-overlay">
+        <h2 style="color: white; margin: 0; font-family: 'Playfair Display', serif;">Edit Recipe Details</h2>
+        <p style="color: rgba(255,255,255,0.8); margin: 4px 0 0 0; font-size: 0.9rem;">Modify ingredients, procedures, and core details</p>
+      </div>
+    </div>
+    
+    <div class="modal-recipe-body edit-mode-body">
+      <form id="recipe-edit-form" data-recipe-id="${recipe.id}">
+        
+        <!-- Core info section -->
+        <div class="edit-section-card">
+          <h3 class="edit-section-title">Core Information</h3>
+          <div class="edit-form-grid">
+            <div class="edit-field" style="grid-column: span 2;">
+              <label>Recipe Title</label>
+              <input type="text" id="edit-title" value="${escapeHtml(recipe.title)}" required style="width: 100%; box-sizing: border-box;">
+            </div>
+            
+            <div class="edit-field">
+              <label>Category</label>
+              <select id="edit-category" style="width: 100%;">
+                ${categoryOptions}
+              </select>
+            </div>
+
+            <div class="edit-field">
+              <label>Difficulty</label>
+              <select id="edit-difficulty" style="width: 100%;">
+                ${difficultyOptions}
+              </select>
+            </div>
+
+            <div class="edit-field" style="grid-column: span 2;">
+              <label>Photo URL</label>
+              <input type="text" id="edit-image" value="${escapeHtml(recipe.image || '')}" placeholder="https://unsplash.com/photo-..." style="width: 100%; box-sizing: border-box;">
+            </div>
+
+            <div class="edit-field" style="grid-column: span 2;">
+              <label>Description</label>
+              <textarea id="edit-description" rows="3" required style="width: 100%; box-sizing: border-box;">${escapeHtml(recipe.description)}</textarea>
+            </div>
+
+            <div class="edit-field">
+              <label>Prep Time (minutes)</label>
+              <input type="number" id="edit-prep-time" value="${recipe.prepTime}" min="0" required style="width: 100%;">
+            </div>
+
+            <div class="edit-field">
+              <label>Cook Time (minutes)</label>
+              <input type="number" id="edit-cook-time" value="${recipe.cookTime}" min="0" required style="width: 100%;">
+            </div>
+
+            <div class="edit-field" style="grid-column: span 2;">
+              <label>Servings (default)</label>
+              <input type="number" id="edit-servings" value="${recipe.servings}" min="1" required style="width: 100%; box-sizing: border-box;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Ingredients Section -->
+        <div class="edit-section-card">
+          <div class="edit-section-header">
+            <h3 class="edit-section-title" style="margin: 0; border: none;">Ingredients</h3>
+            <button type="button" class="btn-edit-add-more" id="btn-add-edit-ing">
+              ${ICONS.plus} Add Ingredient
+            </button>
+          </div>
+          <div class="edit-items-list" id="edit-ingredients-list">
+            ${ingredientsHtml}
+          </div>
+        </div>
+
+        <!-- Kitchen Gear Section -->
+        <div class="edit-section-card">
+          <div class="edit-section-header">
+            <h3 class="edit-section-title" style="margin: 0; border: none;">Kitchen Gear Needed</h3>
+            <button type="button" class="btn-edit-add-more" id="btn-add-edit-gear">
+              ${ICONS.plus} Add Gear
+            </button>
+          </div>
+          <div class="edit-items-list" id="edit-gear-list">
+            ${equipmentHtml}
+          </div>
+        </div>
+
+        <!-- Procedures Section -->
+        <div class="edit-section-card">
+          <div class="edit-section-header">
+            <h3 class="edit-section-title" style="margin: 0; border: none;">Procedures</h3>
+            <button type="button" class="btn-edit-add-more" id="btn-add-edit-step">
+              ${ICONS.plus} Add Step
+            </button>
+          </div>
+          <div class="edit-items-list" id="edit-steps-list">
+            ${instructionsHtml}
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="edit-form-actions">
+          <button type="button" id="btn-edit-cancel" class="btn-edit-secondary">Cancel</button>
+          <button type="submit" id="btn-edit-save" class="btn-edit-primary">Save Changes</button>
+        </div>
+
+      </form>
+    </div>
+  `;
 }
 
 // Export ingredient substitutions list so it can be used for tooltips elsewhere

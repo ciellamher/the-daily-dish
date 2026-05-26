@@ -157,6 +157,20 @@ class Store {
     this.notify();
   }
 
+  updateRecipe(recipeId, updatedRecipe) {
+    // 1. Check if it's already in myRecipes
+    const myIndex = this.state.myRecipes.findIndex(r => r.id === recipeId);
+    if (myIndex !== -1) {
+      this.state.myRecipes[myIndex] = { ...updatedRecipe, id: recipeId };
+    } else {
+      // 2. If it's a default recipe, copy it to myRecipes so the user's edits are saved
+      this.state.myRecipes.unshift({ ...updatedRecipe, id: recipeId });
+    }
+    this.saveMyRecipes();
+    this.updateCombinedRecipes();
+    this.notify();
+  }
+
   deleteRecipe(recipeId) {
     if (this.state.activeTab === "my-recipes") {
       this.removeRecipeFromMyRecipes(recipeId);
