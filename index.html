@@ -52,6 +52,17 @@
         </button>
       </nav>
       <div class="header-actions">
+        <div class="theme-mood-selector">
+          <span class="mood-icon-svg">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          </span>
+          <select id="theme-mood-select" class="mood-select" aria-label="Select Mood Theme">
+            <option value="cozy-cream">Cozy Cream</option>
+            <option value="spring-lavender">Spring Lavender</option>
+            <option value="fresh-sage">Fresh Sage</option>
+            <option value="sunset-terracotta">Sunset Terracotta</option>
+          </select>
+        </div>
         <button id="btn-toggle-cart" class="cart-toggle-btn" aria-label="Open Shopping List">
           <span class="cart-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
@@ -162,6 +173,14 @@
         </div>
         <div class="results-filter-info" id="results-filter-info">
           <!-- Text stating current filter rules -->
+        </div>
+      </div>
+
+      <!-- Visual Recipe Box / Mood Boards Filter (Visible in My Saved Recipes tab) -->
+      <div id="mood-boards-panel" class="mood-boards-panel hidden">
+        <span class="boards-label">My Boards:</span>
+        <div id="boards-chips-container" class="boards-chips-container">
+          <!-- Populated dynamically by JS -->
         </div>
       </div>
 
@@ -381,6 +400,102 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
       </span>
     </button>
+  </div>
+
+  <!-- Cook Mode Fullscreen Overlay -->
+  <div id="cook-mode-overlay" class="cook-mode-overlay hidden" role="dialog" aria-modal="true">
+    <div class="cook-mode-container">
+      <header class="cook-mode-header">
+        <div class="cook-mode-header-left">
+          <span class="cook-mode-logo-badge">Cook Mode</span>
+          <h2 id="cook-mode-recipe-title">Recipe Title</h2>
+        </div>
+        <div class="cook-mode-header-right">
+          <div id="wake-lock-status" class="wake-lock-status">
+            <span class="wake-lock-dot"></span>
+            <span class="wake-lock-text">Keep Awake</span>
+          </div>
+          <button id="btn-close-cook-mode" class="cook-mode-close-btn" aria-label="Exit Cook Mode">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </header>
+      <div class="cook-mode-content">
+        <div class="cook-mode-step-card">
+          <div class="cook-mode-progress-container">
+            <div id="cook-mode-step-indicator" class="cook-mode-step-indicator">Step 1 of 6</div>
+            <div class="cook-mode-progress-bar">
+              <div id="cook-mode-progress-fill" class="progress-fill"></div>
+            </div>
+          </div>
+          <p id="cook-mode-step-text" class="cook-mode-large-text">Step instruction goes here...</p>
+          <div id="cook-mode-tip-box" class="cook-mode-tip-box hidden">
+            <div class="cook-mode-tip-title">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width:16px;height:16px;color:var(--accent-primary);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              <span>Chef's Tip</span>
+            </div>
+            <p id="cook-mode-tip-text">Tip goes here</p>
+          </div>
+        </div>
+      </div>
+      <footer class="cook-mode-footer">
+        <button id="btn-cook-prev" class="cook-nav-btn secondary-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width:18px;height:18px;margin-right:6px;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>Previous</span>
+        </button>
+        <button id="btn-cook-next" class="cook-nav-btn primary-btn">
+          <span>Next Step</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width:18px;height:18px;margin-left:6px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Floating Countdown Timer Bar -->
+  <div id="floating-timer-bar" class="floating-timer-bar hidden">
+    <div class="timer-bar-content">
+      <span class="timer-bar-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      </span>
+      <div class="timer-text-group">
+        <span id="timer-bar-label" class="timer-bar-label">Cooking Timer:</span>
+        <span id="timer-bar-display" class="timer-bar-display">00:00</span>
+      </div>
+      <div class="timer-bar-actions">
+        <button id="btn-timer-toggle" class="timer-action-btn" title="Pause Timer">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" id="timer-toggle-icon"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+        </button>
+        <button id="btn-timer-reset" class="timer-action-btn" title="Reset Timer">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+        </button>
+        <button id="btn-timer-close" class="timer-action-btn danger" title="Dismiss Timer">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Story Exporter Modal -->
+  <div id="story-exporter-modal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-container story-container" style="max-width: 420px; padding: 24px;">
+      <button class="modal-close-btn" id="story-close-btn" aria-label="Close Modal">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      <div class="story-exporter-content" style="text-align: center;">
+        <h3 style="font-family: var(--font-serif); margin-bottom: 8px; font-size: 1.5rem;">Share to Story</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">Here is your visually optimized 9:16 story card graphic.</p>
+        
+        <!-- Preview Container -->
+        <div id="story-preview-wrapper" class="story-preview-wrapper" style="width: 270px; height: 480px; margin: 0 auto 20px auto; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); position: relative; border: 1px solid var(--border-color);">
+          <canvas id="story-canvas" width="1080" height="1920" style="width: 100%; height: 100%; object-fit: contain; display: block;"></canvas>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <a id="btn-download-story" class="btn-card-primary" style="text-decoration: none; padding: 12px 24px; font-size: 0.9rem; cursor: pointer;">Download PNG</a>
+          <button id="btn-copy-story-tip" class="btn-card-secondary" style="padding: 12px 18px; font-size: 0.9rem;">Copy Card</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Main JavaScript File -->

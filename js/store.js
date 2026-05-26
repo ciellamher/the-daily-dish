@@ -42,7 +42,9 @@ class Store {
       searchMode: "ingredients", // 'name' or 'ingredients'
       selectedIngredients: this.loadSelectedIngredients(),
       shoppingList: this.loadShoppingList(),
-      activeSteps: {} // Map of recipeId -> active step index
+      activeSteps: {}, // Map of recipeId -> active step index
+      ambientAudioPlaying: false,
+      activeBoard: "All"
     };
 
     this.updateCombinedRecipes();
@@ -186,6 +188,18 @@ class Store {
 
   setActiveTab(tab) {
     this.state.activeTab = tab;
+    // Reset active board to All when changing tabs
+    this.state.activeBoard = "All";
+    this.notify();
+  }
+
+  setAmbientAudioPlaying(isPlaying) {
+    this.state.ambientAudioPlaying = isPlaying;
+    this.notify();
+  }
+
+  setActiveBoard(board) {
+    this.state.activeBoard = board;
     this.notify();
   }
 
@@ -307,10 +321,15 @@ class Store {
 
   // Getters & Matching Algorithm
   getFilteredRecipes() {
-    const { activeTab, defaultRecipes, myRecipes, searchQuery, searchMode, selectedIngredients } = this.state;
+    const { activeTab, defaultRecipes, myRecipes, searchQuery, searchMode, selectedIngredients, activeBoard } = this.state;
     
     // Filter by name query if present
     let filtered = activeTab === "my-recipes" ? myRecipes : defaultRecipes;
+
+    // Filter by Board category in My Recipes tab
+    if (activeTab === "my-recipes" && activeBoard && activeBoard !== "All") {
+      filtered = filtered.filter(r => r.category.toLowerCase() === activeBoard.toLowerCase());
+    }
     
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();

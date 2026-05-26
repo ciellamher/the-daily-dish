@@ -254,3 +254,154 @@ export const ICONS = {
 
 
 
+// ==========================================================================
+// Ambient Lo-fi Audio Synthesizer (Pure Web Audio API, Zero Network Loading)
+// ==========================================================================
+let audioCtx = null;
+let synthNode = null;
+let crackleNode = null;
+let crackleNodePops = null;
+let chordIndex = 0;
+let chordInterval = null;
+
+// Warm soft chords: Cmaj9, Fmaj9, Am9, G6/9
+const CHORDS = [
+  [130.81, 164.81, 196.00, 246.94, 293.66], // Cmaj9
+  [87.31, 130.81, 174.61, 220.00, 261.63, 329.63], // Fmaj9
+  [110.00, 164.81, 220.00, 261.63, 329.63, 392.00], // Am9
+  [98.00, 146.83, 196.00, 246.94, 293.66, 392.00]  // G6/9
+];
+
+function initAmbientSynth() {
+  if (audioCtx) return;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  audioCtx = new AudioContextClass();
+}
+
+export function startAmbientAudio() {
+  initAmbientSynth();
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+  
+  // 1. Create crackle (vinyl background noise)
+  const bufferSize = 2 * audioCtx.sampleRate;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    output[i] = Math.random() * 2 - 1;
+  }
+  
+  const whiteNoise = audioCtx.createBufferSource();
+  whiteNoise.buffer = noiseBuffer;
+  whiteNoise.loop = true;
+  
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = "bandpass";
+  noiseFilter.frequency.value = 1000;
+  noiseFilter.Q.value = 0.5;
+  
+  const noiseVolume = audioCtx.createGain();
+  noiseVolume.gain.value = 0.015; // Very soft vinyl sound
+  
+  whiteNoise.connect(noiseFilter);
+  noiseFilter.connect(noiseVolume);
+  noiseVolume.connect(audioCtx.destination);
+  whiteNoise.start();
+  crackleNode = whiteNoise;
+  
+  // 2. Create random vinyl crackle pops
+  const popBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const popOutput = popBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    if (Math.random() < 0.0001) { // Random impulses
+      popOutput[i] = Math.random() * 0.4 - 0.2;
+    } else {
+      popOutput[i] = 0;
+    }
+  }
+  
+  const cracklePops = audioCtx.createBufferSource();
+  cracklePops.buffer = popBuffer;
+  cracklePops.loop = true;
+  
+  const popVolume = audioCtx.createGain();
+  popVolume.gain.value = 0.05;
+  
+  cracklePops.connect(popVolume);
+  popVolume.connect(audioCtx.destination);
+  cracklePops.start();
+  crackleNodePops = cracklePops;
+  
+  // 3. Play warm triangle wave pads
+  let activeOscillators = [];
+  const masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.035; // Soft ambient volume
+  masterGain.connect(audioCtx.destination);
+  
+  function playChord(frequencies) {
+    const now = audioCtx.currentTime;
+    // Fade out previous oscillators
+    activeOscillators.forEach(osc => {
+      osc.gainNode.gain.setValueAtTime(osc.gainNode.gain.value, now);
+      osc.gainNode.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+      setTimeout(() => {
+        try { osc.stop(); } catch(e) {}
+      }, 1600);
+    });
+    activeOscillators = [];
+    
+    // Create new oscillators for this chord
+    frequencies.forEach(freq => {
+      const osc = audioCtx.createOscillator();
+      osc.type = "triangle"; // Soft warm tone
+      osc.frequency.setValueAtTime(freq, now);
+      
+      const gainNode = audioCtx.createGain();
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.3, now + 1.2); // Slow attack
+      
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.value = 750; // Lowpass filter to make it cozy
+      
+      osc.connect(gainNode);
+      gainNode.connect(filter);
+      filter.connect(masterGain);
+      
+      osc.start(now);
+      activeOscillators.push({
+        osc,
+        gainNode,
+        stop: () => osc.stop()
+      });
+    });
+  }
+  
+  // Cycle chords every 6 seconds
+  playChord(CHORDS[chordIndex]);
+  chordInterval = setInterval(() => {
+    chordIndex = (chordIndex + 1) % CHORDS.length;
+    playChord(CHORDS[chordIndex]);
+  }, 6000);
+  
+  synthNode = {
+    stop: () => {
+      clearInterval(chordInterval);
+      activeOscillators.forEach(osc => osc.stop());
+      whiteNoise.stop();
+      cracklePops.stop();
+      masterGain.disconnect();
+    }
+  };
+}
+
+export function stopAmbientAudio() {
+  if (synthNode) {
+    synthNode.stop();
+    synthNode = null;
+  }
+  if (audioCtx) {
+    audioCtx.suspend();
+  }
+}

@@ -3,6 +3,57 @@
 import { store } from "../store.js";
 import { formatQuantity, scaleQuantity, escapeHtml, ICONS, getGourmetFoodImage, isIngredientMatch } from "../utils.js";
 
+// Database of common ingredient substitutions
+const INGREDIENT_SUBSTITUTIONS = {
+  "buttermilk": "1 cup milk + 1 tbsp lemon juice or white vinegar (let sit for 5 minutes).",
+  "soy sauce": "Tamari (gluten-free), coconut aminos (soy-free), or Worcestershire sauce.",
+  "white vinegar": "Apple cider vinegar, rice vinegar, lemon juice, or white wine vinegar.",
+  "cane vinegar": "White vinegar, apple cider vinegar, or lemon juice.",
+  "vinegar": "Apple cider vinegar, rice vinegar, lemon juice, or white wine vinegar.",
+  "chicken broth": "Vegetable broth, water with a bouillon cube, or dry white wine.",
+  "chicken stock": "Vegetable broth, water with a bouillon cube, or dry white wine.",
+  "broth": "Vegetable broth, water with a bouillon cube, or dry white wine.",
+  "butter": "Margarine, coconut oil (1:1), olive oil (3/4:1), or applesauce (for baking).",
+  "heavy cream": "Whole milk + melted butter (3:1 ratio), half-and-half, or coconut cream.",
+  "brown sugar": "White sugar + 1 tbsp molasses or maple syrup, or coconut sugar.",
+  "parmesan cheese": "Pecorino Romano, Asiago, or nutritional yeast (vegan option).",
+  "parmesan": "Pecorino Romano, Asiago, or nutritional yeast (vegan option).",
+  "olive oil": "Avocado oil, canola oil, sunflower oil, or melted butter.",
+  "cooking oil": "Avocado oil, canola oil, sunflower oil, or melted butter.",
+  "chicken drumsticks and thighs": "Tofu chunks, pork chops, or beef slices (adjust cooking time).",
+  "chicken breasts": "Tofu chunks, pork chops, or beef slices (adjust cooking time).",
+  "chicken": "Tofu chunks, pork chops, or beef slices (adjust cooking time).",
+  "all-purpose flour": "Gluten-free 1:1 baking flour, oat flour, or whole wheat flour.",
+  "mayonnaise": "Greek yogurt (healthy/protein substitute), sour cream, or mashed avocado.",
+  "milk": "Almond milk, soy milk, oat milk, or coconut milk."
+};
+
+/**
+ * Searches ingredient text and wraps matching keywords with substitution trigger classes.
+ */
+function formatIngredientName(name) {
+  const nameLower = name.toLowerCase().trim();
+  const keys = Object.keys(INGREDIENT_SUBSTITUTIONS).sort((a, b) => b.length - a.length);
+  for (const key of keys) {
+    if (nameLower.includes(key)) {
+      const regex = new RegExp(`(${key})`, 'i');
+      return escapeHtml(name).replace(regex, `<span class="ingredient-sub-trigger" data-ing-key="${key}" title="Click to view substitutions">$1</span>`);
+    }
+  }
+  return escapeHtml(name);
+}
+
+/**
+ * Parses instructions step text and turns minutes/time spans into clickable timer badges.
+ */
+function formatStepTextWithTimers(text) {
+  const regex = /(\d+)(?:-(\d+))?\s*(?:minutes|minute|min)/gi;
+  return text.replace(regex, (match, p1, p2) => {
+    const mins = p2 ? parseInt(p2, 10) : parseInt(p1, 10);
+    return `<button class="step-timer-badge" data-minutes="${mins}" title="Start ${mins}-minute timer">${ICONS.clock} <span>${match}</span></button>`;
+  });
+}
+
 /**
  * Renders the detailed contents of a recipe into the modal container.
  */
@@ -57,7 +108,7 @@ export function renderRecipeDetail(recipe, state) {
       <label class="ingredient-item">
         <input type="checkbox" class="ingredient-checkbox" data-index="${idx}">
         <span class="${itemClass}">
-          <strong>${displayQty}</strong> ${escapeHtml(ing.name)}
+          <strong>${displayQty}</strong> ${formatIngredientName(ing.name)}
           ${badgeHtml}
         </span>
       </label>
@@ -75,24 +126,27 @@ export function renderRecipeDetail(recipe, state) {
     `;
   }).join("");
 
-  // Build step-by-step instructions
-  const instructionsHtml = recipe.instructions.map(inst => `
-    <div class="instruction-step" data-step="${inst.step}">
-      <button class="step-number-badge" aria-label="Mark step ${inst.step} completed">${inst.step}</button>
-      <div class="step-details">
-        <p class="step-text">${escapeHtml(inst.text)}</p>
-        ${inst.tip ? `
-          <div class="chef-tip-box">
-            <div class="chef-tip-title">
-              <span class="tip-icon-svg">${ICONS.info}</span>
-              <span>Chef's Tip</span>
+  // Build step-by-step instructions with interactive timers
+  const instructionsHtml = recipe.instructions.map(inst => {
+    const formattedText = formatStepTextWithTimers(escapeHtml(inst.text));
+    return `
+      <div class="instruction-step" data-step="${inst.step}">
+        <button class="step-number-badge" aria-label="Mark step ${inst.step} completed">${inst.step}</button>
+        <div class="step-details">
+          <p class="step-text">${formattedText}</p>
+          ${inst.tip ? `
+            <div class="chef-tip-box">
+              <div class="chef-tip-title">
+                <span class="tip-icon-svg">${ICONS.info}</span>
+                <span>Chef's Tip</span>
+              </div>
+              <p>${escapeHtml(inst.tip)}</p>
             </div>
-            <p>${escapeHtml(inst.tip)}</p>
-          </div>
-        ` : ""}
+          ` : ""}
+        </div>
       </div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
 
   // Image or Dynamic Unsplash Fallback
   const resolvedImage = recipe.image ? recipe.image : getGourmetFoodImage(recipe.title, recipe.category);
@@ -115,9 +169,27 @@ export function renderRecipeDetail(recipe, state) {
     }
   }
 
+  const isAudioPlaying = state.ambientAudioPlaying || false;
+
   return `
     <div class="recipe-modal-hero">
       ${imageHtml}
+      
+      <!-- Ambient Audio Toggle -->
+      <button class="ambient-audio-toggle ${isAudioPlaying ? 'playing' : ''}" id="ambient-audio-toggle" aria-label="Toggle Ambient Audio">
+        <div class="audio-pulse-bar">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <span class="audio-toggle-text">${isAudioPlaying ? 'Stop Kitchen Sounds' : 'Play Kitchen Sounds'}</span>
+      </button>
+
+      <!-- Share Story Button -->
+      <button class="btn-story-share" id="btn-story-share" title="Share Instagram Story" aria-label="Share Story">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+      </button>
+
       <div class="recipe-modal-overlay-info">
         <span class="modal-recipe-category">${escapeHtml(recipe.category)}</span>
         <h2 class="modal-recipe-title">${escapeHtml(recipe.title)}</h2>
@@ -151,15 +223,21 @@ export function renderRecipeDetail(recipe, state) {
           </div>
         </div>
 
-        <div class="servings-scaler">
-          <span class="servings-scaler-label">Servings:</span>
-          <button class="servings-btn servings-btn-minus" aria-label="Decrease Servings" data-recipe-id="${recipe.id}">
-            ${ICONS.minus}
-          </button>
-          <span class="servings-display">${currentServings}</span>
-          <button class="servings-btn servings-btn-plus" aria-label="Increase Servings" data-recipe-id="${recipe.id}">
-            ${ICONS.plus}
-          </button>
+        <!-- Servings Scale + Range Slider -->
+        <div class="servings-scaler-wrapper" style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 140px;">
+          <div class="servings-scaler">
+            <span class="servings-scaler-label">Servings:</span>
+            <button class="servings-btn servings-btn-minus" aria-label="Decrease Servings" data-recipe-id="${recipe.id}">
+              ${ICONS.minus}
+            </button>
+            <span class="servings-display">${currentServings}</span>
+            <button class="servings-btn servings-btn-plus" aria-label="Increase Servings" data-recipe-id="${recipe.id}">
+              ${ICONS.plus}
+            </button>
+          </div>
+          <div class="servings-slider-container" style="width: 100%;">
+            <input type="range" class="servings-slider" min="1" max="12" value="${currentServings}" data-recipe-id="${recipe.id}">
+          </div>
         </div>
       </div>
 
@@ -202,7 +280,13 @@ export function renderRecipeDetail(recipe, state) {
 
         <!-- Right Side: Step-by-Step Guided Procedure -->
         <div class="instructions-column">
-          <h3 class="column-title">Procedures</h3>
+          <div class="procedures-header-row" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px;">
+            <h3 class="column-title" style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Procedures</h3>
+            <button class="btn-card-secondary btn-start-cook-mode" data-id="${recipe.id}" style="padding: 6px 14px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; border-radius: var(--radius-full); cursor: pointer;">
+              <span class="btn-action-icon">${ICONS.wand}</span>
+              <span>Cook Mode</span>
+            </button>
+          </div>
           <div class="instructions-list">
             ${instructionsHtml}
           </div>
@@ -219,7 +303,7 @@ export function renderRecipeDetail(recipe, state) {
 export function handleDetailModalClick(event, recipe, state) {
   const target = event.target;
   
-  // 1. Servings Change
+  // 1. Servings Change via buttons
   if (target.closest(".servings-btn-minus")) {
     const currentServings = store.getServings(recipe);
     store.setServings(recipe.id, currentServings - 1);
@@ -296,9 +380,12 @@ export function handleDetailModalClick(event, recipe, state) {
 
   // 5. Click on instruction text toggles completion as well
   const stepText = target.closest(".step-text");
-  if (stepText) {
+  if (stepText && !target.closest(".step-timer-badge")) { // Don't trigger toggle if clicking timer button
     const stepRow = stepText.closest(".instruction-step");
     stepRow.classList.toggle("completed");
     return;
   }
 }
+
+// Export ingredient substitutions list so it can be used for tooltips elsewhere
+export { INGREDIENT_SUBSTITUTIONS };

@@ -429,3 +429,52 @@ button {
     height: 16px;
   }
 }
+
+/* ==========================================================================
+   Cohesive Airy Pastel Mood Themes overrides
+   ========================================================================== */
+
+/* Spring Lavender Theme */
+body.theme-spring-lavender {
+  --bg-primary: #F3EEF5;
+  --bg-secondary: #FAF8FC;
+  --bg-tertiary: #E8E0EC;
+  --bg-glass: rgba(243, 238, 245, 0.9);
+  --border-color: rgba(92, 74, 102, 0.08);
+  --text-primary: #3B2E42;
+  --text-secondary: #5C4A66;
+  --text-muted: #857091;
+  --accent-primary: #8A70A4;
+  --accent-hover: #AB92C4;
+  --border-focus: rgba(138, 112, 164, 0.4);
+}
+
+/* Fresh Sage Theme */
+body.theme-fresh-sage {
+  --bg-primary: #F0F4F1;
+  --bg-secondary: #F7FAF8;
+  --bg-tertiary: #E1EBE4;
+  --bg-glass: rgba(240, 244, 241, 0.9);
+  --border-color: rgba(71, 92, 76, 0.08);
+  --text-primary: #2A382E;
+  --text-secondary: #475C4C;
+  --text-muted: #708A77;
+  --accent-primary: #528265;
+  --accent-hover: #75A888;
+  --border-focus: rgba(82, 130, 101, 0.4);
+}
+
+/* Sunset Terracotta Theme */
+body.theme-sunset-terracotta {
+  --bg-primary: #FAF2EC;
+  --bg-secondary: #FFFBF7;
+  --bg-tertiary: #F3E4D8;
+  --bg-glass: rgba(250, 242, 236, 0.9);
+  --border-color: rgba(112, 73, 46, 0.08);
+  --text-primary: #4A2B15;
+  --text-secondary: #70492E;
+  --text-muted: #9E7457;
+  --accent-primary: #D07B3A;
+  --accent-hover: #EE9E5F;
+  --border-focus: rgba(208, 123, 58, 0.4);
+}

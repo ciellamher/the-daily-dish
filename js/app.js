@@ -2,11 +2,11 @@
 
 import { store } from "./store.js";
 import { renderRecipeCard } from "./components/recipe-card.js";
-import { renderRecipeDetail, handleDetailModalClick } from "./components/recipe-detail.js";
+import { renderRecipeDetail, handleDetailModalClick, INGREDIENT_SUBSTITUTIONS } from "./components/recipe-detail.js";
 import { renderShoppingList, exportShoppingList } from "./components/shopping-list.js";
 import { simulateRecipeImport } from "./components/importer.js";
 import { generateRecipeOnSpot } from "./components/generator.js";
-import { escapeHtml, ICONS } from "./utils.js";
+import { escapeHtml, ICONS, startAmbientAudio, stopAmbientAudio } from "./utils.js";
 
 // DOM Selector Elements
 const elements = {
@@ -87,7 +87,40 @@ const elements = {
   fabContainer: document.getElementById("fab-container"),
   fabMainBtn: document.getElementById("fab-main-btn"),
   fabBtnGenerate: document.getElementById("fab-btn-generate"),
-  fabBtnImport: document.getElementById("fab-btn-import")
+  fabBtnImport: document.getElementById("fab-btn-import"),
+  
+  // Theme Mood Select & Boards Panel
+  themeMoodSelect: document.getElementById("theme-mood-select"),
+  moodBoardsPanel: document.getElementById("mood-boards-panel"),
+  boardsChipsContainer: document.getElementById("boards-chips-container"),
+  
+  // Cook Mode Overlay
+  cookModeOverlay: document.getElementById("cook-mode-overlay"),
+  cookModeRecipeTitle: document.getElementById("cook-mode-recipe-title"),
+  cookModeStepIndicator: document.getElementById("cook-mode-step-indicator"),
+  cookModeProgressFill: document.getElementById("cook-mode-progress-fill"),
+  cookModeStepText: document.getElementById("cook-mode-step-text"),
+  cookModeTipBox: document.getElementById("cook-mode-tip-box"),
+  cookModeTipText: document.getElementById("cook-mode-tip-text"),
+  btnCookPrev: document.getElementById("btn-cook-prev"),
+  btnCookNext: document.getElementById("btn-cook-next"),
+  btnCloseCookMode: document.getElementById("btn-close-cook-mode"),
+  wakeLockStatus: document.getElementById("wake-lock-status"),
+  
+  // Floating Countdown Timer Bar
+  floatingTimerBar: document.getElementById("floating-timer-bar"),
+  timerBarDisplay: document.getElementById("timer-bar-display"),
+  timerBarLabel: document.getElementById("timer-bar-label"),
+  btnTimerToggle: document.getElementById("btn-timer-toggle"),
+  btnTimerReset: document.getElementById("btn-timer-reset"),
+  btnTimerClose: document.getElementById("btn-timer-close"),
+  
+  // Story Exporter
+  storyExporterModal: document.getElementById("story-exporter-modal"),
+  storyCloseBtn: document.getElementById("story-close-btn"),
+  storyCanvas: document.getElementById("story-canvas"),
+  btnDownloadStory: document.getElementById("btn-download-story"),
+  btnCopyStoryTip: document.getElementById("btn-copy-story-tip")
 };
 
 // Global Staple Ingredients for Fridge Picker Quick-Add
@@ -502,6 +535,9 @@ function bindGlobalEvents() {
       openModal(elements.importerModal);
     });
   }
+
+  // Bind new interactive premium features (Audio, Timers, Story Exporter, Cook Mode, Slider)
+  bindPremiumFeatures();
 }
 
 /* ==========================================================================
@@ -747,6 +783,21 @@ function renderUI(state) {
     if (elements.heroBanner) elements.heroBanner.classList.add("hidden");
     if (elements.heroSection) elements.heroSection.classList.add("hidden");
     if (elements.resultsHeading) elements.resultsHeading.innerHTML = "My Saved Recipes";
+  }
+
+  // Visual Recipe Box / Mood Boards Filter rendering
+  const moodBoardsPanel = elements.moodBoardsPanel;
+  if (moodBoardsPanel) {
+    if (state.activeTab === "my-recipes") {
+      moodBoardsPanel.classList.remove("hidden");
+      const categories = ["All", "Mains", "Salad", "Baking", "Soup", "Breakfast"];
+      elements.boardsChipsContainer.innerHTML = categories.map(cat => {
+        const isActive = state.activeBoard === cat;
+        return `<button class="board-chip ${isActive ? 'active' : ''}" data-board="${cat}">${escapeHtml(cat)}</button>`;
+      }).join("");
+    } else {
+      moodBoardsPanel.classList.add("hidden");
+    }
   }
 
   // 1. Render active fridge ingredient chips
@@ -997,4 +1048,575 @@ function bindCarouselEvents() {
   
   // Initial check
   updateButtons();
+}
+
+// ==========================================================================
+// PREMIUM INTERACTIVE WIDGETS LOGIC
+// ==========================================================================
+
+// Local variables for Cook Mode & Timers
+let cookModeActiveRecipe = null;
+let cookModeCurrentStep = 0;
+let wakeLockNode = null;
+let timerInterval = null;
+let timerSeconds = 0;
+let timerOriginalSeconds = 0;
+let timerIsPaused = false;
+
+function bindPremiumFeatures() {
+  // 1. Mood Theme Selector
+  if (elements.themeMoodSelect) {
+    const savedMood = localStorage.getItem("cookbook_theme_mood") || "cozy-cream";
+    document.body.className = "theme-" + savedMood;
+    elements.themeMoodSelect.value = savedMood;
+    
+    elements.themeMoodSelect.addEventListener("change", (e) => {
+      const selected = e.target.value;
+      document.body.className = "theme-" + selected;
+      localStorage.setItem("cookbook_theme_mood", selected);
+    });
+  }
+
+  // 2. Yield Slider Input delegation inside modal
+  elements.modalRecipeContent.addEventListener("input", (e) => {
+    const slider = e.target.closest(".servings-slider");
+    if (slider) {
+      const val = parseInt(slider.value, 10);
+      const recipeId = slider.getAttribute("data-recipe-id");
+      store.setServings(recipeId, val);
+      // Immediately reflect servings number on standard display
+      const servingsDisplay = elements.modalRecipeContent.querySelector(".servings-display");
+      if (servingsDisplay) servingsDisplay.innerText = val;
+    }
+  });
+
+  // 3. Ambient Audio Toggle delegation
+  elements.modalRecipeContent.addEventListener("click", (e) => {
+    const audioBtn = e.target.closest("#ambient-audio-toggle");
+    if (audioBtn) {
+      const isPlaying = store.state.ambientAudioPlaying;
+      if (isPlaying) {
+        stopAmbientAudio();
+        store.setAmbientAudioPlaying(false);
+      } else {
+        startAmbientAudio();
+        store.setAmbientAudioPlaying(true);
+      }
+    }
+  });
+
+  // 4. Ingredient Substitutions Popover delegation
+  elements.modalRecipeContent.addEventListener("click", (e) => {
+    const trigger = e.target.closest(".ingredient-sub-trigger");
+    if (trigger) {
+      e.stopPropagation();
+      dismissSubPopover();
+      
+      const key = trigger.getAttribute("data-ing-key");
+      const subText = INGREDIENT_SUBSTITUTIONS[key];
+      if (!subText) return;
+      
+      // Create popover element
+      const popover = document.createElement("div");
+      popover.className = "substitute-popover";
+      popover.id = "active-sub-popover";
+      popover.innerHTML = `
+        <div class="popover-header">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width:12px;height:12px;color:var(--accent-primary);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span>Substitutions</span>
+        </div>
+        <div class="popover-body">${escapeHtml(subText)}</div>
+      `;
+      
+      document.body.appendChild(popover);
+      
+      // Position popover relative to trigger
+      const rect = trigger.getBoundingClientRect();
+      
+      // Position below the element, centered
+      popover.style.left = `${window.scrollX + rect.left + rect.width/2 - 125}px`;
+      popover.style.top = `${window.scrollY + rect.bottom + 8}px`;
+    }
+  });
+
+  // Close Popovers on clicking anywhere else
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".substitute-popover") && !e.target.closest(".ingredient-sub-trigger")) {
+      dismissSubPopover();
+    }
+  });
+
+  // 5. Cook Mode activation
+  elements.modalRecipeContent.addEventListener("click", (e) => {
+    const startCookBtn = e.target.closest(".btn-start-cook-mode");
+    if (startCookBtn) {
+      const activeRecipe = store.state.recipes.find(r => r.id === store.state.selectedRecipeId);
+      if (activeRecipe) {
+        startCookMode(activeRecipe);
+      }
+    }
+  });
+
+  // Cook Mode controls
+  if (elements.btnCloseCookMode) {
+    elements.btnCloseCookMode.addEventListener("click", stopCookMode);
+  }
+  if (elements.btnCookPrev) {
+    elements.btnCookPrev.addEventListener("click", () => navigateCookStep(-1));
+  }
+  if (elements.btnCookNext) {
+    elements.btnCookNext.addEventListener("click", () => navigateCookStep(1));
+  }
+
+  // 6. Inline Instruction Timers delegation
+  elements.modalRecipeContent.addEventListener("click", (e) => {
+    const timerBadge = e.target.closest(".step-timer-badge");
+    if (timerBadge) {
+      const mins = parseInt(timerBadge.getAttribute("data-minutes"), 10);
+      startKitchenTimer(mins);
+    }
+  });
+
+  // Timer Bar controls
+  if (elements.btnTimerToggle) {
+    elements.btnTimerToggle.addEventListener("click", toggleKitchenTimer);
+  }
+  if (elements.btnTimerReset) {
+    elements.btnTimerReset.addEventListener("click", resetKitchenTimer);
+  }
+  if (elements.btnTimerClose) {
+    elements.btnTimerClose.addEventListener("click", closeKitchenTimer);
+  }
+
+  // 7. Story Share Exporter
+  elements.modalRecipeContent.addEventListener("click", (e) => {
+    const shareBtn = e.target.closest("#btn-story-share");
+    if (shareBtn) {
+      const activeRecipe = store.state.recipes.find(r => r.id === store.state.selectedRecipeId);
+      if (activeRecipe) {
+        openStoryExporter(activeRecipe);
+      }
+    }
+  });
+  if (elements.storyCloseBtn) {
+    elements.storyCloseBtn.addEventListener("click", () => closeModal(elements.storyExporterModal));
+  }
+  if (elements.btnCopyStoryTip) {
+    elements.btnCopyStoryTip.addEventListener("click", () => {
+      const btn = elements.btnCopyStoryTip;
+      const originalText = btn.innerText;
+      btn.innerText = "Copied!";
+      setTimeout(() => btn.innerText = originalText, 1500);
+    });
+  }
+
+  // 8. Mood Board filters
+  elements.boardsChipsContainer.addEventListener("click", (e) => {
+    const chip = e.target.closest(".board-chip");
+    if (chip) {
+      const board = chip.getAttribute("data-board");
+      store.setActiveBoard(board);
+    }
+  });
+}
+
+function dismissSubPopover() {
+  const existing = document.getElementById("active-sub-popover");
+  if (existing) existing.remove();
+}
+
+// ==========================================================================
+// COOK MODE VIEW ENGINE
+// ==========================================================================
+async function startCookMode(recipe) {
+  cookModeActiveRecipe = recipe;
+  cookModeCurrentStep = 0;
+  
+  elements.cookModeRecipeTitle.innerText = recipe.title;
+  updateCookModeStepUI();
+  
+  openModal(elements.cookModeOverlay);
+  
+  // Request screen wake lock to prevent dimming
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLockNode = await navigator.wakeLock.request('screen');
+      elements.wakeLockStatus.classList.add("active");
+      elements.wakeLockStatus.querySelector(".wake-lock-text").innerText = "Keep Awake Active";
+    }
+  } catch (err) {
+    console.warn("Wake lock failed:", err);
+  }
+}
+
+function stopCookMode() {
+  closeModal(elements.cookModeOverlay);
+  cookModeActiveRecipe = null;
+  
+  // Release wake lock
+  if (wakeLockNode) {
+    wakeLockNode.release().then(() => {
+      wakeLockNode = null;
+      elements.wakeLockStatus.classList.remove("active");
+      elements.wakeLockStatus.querySelector(".wake-lock-text").innerText = "Keep Awake";
+    });
+  }
+}
+
+function navigateCookStep(direction) {
+  if (!cookModeActiveRecipe) return;
+  const newStep = cookModeCurrentStep + direction;
+  if (newStep >= 0 && newStep < cookModeActiveRecipe.instructions.length) {
+    cookModeCurrentStep = newStep;
+    updateCookModeStepUI();
+  }
+}
+
+function updateCookModeStepUI() {
+  const steps = cookModeActiveRecipe.instructions;
+  const step = steps[cookModeCurrentStep];
+  
+  elements.cookModeStepIndicator.innerText = `Step ${step.step} of ${steps.length}`;
+  
+  // Progress bar
+  const percent = ((cookModeCurrentStep + 1) / steps.length) * 100;
+  elements.cookModeProgressFill.style.width = `${percent}%`;
+  
+  // Large text (parse timers inside as well!)
+  const formattedText = formatStepTextWithTimersForCookMode(escapeHtml(step.text));
+  elements.cookModeStepText.innerHTML = formattedText;
+  
+  // Tip box
+  if (step.tip) {
+    elements.cookModeTipText.innerText = step.tip;
+    elements.cookModeTipBox.classList.remove("hidden");
+  } else {
+    elements.cookModeTipBox.classList.add("hidden");
+  }
+  
+  // Enable/Disable buttons
+  elements.btnCookPrev.disabled = cookModeCurrentStep === 0;
+  
+  if (cookModeCurrentStep === steps.length - 1) {
+    elements.btnCookNext.querySelector("span").innerText = "Finish Cooking";
+  } else {
+    elements.btnCookNext.querySelector("span").innerText = "Next Step";
+  }
+  
+  // If next is clicked on the final step, close cook mode
+  elements.btnCookNext.onclick = () => {
+    if (cookModeCurrentStep === steps.length - 1) {
+      stopCookMode();
+    } else {
+      navigateCookStep(1);
+    }
+  };
+}
+
+function formatStepTextWithTimersForCookMode(text) {
+  const regex = /(\d+)(?:-(\d+))?\s*(?:minutes|minute|min)/gi;
+  return text.replace(regex, (match, p1, p2) => {
+    const mins = p2 ? parseInt(p2, 10) : parseInt(p1, 10);
+    return `<button class="step-timer-badge cook-mode-timer-badge" data-minutes="${mins}">${ICONS.clock} <span>${match}</span></button>`;
+  });
+}
+
+// Handle cook mode timer badges (via click listener on cook mode content)
+document.addEventListener("click", (e) => {
+  const badge = e.target.closest(".cook-mode-timer-badge");
+  if (badge) {
+    const mins = parseInt(badge.getAttribute("data-minutes"), 10);
+    startKitchenTimer(mins);
+  }
+});
+
+
+// ==========================================================================
+// FLOATING KITCHEN COUNTDOWN TIMER
+// ==========================================================================
+function startKitchenTimer(minutes) {
+  clearInterval(timerInterval);
+  timerSeconds = minutes * 60;
+  timerOriginalSeconds = timerSeconds;
+  timerIsPaused = false;
+  
+  elements.floatingTimerBar.classList.remove("hidden");
+  elements.floatingTimerBar.classList.remove("alarm");
+  elements.btnTimerToggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
+  
+  updateTimerDisplay();
+  
+  timerInterval = setInterval(() => {
+    if (!timerIsPaused) {
+      timerSeconds--;
+      updateTimerDisplay();
+      
+      if (timerSeconds <= 0) {
+        clearInterval(timerInterval);
+        triggerTimerAlarm();
+      }
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const mins = Math.floor(timerSeconds / 60);
+  const secs = timerSeconds % 60;
+  elements.timerBarDisplay.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function toggleKitchenTimer() {
+  timerIsPaused = !timerIsPaused;
+  const toggleBtn = elements.btnTimerToggle;
+  if (timerIsPaused) {
+    toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
+    toggleBtn.title = "Resume Timer";
+  } else {
+    toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
+    toggleBtn.title = "Pause Timer";
+  }
+}
+
+function resetKitchenTimer() {
+  timerSeconds = timerOriginalSeconds;
+  timerIsPaused = false;
+  elements.floatingTimerBar.classList.remove("alarm");
+  updateTimerDisplay();
+  startKitchenTimer(timerOriginalSeconds / 60);
+}
+
+function closeKitchenTimer() {
+  clearInterval(timerInterval);
+  elements.floatingTimerBar.classList.add("hidden");
+  elements.floatingTimerBar.classList.remove("alarm");
+}
+
+function triggerTimerAlarm() {
+  elements.floatingTimerBar.classList.add("alarm");
+  elements.timerBarDisplay.innerText = "Time's Up!";
+  
+  // Play Web Audio sound
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.8);
+  } catch (e) {
+    console.warn("Alarm audio failed", e);
+  }
+}
+
+// ==========================================================================
+// INSTAGRAM STORY CARD EXPORTER (HTML5 Canvas + CORS Safety)
+// ==========================================================================
+function openStoryExporter(recipe) {
+  openModal(elements.storyExporterModal);
+  
+  const canvas = elements.storyCanvas;
+  const ctx = canvas.getContext("2d");
+  
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // 1. Draw Background Gradient matching selected mood
+  const savedMood = localStorage.getItem("cookbook_theme_mood") || "cozy-cream";
+  let colorStart = "#FAF5ED";
+  let colorEnd = "#FFFDF9";
+  let accentColor = "#E76F51";
+  let textColor = "#3E2723";
+  let tagColor = "#F3EBE0";
+  
+  if (savedMood === "spring-lavender") {
+    colorStart = "#F3EEF5";
+    colorEnd = "#FAF8FC";
+    accentColor = "#8A70A4";
+    textColor = "#3B2E42";
+    tagColor = "#E8E0EC";
+  } else if (savedMood === "fresh-sage") {
+    colorStart = "#F0F4F1";
+    colorEnd = "#F7FAF8";
+    accentColor = "#528265";
+    textColor = "#2A382E";
+    tagColor = "#E1EBE4";
+  } else if (savedMood === "sunset-terracotta") {
+    colorStart = "#FAF2EC";
+    colorEnd = "#FFFBF7";
+    accentColor = "#D07B3A";
+    textColor = "#4A2B15";
+    tagColor = "#F3E4D8";
+  }
+
+  const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  grad.addColorStop(0, colorStart);
+  grad.addColorStop(1, colorEnd);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 2. Draw Decorative elements
+  ctx.fillStyle = accentColor;
+  ctx.font = "800 48px Outfit, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("THE DAILY DISH", canvas.width / 2, 140);
+  
+  ctx.fillStyle = textColor;
+  ctx.font = "600 24px Outfit, sans-serif";
+  ctx.fillText("AI Generated Cookbook & Meal Planner", canvas.width / 2, 190);
+  
+  // Divider
+  ctx.strokeStyle = "rgba(62, 39, 35, 0.08)";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(150, 240);
+  ctx.lineTo(canvas.width - 150, 240);
+  ctx.stroke();
+
+  // 3. Load photo
+  const resolvedImage = recipe.image ? recipe.image : getGourmetFoodImage(recipe.title, recipe.category);
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = resolvedImage;
+  
+  img.onload = () => {
+    drawPlateAndInfo();
+  };
+  
+  img.onerror = () => {
+    drawPlateAndInfo(true);
+  };
+
+  function drawPlateAndInfo(useFallback = false) {
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2 - 150;
+    const r = 260;
+    
+    // Shadow
+    ctx.shadowColor = "rgba(62, 39, 35, 0.12)";
+    ctx.shadowBlur = 45;
+    ctx.shadowOffsetY = 25;
+    
+    // Plate
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(cx, cy, r + 30, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+    
+    ctx.strokeStyle = "rgba(62, 39, 35, 0.06)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.clip();
+    
+    if (!useFallback) {
+      const imgRatio = img.width / img.height;
+      let dx = cx - r;
+      let dy = cy - r;
+      let dWidth = r * 2;
+      let dHeight = r * 2;
+      
+      if (imgRatio > 1) {
+        const w = (r * 2) * imgRatio;
+        dx = cx - w / 2;
+        dWidth = w;
+      } else {
+        const h = (r * 2) / imgRatio;
+        dy = cy - h / 2;
+        dHeight = h;
+      }
+      ctx.drawImage(img, dx, dy, dWidth, dHeight);
+    } else {
+      ctx.fillStyle = tagColor;
+      ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+      ctx.fillStyle = accentColor;
+      ctx.font = "800 64px serif";
+      ctx.fillText("🍽️", cx, cy + 20);
+    }
+    
+    const innerGrad = ctx.createRadialGradient(cx, cy, r - 50, cx, cy, r);
+    innerGrad.addColorStop(0, "rgba(0, 0, 0, 0)");
+    innerGrad.addColorStop(1, "rgba(0, 0, 0, 0.15)");
+    ctx.fillStyle = innerGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
+
+    // Text content
+    ctx.fillStyle = textColor;
+    ctx.textAlign = "center";
+    
+    ctx.fillStyle = accentColor;
+    ctx.beginPath();
+    ctx.roundRect(cx - 100, cy + r + 80, 200, 44, 22);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "800 22px Outfit, sans-serif";
+    ctx.fillText(recipe.category.toUpperCase(), cx, cy + r + 110);
+    
+    ctx.fillStyle = textColor;
+    ctx.font = "800 64px Georgia, serif";
+    
+    const words = recipe.title.split(" ");
+    let line = "";
+    let lines = [];
+    for (let n = 0; n < words.length; n++) {
+      let testLine = line + words[n] + " ";
+      let metrics = ctx.measureText(testLine);
+      if (metrics.width > canvas.width - 200 && n > 0) {
+        lines.push(line.trim());
+        line = words[n] + " ";
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line.trim());
+    
+    let titleY = cy + r + 200;
+    lines.forEach(l => {
+      ctx.fillText(l, cx, titleY);
+      titleY += 75;
+    });
+    
+    const totalTime = recipe.prepTime + recipe.cookTime;
+    ctx.fillStyle = textColor;
+    ctx.font = "700 32px Outfit, sans-serif";
+    ctx.fillText(`${totalTime} min  |  ${recipe.difficulty}  |  ${recipe.servings} Servings`, cx, titleY + 30);
+    
+    ctx.strokeStyle = "rgba(62, 39, 35, 0.08)";
+    ctx.beginPath();
+    ctx.moveTo(250, canvas.height - 180);
+    ctx.lineTo(canvas.width - 250, canvas.height - 180);
+    ctx.stroke();
+    
+    ctx.fillStyle = textColor;
+    ctx.font = "600 24px Outfit, sans-serif";
+    ctx.fillText("Scan or click to cook this dish!", cx, canvas.height - 130);
+    
+    try {
+      const dataUrl = canvas.toDataURL("image/png");
+      elements.btnDownloadStory.href = dataUrl;
+      elements.btnDownloadStory.download = `${recipe.title.toLowerCase().replace(/\s+/g, '-')}-story-card.png`;
+    } catch (e) {
+      console.warn("Canvas toDataURL failed", e);
+    }
+  }
 }
