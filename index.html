@@ -316,8 +316,17 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width: 28px; height: 28px; color: var(--accent-primary);"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </div>
           <h3 style="font-family: var(--font-serif); margin-bottom: 8px;">Recipe Not Found</h3>
-          <p id="generator-failure-message" style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.4;">We couldn't find a verified recipe for this dish online.</p>
-          <a id="btn-search-external-link" href="#" target="_blank" class="view-imported-btn" style="text-decoration: none; display: inline-block; line-height: 2.2; text-align: center;">Search on Google</a>
+          <p id="generator-failure-message" style="margin-bottom: 12px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.4;">We couldn't find a verified recipe for this dish online.</p>
+          
+          <div style="margin-bottom: 16px;">
+            <a id="btn-search-external-link" href="#" target="_blank" class="btn-card-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 0.85rem; border-radius: var(--radius-full); margin-bottom: 12px;">
+              <span>Search on Google</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width:12px;height:12px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            </a>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Found a link? Paste it below to import it into your Cookbook!</p>
+            <input type="url" id="generator-failure-import-url" placeholder="Paste recipe URL here..." style="width: 100%; max-width: 320px; margin: 0 auto 10px auto; display: block; border-radius: var(--radius-full); padding: 8px 16px; border: 1px solid var(--border-color); font-family: var(--font-sans); font-size: 0.85rem; background: var(--bg-secondary); color: var(--text-primary); outline: none; text-align: center;">
+            <button id="btn-generator-failure-import" class="view-imported-btn" style="width: auto; padding: 10px 24px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">Import & Save</button>
+          </div>
         </div>
       </div>
     </div>

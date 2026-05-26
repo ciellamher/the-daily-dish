@@ -85,6 +85,8 @@ const elements = {
   generatorFailureState: document.getElementById("generator-failure-state"),
   generatorFailureMessage: document.getElementById("generator-failure-message"),
   btnSearchExternalLink: document.getElementById("btn-search-external-link"),
+  generatorFailureImportUrl: document.getElementById("generator-failure-import-url"),
+  btnGeneratorFailureImport: document.getElementById("btn-generator-failure-import"),
   
   // Floating Action Button
   fabContainer: document.getElementById("fab-container"),
@@ -506,6 +508,50 @@ function bindGlobalEvents() {
       openModal(elements.recipeDetailModal);
     }
   });
+  if (elements.btnGeneratorFailureImport) {
+    elements.btnGeneratorFailureImport.addEventListener("click", () => {
+      const url = elements.generatorFailureImportUrl.value.trim();
+      if (!url || !url.startsWith("http")) {
+        alert("Please enter a valid recipe URL.");
+        return;
+      }
+
+      elements.generatorFailureState.classList.add("hidden");
+      elements.generatorLoadingState.classList.remove("hidden");
+      
+      resetGeneratorStepsUI();
+      
+      simulateRecipeImport(
+        url,
+        (update) => {
+          elements.generatorLoaderStatus.innerText = update.status;
+          elements.generatorProgressFill.style.width = `${update.progress}%`;
+          
+          const stepEl = document.getElementById(`gen-step-${update.step}`);
+          if (stepEl) {
+            stepEl.classList.add("active");
+          }
+          
+          if (update.step === "extract") {
+            document.getElementById("gen-step-connect").classList.remove("active");
+            document.getElementById("gen-step-connect").classList.add("done");
+          } else if (update.step === "structure") {
+            document.getElementById("gen-step-extract").classList.remove("active");
+            document.getElementById("gen-step-extract").classList.add("done");
+          } else if (update.step === "save") {
+            document.getElementById("gen-step-structure").classList.remove("active");
+            document.getElementById("gen-step-structure").classList.add("done");
+          }
+        },
+        (importedRecipe) => {
+          elements.generatorLoadingState.classList.add("hidden");
+          elements.generatorSuccessState.classList.remove("hidden");
+          elements.generatedRecipeTitlePreview.innerText = importedRecipe.title;
+          elements.generatorFailureImportUrl.value = "";
+        }
+      );
+    });
+  }
 
   /* --- 14. Floating Action Button Speed Dial --- */
   if (elements.fabMainBtn) {
@@ -1021,6 +1067,9 @@ function resetGeneratorState() {
   elements.generatorSuccessState.classList.add("hidden");
   if (elements.generatorFailureState) {
     elements.generatorFailureState.classList.add("hidden");
+  }
+  if (elements.generatorFailureImportUrl) {
+    elements.generatorFailureImportUrl.value = "";
   }
   resetGeneratorStepsUI();
 }
