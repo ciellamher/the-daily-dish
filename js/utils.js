@@ -405,3 +405,52 @@ export function stopAmbientAudio() {
     audioCtx.suspend();
   }
 }
+
+/**
+ * Scans title, ingredients, and instructions to accurately determine required kitchen gear.
+ */
+export function extractEquipment(title, ingredients, instructions) {
+  const textToScan = [
+    title || "",
+    ...(ingredients || []).map(i => i.name || ""),
+    ...(instructions || []).map(i => i.text || "")
+  ].join(" ").toLowerCase();
+
+  const gearMap = [
+    { key: "pot", names: ["pot", "saucepan", "dutch oven", "slow cooker", "boil", "soup", "simmer", "casserole", "boiling"], defaultName: "Pot" },
+    { key: "pan", names: ["pan", "skillet", "griddle", "wok", "fry", "sear", "sauté", "cook in skillet", "cast iron"], defaultName: "Skillet" },
+    { key: "knife", names: ["knife", "slice", "chop", "dice", "mince", "cut", "peel", "butterfly"], defaultName: "Chef's Knife" },
+    { key: "board", names: ["board", "cutting board"], defaultName: "Cutting Board" },
+    { key: "bowl", names: ["bowl", "mixing bowl", "ramekin", "ramekins"], defaultName: "Mixing Bowl" },
+    { key: "sheet", names: ["sheet", "baking sheet", "baking pan", "baking dish", "oven", "bake", "preheat"], defaultName: "Baking Sheet" },
+    { key: "paper", names: ["parchment", "foil", "paper towel"], defaultName: "Parchment Paper" },
+    { key: "tongs", names: ["tongs"], defaultName: "Tongs" },
+    { key: "spoon", names: ["spoon", "spatula", "whisk", "ladle", "stir"], defaultName: "Cooking Spoon" },
+    { key: "brush", names: ["brush", "pastry brush"], defaultName: "Pastry Brush" },
+    { key: "cutter", names: ["cutter", "pizza cutter"], defaultName: "Pizza Cutter" },
+    { key: "rollingPin", names: ["rolling pin"], defaultName: "Rolling Pin" },
+    { key: "blender", names: ["blender", "food processor", "purée"], defaultName: "Blender" },
+    { key: "rack", names: ["rack", "wire rack", "cooling rack"], defaultName: "Cooling Rack" },
+    { key: "toaster", names: ["toast", "toaster"], defaultName: "Toaster" }
+  ];
+
+  const foundKeys = new Set();
+  const equipmentList = [];
+
+  for (const gear of gearMap) {
+    if (gear.names.some(keyword => textToScan.includes(keyword))) {
+      foundKeys.add(gear.key);
+      equipmentList.push({ name: gear.defaultName, icon: gear.key });
+    }
+  }
+
+  // If nothing was found, add a few default items
+  if (equipmentList.length === 0) {
+    equipmentList.push({ name: "Chef's Knife", icon: "knife" });
+    equipmentList.push({ name: "Cooking Spoon", icon: "spoon" });
+    equipmentList.push({ name: "Pot or Pan", icon: "pot" });
+  }
+
+  return equipmentList;
+}
+

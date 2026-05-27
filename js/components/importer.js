@@ -1,7 +1,7 @@
 // URL Recipe Importer Logic & Scraper Simulator
 
 import { store } from "../store.js";
-import { getGourmetFoodImage } from "../utils.js";
+import { getGourmetFoodImage, extractEquipment } from "../utils.js";
 
 // Mock database of recipes to return based on URL keyword searches
 const MOCK_IMPORTED_RECIPES = {
@@ -214,11 +214,7 @@ export function simulateRecipeImport(url, onStepChange, onComplete) {
             image: imageUrl,
             sourceUrl: targetUrl,
             sourceName: extractDomain(targetUrl),
-            equipment: [
-              { name: "Chef's Knife", icon: "knife" },
-              { name: "Cooking Spoon", icon: "spoon" },
-              { name: "Pot or Pan", icon: "pot" }
-            ],
+            equipment: extractEquipment(title, parsedIngredients, parsedInstructions),
             ingredients: parsedIngredients,
             instructions: parsedInstructions.length > 0 ? parsedInstructions : [
               { step: 1, text: "Click the reference link above to view full cooking procedures on the original website.", tip: "Detailed steps were not found in structured metadata." }
@@ -602,10 +598,7 @@ function serveFinalMetaFallback(meta, url, onStepChange, onComplete) {
     image: meta.image || getGourmetFoodImage(title, "Mains"),
     sourceUrl: url,
     sourceName: extractDomain(url),
-    equipment: [
-      { name: "Cooking Spoon", icon: "spoon" },
-      { name: "Pot or Pan", icon: "pot" }
-    ],
+    equipment: extractEquipment(title, [], [{ text: "Click the reference link above to view full cooking procedures on the original website." }]),
     ingredients: [
       { name: "refer to original link for ingredients", quantity: 1, unit: "pc", category: "Pantry" }
     ],
@@ -722,11 +715,7 @@ function parseMealDBMealScraped(meal, url) {
     image: meal.strMealThumb,
     sourceUrl: url,
     sourceName: extractDomain(url),
-    equipment: [
-      { name: "Chef's Knife", icon: "knife" },
-      { name: "Cooking Spoon", icon: "spoon" },
-      { name: "Pot or Pan", icon: "pot" }
-    ],
+    equipment: extractEquipment(title, ingredients, instructions),
     ingredients,
     instructions
   };

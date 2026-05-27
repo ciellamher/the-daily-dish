@@ -1186,6 +1186,33 @@
   color: var(--accent-primary);
 }
 
+.btn-recipe-planner {
+  position: absolute;
+  top: 20px;
+  right: 110px;
+  background: var(--bg-glass);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-primary);
+  cursor: pointer;
+  z-index: 10;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-recipe-planner:hover {
+  transform: scale(1.04);
+  background: white;
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
 .edit-mode-hero {
   background: linear-gradient(135deg, var(--accent-primary) 0%, #d95d39 100%);
   display: flex;

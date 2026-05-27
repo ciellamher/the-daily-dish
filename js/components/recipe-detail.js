@@ -190,6 +190,11 @@ export function renderRecipeDetail(recipe, state) {
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
       </button>
 
+      <!-- Add to Meal Planner Button -->
+      <button class="btn-recipe-planner" id="btn-recipe-planner" title="Add to Meal Planner" aria-label="Add to Meal Planner">
+        ${ICONS.calendar}
+      </button>
+
       <!-- Edit Recipe Button -->
       <button class="btn-recipe-edit" id="btn-recipe-edit" title="Edit Recipe" aria-label="Edit Recipe">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>

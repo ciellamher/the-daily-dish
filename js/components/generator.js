@@ -1,7 +1,7 @@
 // AI Recipe Generator Component (Client-side Simulation)
 
 import { store } from "../store.js";
-import { getGourmetFoodImage } from "../utils.js";
+import { getGourmetFoodImage, extractEquipment } from "../utils.js";
 
 // Rich recipes templates for popular keyword matches
 const PREDEFINED_AI_TEMPLATES = {
@@ -701,7 +701,7 @@ function generateDynamicFallback(query) {
     category,
     tags: ["Generated", "AI Chef", "On The Spot"],
     image: "", // Generates placeholder card icon
-    equipment,
+    equipment: extractEquipment(title, ingredients, instructions),
     ingredients,
     instructions
   };
@@ -940,11 +940,7 @@ function parseMealDBMeal(meal) {
     image: meal.strMealThumb,
     sourceUrl,
     sourceName,
-    equipment: [
-      { name: "Chef's Knife", icon: "knife" },
-      { name: "Cooking Spoon", icon: "spoon" },
-      { name: "Pot or Pan", icon: "pot" }
-    ],
+    equipment: extractEquipment(title, ingredients, instructions),
     ingredients,
     instructions
   };

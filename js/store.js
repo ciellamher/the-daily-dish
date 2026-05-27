@@ -30,22 +30,26 @@ class Store {
     this.listeners = [];
     
     this.state = {
-      myRecipes: this.loadMyRecipes(),
-      deletedDefaultIds: this.loadDeletedDefaultIds(),
-      activeTab: "home", // "home" or "my-recipes"
+      currentUser: this.loadCurrentUser(),
+      activeTab: "home", // "home" or "my-recipes", or "meal-planner"
       weeklySeed: getWeekSeed(),
       defaultRecipes: [], // Populated in updateCombinedRecipes
       recipes: [],        // Populated in updateCombinedRecipes
       selectedRecipeId: null,
       customServings: {}, // Map of recipeId -> current serving size
       searchQuery: "",
-      searchMode: "ingredients", // 'name' or 'ingredients'
-      selectedIngredients: this.loadSelectedIngredients(),
-      shoppingList: this.loadShoppingList(),
+      searchMode: "name", // 'name' or 'ingredients'
       activeSteps: {}, // Map of recipeId -> active step index
       ambientAudioPlaying: false,
       activeBoard: "All"
     };
+
+    // Scoped loaders
+    this.state.myRecipes = this.loadMyRecipes();
+    this.state.deletedDefaultIds = this.loadDeletedDefaultIds();
+    this.state.selectedIngredients = this.loadSelectedIngredients();
+    this.state.shoppingList = this.loadShoppingList();
+    this.state.mealPlan = this.loadMealPlan();
 
     this.updateCombinedRecipes();
   }
@@ -62,10 +66,37 @@ class Store {
     this.listeners.forEach(callback => callback(this.state));
   }
 
+  // User-scoped suffix helper
+  getUserSuffix() {
+    return this.state && this.state.currentUser ? `_${this.state.currentUser.username.toLowerCase().trim()}` : "";
+  }
+
+  // Auth Loaders
+  loadCurrentUser() {
+    try {
+      const stored = localStorage.getItem("cookbook_current_user");
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error("Failed to parse stored user", e);
+    }
+    return null;
+  }
+
+  saveCurrentUser(user) {
+    if (user) {
+      localStorage.setItem("cookbook_current_user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("cookbook_current_user");
+    }
+  }
+
   // Loaders
   loadMyRecipes() {
     try {
-      const stored = localStorage.getItem("cookbook_my_recipes");
+      const suffix = this.getUserSuffix();
+      const stored = localStorage.getItem(`cookbook_my_recipes${suffix}`);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) return parsed;
@@ -78,7 +109,8 @@ class Store {
 
   loadDeletedDefaultIds() {
     try {
-      const stored = localStorage.getItem("cookbook_deleted_defaults");
+      const suffix = this.getUserSuffix();
+      const stored = localStorage.getItem(`cookbook_deleted_defaults${suffix}`);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) return parsed;
@@ -91,7 +123,8 @@ class Store {
 
   loadSelectedIngredients() {
     try {
-      const stored = localStorage.getItem("cookbook_fridge_ingredients");
+      const suffix = this.getUserSuffix();
+      const stored = localStorage.getItem(`cookbook_fridge_ingredients${suffix}`);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) return parsed;
@@ -104,7 +137,8 @@ class Store {
 
   loadShoppingList() {
     try {
-      const stored = localStorage.getItem("cookbook_shopping_list");
+      const suffix = this.getUserSuffix();
+      const stored = localStorage.getItem(`cookbook_shopping_list${suffix}`);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) return parsed;
@@ -115,21 +149,51 @@ class Store {
     return [];
   }
 
+  loadMealPlan() {
+    try {
+      const suffix = this.getUserSuffix();
+      const stored = localStorage.getItem(`cookbook_meal_plan${suffix}`);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error("Failed to parse stored mealPlan", e);
+    }
+    return {
+      Monday: { breakfast: null, lunch: null, dinner: null },
+      Tuesday: { breakfast: null, lunch: null, dinner: null },
+      Wednesday: { breakfast: null, lunch: null, dinner: null },
+      Thursday: { breakfast: null, lunch: null, dinner: null },
+      Friday: { breakfast: null, lunch: null, dinner: null },
+      Saturday: { breakfast: null, lunch: null, dinner: null },
+      Sunday: { breakfast: null, lunch: null, dinner: null }
+    };
+  }
+
   // Persisters
   saveMyRecipes() {
-    localStorage.setItem("cookbook_my_recipes", JSON.stringify(this.state.myRecipes));
+    const suffix = this.getUserSuffix();
+    localStorage.setItem(`cookbook_my_recipes${suffix}`, JSON.stringify(this.state.myRecipes));
   }
 
   saveDeletedDefaultIds() {
-    localStorage.setItem("cookbook_deleted_defaults", JSON.stringify(this.state.deletedDefaultIds));
+    const suffix = this.getUserSuffix();
+    localStorage.setItem(`cookbook_deleted_defaults${suffix}`, JSON.stringify(this.state.deletedDefaultIds));
   }
 
   saveSelectedIngredients() {
-    localStorage.setItem("cookbook_fridge_ingredients", JSON.stringify(this.state.selectedIngredients));
+    const suffix = this.getUserSuffix();
+    localStorage.setItem(`cookbook_fridge_ingredients${suffix}`, JSON.stringify(this.state.selectedIngredients));
   }
 
   saveShoppingList() {
-    localStorage.setItem("cookbook_shopping_list", JSON.stringify(this.state.shoppingList));
+    const suffix = this.getUserSuffix();
+    localStorage.setItem(`cookbook_shopping_list${suffix}`, JSON.stringify(this.state.shoppingList));
+  }
+
+  saveMealPlan() {
+    const suffix = this.getUserSuffix();
+    localStorage.setItem(`cookbook_meal_plan${suffix}`, JSON.stringify(this.state.mealPlan));
   }
 
   updateCombinedRecipes() {
@@ -150,11 +214,21 @@ class Store {
 
   // Actions
   addRecipe(recipe) {
+    // Check if recipe is already in myRecipes (by title or source URL)
+    const isDuplicate = this.state.myRecipes.some(
+      r => r.title.toLowerCase().trim() === recipe.title.toLowerCase().trim() ||
+           (r.sourceUrl && recipe.sourceUrl && r.sourceUrl.trim() === recipe.sourceUrl.trim())
+    );
+    if (isDuplicate) {
+      alert(`"${recipe.title}" is already in your Saved Recipes list!`);
+      return false;
+    }
     // Generated recipes go directly into My Recipes
     this.state.myRecipes.unshift(recipe);
     this.saveMyRecipes();
     this.updateCombinedRecipes();
     this.notify();
+    return true;
   }
 
   updateRecipe(recipeId, updatedRecipe) {
@@ -186,11 +260,91 @@ class Store {
   saveRecipeToMyRecipes(recipeId) {
     const recipe = this.state.recipes.find(r => r.id === recipeId);
     if (recipe && !this.state.myRecipes.some(r => r.id === recipeId)) {
+      const isDuplicate = this.state.myRecipes.some(
+        r => r.title.toLowerCase().trim() === recipe.title.toLowerCase().trim()
+      );
+      if (isDuplicate) {
+        alert(`"${recipe.title}" is already in your Saved Recipes list!`);
+        return;
+      }
       this.state.myRecipes.unshift(recipe);
       this.saveMyRecipes();
       this.updateCombinedRecipes();
       this.notify();
     }
+  }
+
+  loginUser(username) {
+    if (!username || !username.trim()) return false;
+    const user = { username: username.trim() };
+    this.state.currentUser = user;
+    this.saveCurrentUser(user);
+
+    // Scoped loaders
+    this.state.myRecipes = this.loadMyRecipes();
+    this.state.deletedDefaultIds = this.loadDeletedDefaultIds();
+    this.state.selectedIngredients = this.loadSelectedIngredients();
+    this.state.shoppingList = this.loadShoppingList();
+    this.state.mealPlan = this.loadMealPlan();
+
+    this.updateCombinedRecipes();
+    this.notify();
+    return true;
+  }
+
+  logoutUser() {
+    this.state.currentUser = null;
+    this.saveCurrentUser(null);
+
+    // Scoped loaders
+    this.state.myRecipes = this.loadMyRecipes();
+    this.state.deletedDefaultIds = this.loadDeletedDefaultIds();
+    this.state.selectedIngredients = this.loadSelectedIngredients();
+    this.state.shoppingList = this.loadShoppingList();
+    this.state.mealPlan = this.loadMealPlan();
+
+    this.updateCombinedRecipes();
+    this.notify();
+  }
+
+  addMealToPlan(day, slot, recipeId) {
+    const recipe = this.state.recipes.find(r => r.id === recipeId);
+    if (recipe && this.state.mealPlan[day]) {
+      this.state.mealPlan[day][slot] = {
+        id: recipe.id,
+        title: recipe.title,
+        category: recipe.category,
+        image: recipe.image,
+        prepTime: recipe.prepTime,
+        cookTime: recipe.cookTime,
+        difficulty: recipe.difficulty,
+        ingredients: recipe.ingredients
+      };
+      this.saveMealPlan();
+      this.notify();
+    }
+  }
+
+  removeMealFromPlan(day, slot) {
+    if (this.state.mealPlan[day]) {
+      this.state.mealPlan[day][slot] = null;
+      this.saveMealPlan();
+      this.notify();
+    }
+  }
+
+  clearMealPlan() {
+    this.state.mealPlan = {
+      Monday: { breakfast: null, lunch: null, dinner: null },
+      Tuesday: { breakfast: null, lunch: null, dinner: null },
+      Wednesday: { breakfast: null, lunch: null, dinner: null },
+      Thursday: { breakfast: null, lunch: null, dinner: null },
+      Friday: { breakfast: null, lunch: null, dinner: null },
+      Saturday: { breakfast: null, lunch: null, dinner: null },
+      Sunday: { breakfast: null, lunch: null, dinner: null }
+    };
+    this.saveMealPlan();
+    this.notify();
   }
 
   removeRecipeFromMyRecipes(recipeId) {
