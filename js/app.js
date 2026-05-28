@@ -13,8 +13,6 @@ const elements = {
   // Search & Navigation
   recipeSearchInput: document.getElementById("recipe-search-input"),
   searchClearBtn: document.getElementById("search-clear-btn"),
-  tabModeIngredients: document.getElementById("tab-mode-ingredients"),
-  tabModeName: document.getElementById("tab-mode-name"),
   suggestionsDropdown: document.getElementById("ingredient-suggestions"),
   
   // Custom Navigation elements
@@ -142,7 +140,18 @@ const elements = {
   loginForm: document.getElementById("login-form"),
   loginUsernameInput: document.getElementById("login-username-input"),
   loginPasswordInput: document.getElementById("login-password-input"),
+  linkToggleRegister: document.getElementById("link-toggle-register"),
+  loginModalTitle: document.getElementById("login-modal-title"),
+  loginModalSubtitle: document.getElementById("login-modal-subtitle"),
+  loginPasswordLabel: document.getElementById("login-password-label"),
+  btnLoginSubmit: document.getElementById("btn-login-submit"),
+  loginErrorMsg: document.getElementById("login-error-msg"),
+  btnOauthGoogle: document.getElementById("btn-oauth-google"),
+  btnOauthApple: document.getElementById("btn-oauth-apple"),
   
+  // Saved Recipes Tab
+  btnTabImport: document.getElementById("btn-tab-import"),
+
   // Weekly Meal Planner
   btnShowPlanner: document.getElementById("btn-show-planner"),
   btnClearPlanner: document.getElementById("btn-clear-planner"),
@@ -154,7 +163,10 @@ const elements = {
   plannerAddRecipeId: document.getElementById("planner-add-recipe-id"),
   plannerRecipeTitle: document.getElementById("planner-recipe-title"),
   plannerDaySelect: document.getElementById("planner-day-select"),
-  plannerSlotSelect: document.getElementById("planner-slot-select")
+  plannerSlotSelect: document.getElementById("planner-slot-select"),
+  plannerRecipeSelect: document.getElementById("planner-recipe-select"),
+  plannerCustomInputGroup: document.getElementById("planner-custom-input-group"),
+  plannerCustomName: document.getElementById("planner-custom-name")
 };
 
 // Global Staple Ingredients for Fridge Picker Quick-Add
@@ -165,6 +177,7 @@ const QUICK_ADD_STAPLES = [
 
 // Local state for suggestion dropdown tracking
 let highlightedSuggestionIndex = -1;
+let authModalMode = "login"; // "login" or "register"
 
 /* ==========================================================================
    INITIALIZATION & EVENT BINDINGS
@@ -179,6 +192,12 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Initial render
   renderUI(store.state);
+
+  // Prompt login immediately if user is not logged in
+  if (!store.state.currentUser) {
+    setAuthModalMode("login");
+    openModal(elements.loginModal);
+  }
 });
 
 // Build quick-add staple chips in DOM (removes plus emoji in favor of text/clean styling)
@@ -265,23 +284,6 @@ function bindGlobalEvents() {
     }
   });
 
-  /* --- 6. Search Mode Tabs --- */
-  elements.tabModeIngredients.addEventListener("click", () => {
-    store.setSearchMode("ingredients");
-    elements.tabModeIngredients.classList.add("active");
-    elements.tabModeName.classList.remove("active");
-    elements.fridgePickerPanel.classList.remove("hidden");
-    elements.recipeSearchInput.placeholder = "Type ingredients you have (e.g. eggs, tomato)...";
-  });
-
-  elements.tabModeName.addEventListener("click", () => {
-    store.setSearchMode("name");
-    elements.tabModeName.classList.add("active");
-    elements.tabModeIngredients.classList.remove("active");
-    elements.fridgePickerPanel.classList.add("hidden");
-    elements.recipeSearchInput.placeholder = "Search for dishes (e.g. Pasta, Cheeseburger, Salad)...";
-  });
-
   /* --- 7. Fridge Ingredient Triggers --- */
   elements.staplesChipsContainer.addEventListener("click", (e) => {
     const chip = e.target.closest(".btn-staple-chip");
@@ -317,9 +319,11 @@ function bindGlobalEvents() {
   });
 
   // Importer trigger
-  elements.btnShowImport.addEventListener("click", () => {
-    openModal(elements.importerModal);
-  });
+  if (elements.btnShowImport) {
+    elements.btnShowImport.addEventListener("click", () => {
+      openModal(elements.importerModal);
+    });
+  }
   elements.importerCloseBtn.addEventListener("click", () => {
     closeModal(elements.importerModal);
     resetImporterState();
@@ -632,6 +636,12 @@ function bindGlobalEvents() {
     });
   }
 
+  if (elements.btnTabImport) {
+    elements.btnTabImport.addEventListener("click", () => {
+      openModal(elements.importerModal);
+    });
+  }
+
   /* --- 15. User Authentication Events --- */
   if (elements.btnUserProfile) {
     elements.btnUserProfile.addEventListener("click", (e) => {
@@ -650,6 +660,7 @@ function bindGlobalEvents() {
   if (elements.btnDropdownLogin) {
     elements.btnDropdownLogin.addEventListener("click", () => {
       elements.profileDropdown.classList.add("hidden");
+      setAuthModalMode("login");
       openModal(elements.loginModal);
       elements.loginUsernameInput.focus();
     });
@@ -659,6 +670,10 @@ function bindGlobalEvents() {
     elements.loginCloseBtn.addEventListener("click", () => {
       closeModal(elements.loginModal);
       elements.loginForm.reset();
+      if (elements.loginErrorMsg) {
+        elements.loginErrorMsg.classList.add("hidden");
+        elements.loginErrorMsg.innerText = "";
+      }
     });
   }
 
@@ -666,12 +681,59 @@ function bindGlobalEvents() {
     elements.loginForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const username = elements.loginUsernameInput.value.trim();
-      if (username) {
-        store.loginUser(username);
+      const password = elements.loginPasswordInput.value;
+
+      if (!username || !password) return;
+
+      let result;
+      if (authModalMode === "login") {
+        result = store.authenticateUser(username, password);
+      } else {
+        result = store.registerUser(username, password);
+      }
+
+      if (result.success) {
         closeModal(elements.loginModal);
         elements.loginForm.reset();
+        if (elements.loginErrorMsg) {
+          elements.loginErrorMsg.classList.add("hidden");
+          elements.loginErrorMsg.innerText = "";
+        }
+      } else {
+        if (elements.loginErrorMsg) {
+          elements.loginErrorMsg.innerText = result.error;
+          elements.loginErrorMsg.classList.remove("hidden");
+        }
       }
     });
+  }
+
+  const handleOauthClick = (provider) => {
+    if (elements.loginErrorMsg) {
+      elements.loginErrorMsg.classList.add("hidden");
+    }
+    const btn = provider === "google" ? elements.btnOauthGoogle : elements.btnOauthApple;
+    if (btn) {
+      const originalText = btn.innerText;
+      btn.disabled = true;
+      btn.innerText = "Connecting...";
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerText = originalText;
+        const mockName = provider === "google" ? "Google Chef" : "Apple Chef";
+        store.loginUser(mockName);
+        closeModal(elements.loginModal);
+        elements.loginForm.reset();
+      }, 1200);
+    }
+  };
+
+  if (elements.btnOauthGoogle) {
+    elements.btnOauthGoogle.addEventListener("click", () => handleOauthClick("google"));
+  }
+
+  if (elements.btnOauthApple) {
+    elements.btnOauthApple.addEventListener("click", () => handleOauthClick("apple"));
   }
 
   if (elements.btnDropdownLogout) {
@@ -696,20 +758,62 @@ function bindGlobalEvents() {
     elements.plannerAddCloseBtn.addEventListener("click", () => {
       closeModal(elements.mealPlannerAddModal);
       elements.plannerAddForm.reset();
+      if (elements.plannerCustomInputGroup) elements.plannerCustomInputGroup.classList.add("hidden");
+    });
+  }
+
+  if (elements.plannerRecipeSelect) {
+    elements.plannerRecipeSelect.addEventListener("change", (e) => {
+      if (e.target.value === "custom") {
+        if (elements.plannerCustomInputGroup) elements.plannerCustomInputGroup.classList.remove("hidden");
+        if (elements.plannerCustomName) {
+          elements.plannerCustomName.required = true;
+          elements.plannerCustomName.focus();
+        }
+      } else {
+        if (elements.plannerCustomInputGroup) elements.plannerCustomInputGroup.classList.add("hidden");
+        if (elements.plannerCustomName) {
+          elements.plannerCustomName.required = false;
+          elements.plannerCustomName.value = "";
+        }
+      }
     });
   }
 
   if (elements.plannerAddForm) {
     elements.plannerAddForm.addEventListener("submit", (e) => {
       e.preventDefault();
+      
       const recipeId = elements.plannerAddRecipeId.value;
+      
+      // Temporarily enable elements to make sure value is read (though JS reads it anyway)
+      if (elements.plannerDaySelect) elements.plannerDaySelect.disabled = false;
+      if (elements.plannerSlotSelect) elements.plannerSlotSelect.disabled = false;
+      
       const day = elements.plannerDaySelect.value;
       const slot = elements.plannerSlotSelect.value;
-      if (recipeId && day && slot) {
-        store.addMealToPlan(day, slot, recipeId);
-        closeModal(elements.mealPlannerAddModal);
-        elements.plannerAddForm.reset();
+      
+      if (recipeId) {
+        // Adding from recipe details view
+        if (day && slot) {
+          store.addMealToPlan(day, slot, recipeId);
+        }
+      } else {
+        // Adding from calendar slot view
+        const selectVal = elements.plannerRecipeSelect.value;
+        if (selectVal === "custom") {
+          const customName = elements.plannerCustomName.value.trim();
+          if (customName && day && slot) {
+            store.addMealToPlan(day, slot, "custom", customName);
+          }
+        } else if (selectVal && day && slot) {
+          store.addMealToPlan(day, slot, selectVal);
+        }
       }
+      
+      closeModal(elements.mealPlannerAddModal);
+      elements.plannerAddForm.reset();
+      if (elements.plannerCustomInputGroup) elements.plannerCustomInputGroup.classList.add("hidden");
     });
   }
 
@@ -725,13 +829,26 @@ function bindGlobalEvents() {
         }
         return;
       }
+
+      // Handle clicking empty slot to add meal
+      const addBtn = e.target.closest(".btn-add-slot-meal");
+      if (addBtn) {
+        const day = addBtn.getAttribute("data-day");
+        const slot = addBtn.getAttribute("data-slot");
+        if (day && slot) {
+          openMealPlannerModal(null, day, slot);
+        }
+        return;
+      }
       
       // Handle clicking planned meal card to open recipe detail modal
       const card = e.target.closest(".meal-slot-card.filled");
       if (card && !e.target.closest("button")) {
         const id = card.getAttribute("data-id");
-        store.setSelectedRecipe(id);
-        openModal(elements.recipeDetailModal);
+        if (id && !id.startsWith("custom_")) {
+          store.setSelectedRecipe(id);
+          openModal(elements.recipeDetailModal);
+        }
       }
     });
   }
@@ -800,6 +917,141 @@ function openModal(modalEl) {
 function closeModal(modalEl) {
   modalEl.classList.remove("active");
   document.body.style.overflow = "";
+}
+
+function setAuthModalMode(mode) {
+  authModalMode = mode;
+  if (!elements.loginModal) return;
+
+  // Clear errors
+  if (elements.loginErrorMsg) {
+    elements.loginErrorMsg.classList.add("hidden");
+    elements.loginErrorMsg.innerText = "";
+  }
+
+  if (mode === "login") {
+    if (elements.loginModalTitle) elements.loginModalTitle.innerText = "Welcome Back";
+    if (elements.loginModalSubtitle) elements.loginModalSubtitle.innerText = "Login to sync your custom recipes, shopping lists, and meal plans.";
+    if (elements.btnLoginSubmit) elements.btnLoginSubmit.innerText = "Log In";
+    const promptEl = document.getElementById("login-toggle-prompt");
+    if (promptEl) {
+      promptEl.innerHTML = `Don't have a chef profile? <a href="#" id="link-toggle-register" style="font-weight:700; color: var(--accent-primary);">Sign Up</a>`;
+    }
+  } else {
+    if (elements.loginModalTitle) elements.loginModalTitle.innerText = "Register Chef Profile";
+    if (elements.loginModalSubtitle) elements.loginModalSubtitle.innerText = "Create a new chef profile to save recipes and plan your meals.";
+    if (elements.btnLoginSubmit) elements.btnLoginSubmit.innerText = "Sign Up / Register";
+    const promptEl = document.getElementById("login-toggle-prompt");
+    if (promptEl) {
+      promptEl.innerHTML = `Already have a chef profile? <a href="#" id="link-toggle-register" style="font-weight:700; color: var(--accent-primary);">Log In</a>`;
+    }
+  }
+
+  // Bind the toggle link click event dynamically
+  const toggleLink = document.getElementById("link-toggle-register");
+  if (toggleLink) {
+    toggleLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      setAuthModalMode(authModalMode === "login" ? "register" : "login");
+    });
+  }
+}
+
+function getWeekDates() {
+  const today = new Date();
+  const currentDay = today.getDay(); // 0 is Sunday, 1 is Monday...
+  
+  // Calculate difference to Monday. Monday is day 1, Sunday is day 7 or 0.
+  // If it's Sunday (0), distance to Monday is -6. Otherwise, 1 - currentDay.
+  const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+  
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + distanceToMonday);
+  
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const weekDates = {};
+  
+  days.forEach((dayName, index) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + index);
+    
+    const month = d.toLocaleDateString("en-US", { month: "short" });
+    const dateNum = d.getDate();
+    const isToday = d.toDateString() === today.toDateString();
+    
+    weekDates[dayName] = {
+      label: `${month} ${dateNum}`,
+      isToday: isToday
+    };
+  });
+  
+  return weekDates;
+}
+
+function openMealPlannerModal(recipeId = null, preSelectedDay = null, preSelectedSlot = null) {
+  const allRecipes = store.state.recipes;
+
+  if (recipeId) {
+    // Adding from Recipe Detail modal
+    const recipe = allRecipes.find(r => r.id === recipeId);
+    if (!recipe) return;
+
+    if (elements.plannerAddRecipeId) elements.plannerAddRecipeId.value = recipe.id;
+    if (elements.plannerAddInstructions) {
+      elements.plannerAddInstructions.innerHTML = `Select the day and time slot to add <strong>${escapeHtml(recipe.title)}</strong> to your plan.`;
+    }
+
+    // Hide dropdown select, hide custom input
+    if (elements.plannerRecipeSelect) elements.plannerRecipeSelect.parentElement.classList.add("hidden");
+    if (elements.plannerCustomInputGroup) elements.plannerCustomInputGroup.classList.add("hidden");
+
+    // Enable day/slot
+    if (elements.plannerDaySelect) {
+      elements.plannerDaySelect.disabled = false;
+      if (preSelectedDay) elements.plannerDaySelect.value = preSelectedDay;
+    }
+    if (elements.plannerSlotSelect) {
+      elements.plannerSlotSelect.disabled = false;
+      if (preSelectedSlot) elements.plannerSlotSelect.value = preSelectedSlot;
+    }
+  } else {
+    // Adding from Calendar cell directly
+    if (elements.plannerAddRecipeId) elements.plannerAddRecipeId.value = "";
+    if (elements.plannerAddInstructions) {
+      elements.plannerAddInstructions.innerHTML = "Select a recipe or input a custom meal name to add to your plan.";
+    }
+
+    // Show dropdown select
+    if (elements.plannerRecipeSelect) {
+      elements.plannerRecipeSelect.parentElement.classList.remove("hidden");
+      
+      let optionsHtml = `
+        <option value="" disabled selected>-- Select a Recipe --</option>
+        <option value="custom">* Type Custom Meal Name...</option>
+      `;
+
+      optionsHtml += allRecipes.map(r => `
+        <option value="${r.id}">${escapeHtml(r.title)} (${escapeHtml(r.category)})</option>
+      `).join("");
+
+      elements.plannerRecipeSelect.innerHTML = optionsHtml;
+    }
+
+    if (elements.plannerCustomInputGroup) elements.plannerCustomInputGroup.classList.add("hidden");
+    if (elements.plannerCustomName) elements.plannerCustomName.value = "";
+
+    // Lock selected Day and Slot
+    if (elements.plannerDaySelect) {
+      if (preSelectedDay) elements.plannerDaySelect.value = preSelectedDay;
+      elements.plannerDaySelect.disabled = true;
+    }
+    if (elements.plannerSlotSelect) {
+      if (preSelectedSlot) elements.plannerSlotSelect.value = preSelectedSlot;
+      elements.plannerSlotSelect.disabled = true;
+    }
+  }
+
+  openModal(elements.mealPlannerAddModal);
 }
 
 /* ==========================================================================
@@ -1045,7 +1297,7 @@ function renderUI(state) {
     if (elements.heroSection) elements.heroSection.classList.remove("hidden");
     if (listAnchor) listAnchor.classList.remove("hidden");
     if (mealPlannerView) mealPlannerView.classList.add("hidden");
-    if (elements.resultsHeading) elements.resultsHeading.innerHTML = "Weekly Default Recipes";
+    if (elements.resultsHeading) elements.resultsHeading.innerHTML = "Top List &ndash; Our mainstay menu";
   } else if (state.activeTab === "my-recipes") {
     if (elements.btnShowHome) elements.btnShowHome.classList.remove("active");
     if (elements.btnShowMyRecipes) elements.btnShowMyRecipes.classList.add("active");
@@ -1202,20 +1454,26 @@ function renderUI(state) {
     if (calendarEl) {
       const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
       const slots = ["breakfast", "lunch", "dinner"];
+      const weekDates = getWeekDates();
       
       calendarEl.innerHTML = days.map(day => {
         const plannedMeals = state.mealPlan[day] || { breakfast: null, lunch: null, dinner: null };
+        const dayInfo = weekDates[day] || { label: "", isToday: false };
         
         const slotsHtml = slots.map(slot => {
           const meal = plannedMeals[slot];
           if (meal) {
+            const metaText = meal.isCustom 
+              ? `<span class="meal-recipe-meta" style="color: var(--accent-primary); font-weight: 700;">Custom Meal</span>`
+              : `<span class="meal-recipe-meta">${meal.prepTime + meal.cookTime} mins | ${meal.difficulty}</span>`;
+              
             return `
               <div class="planner-meal-slot">
                 <span class="meal-slot-label">${slot}</span>
                 <div class="meal-slot-card filled" data-id="${meal.id}" data-day="${day}" data-slot="${slot}">
                   <button class="btn-remove-meal" data-day="${day}" data-slot="${slot}" title="Remove from plan">&times;</button>
                   <h5 class="meal-recipe-title">${escapeHtml(meal.title)}</h5>
-                  <span class="meal-recipe-meta">${meal.prepTime + meal.cookTime} mins | ${meal.difficulty}</span>
+                  ${metaText}
                 </div>
               </div>
             `;
@@ -1223,17 +1481,24 @@ function renderUI(state) {
             return `
               <div class="planner-meal-slot">
                 <span class="meal-slot-label">${slot}</span>
-                <div class="meal-slot-card empty">
-                  <span class="meal-slot-empty">No meal planned</span>
-                </div>
+                <button class="meal-slot-card empty btn-add-slot-meal" data-day="${day}" data-slot="${slot}" title="Add meal to ${day} ${slot}">
+                  <span class="meal-slot-empty">+ Plan ${slot}</span>
+                </button>
               </div>
             `;
           }
         }).join("");
 
+        const todayClass = dayInfo.isToday ? "today-column" : "";
+        const todayBadge = dayInfo.isToday ? `<span class="today-badge">Today</span>` : "";
+
         return `
-          <div class="planner-day-column">
-            <h4 class="day-name-heading">${day}</h4>
+          <div class="planner-day-column ${todayClass}">
+            <h4 class="day-name-heading">
+              ${day}
+              <span class="day-date-label">${dayInfo.label}</span>
+              ${todayBadge}
+            </h4>
             ${slotsHtml}
           </div>
         `;

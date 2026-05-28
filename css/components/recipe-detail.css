@@ -478,9 +478,18 @@
 .mood-boards-panel {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   margin-top: -15px;
   margin-bottom: 25px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.boards-left-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   flex-wrap: wrap;
 }
 

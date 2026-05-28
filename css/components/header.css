@@ -100,26 +100,29 @@
 }
 
 /* Cart Trigger Button */
-.cart-toggle-btn {
+.cart-toggle-icon-btn {
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
-  padding: 10px 22px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-full);
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 10px;
   box-shadow: var(--shadow-sm);
   transition: var(--transition-normal);
+  position: relative;
+  color: var(--text-primary);
 }
 
-.cart-toggle-btn:hover {
+.cart-toggle-icon-btn:hover {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
   box-shadow: 0 0 15px rgba(231, 111, 81, 0.25);
+  color: var(--bg-secondary);
 }
 
-.cart-toggle-btn:hover .cart-label,
-.cart-toggle-btn:hover .cart-icon {
+.cart-toggle-icon-btn:hover .cart-icon {
   color: var(--bg-secondary);
 }
 
@@ -127,12 +130,6 @@
   display: inline-flex;
   align-items: center;
   font-size: 1.15rem;
-}
-
-.cart-label {
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--text-primary);
   transition: var(--transition-fast);
 }
 
@@ -150,15 +147,18 @@
   padding: 0 6px;
   box-shadow: 0 2px 4px rgba(62, 39, 35, 0.15);
   animation: pulse-badge 2s infinite;
+  position: absolute;
+  top: -4px;
+  right: -4px;
 }
 
 @keyframes pulse-badge {
   0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  50% { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
 
-.cart-toggle-btn:hover .cart-badge {
+.cart-toggle-icon-btn:hover .cart-badge {
   background: var(--bg-secondary);
   color: var(--accent-primary);
 }
@@ -247,13 +247,28 @@
 }
 
 .circle-bowl-container {
+  position: relative;
   width: 380px;
   height: 380px;
   border-radius: var(--radius-full);
   overflow: hidden;
-  box-shadow: 0 20px 45px rgba(62, 39, 35, 0.12);
-  border: 8px solid var(--bg-secondary);
+  box-shadow: 0 25px 55px rgba(62, 39, 35, 0.15), 0 5px 15px rgba(62, 39, 35, 0.08);
+  border: 24px solid #ffffff; /* Thick white plate rim */
+  background-color: #ffffff;
   animation: float-bowl 6s ease-in-out infinite alternate;
+}
+
+.circle-bowl-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 12px 18px rgba(0, 0, 0, 0.15), inset 0 -6px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(62, 39, 35, 0.08); /* Rim divider line */
+  pointer-events: none;
 }
 
 .circle-bowl-img {

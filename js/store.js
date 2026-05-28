@@ -274,54 +274,138 @@ class Store {
     }
   }
 
-  loginUser(username) {
-    if (!username || !username.trim()) return false;
-    const user = { username: username.trim() };
-    this.state.currentUser = user;
-    this.saveCurrentUser(user);
+  loadUsers() {
+    try {
+      const stored = localStorage.getItem("cookbook_users");
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error("Failed to parse stored users", e);
+    }
+    return [];
+  }
 
-    // Scoped loaders
+  saveUsers(users) {
+    localStorage.setItem("cookbook_users", JSON.stringify(users));
+  }
+
+  authenticateUser(username, password) {
+    if (!username || !username.trim() || !password) {
+      return { success: false, error: "Please enter both username and password." };
+    }
+    
+    const uName = username.trim();
+    const users = this.loadUsers();
+    const user = users.find(u => u.username.toLowerCase() === uName.toLowerCase());
+    
+    if (!user) {
+      return { 
+        success: false, 
+        error: "Chef account not found. Toggle 'Sign Up' below to register this username!" 
+      };
+    }
+    
+    if (user.password !== password) {
+      return { success: false, error: "Incorrect password. Please try again." };
+    }
+    
+    // Log in
+    this.state.currentUser = { username: user.username };
+    this.saveCurrentUser(this.state.currentUser);
+    this.loadUserData();
+    return { success: true };
+  }
+
+  registerUser(username, password) {
+    if (!username || !username.trim() || !password) {
+      return { success: false, error: "Please enter both username and password." };
+    }
+    if (username.trim().length < 3) {
+      return { success: false, error: "Username must be at least 3 characters long." };
+    }
+    if (password.length < 4) {
+      return { success: false, error: "Password must be at least 4 characters long." };
+    }
+    
+    const uName = username.trim();
+    const users = this.loadUsers();
+    const exists = users.some(u => u.username.toLowerCase() === uName.toLowerCase());
+    
+    if (exists) {
+      return { success: false, error: "Username is already taken. Please choose another." };
+    }
+    
+    // Create user
+    users.push({ username: uName, password });
+    this.saveUsers(users);
+    
+    // Log in
+    this.state.currentUser = { username: uName };
+    this.saveCurrentUser(this.state.currentUser);
+    this.loadUserData();
+    return { success: true };
+  }
+
+  loadUserData() {
     this.state.myRecipes = this.loadMyRecipes();
     this.state.deletedDefaultIds = this.loadDeletedDefaultIds();
     this.state.selectedIngredients = this.loadSelectedIngredients();
     this.state.shoppingList = this.loadShoppingList();
     this.state.mealPlan = this.loadMealPlan();
-
     this.updateCombinedRecipes();
     this.notify();
+  }
+
+  loginUser(username) {
+    // OAuth/simulate bypass
+    if (!username || !username.trim()) return false;
+    const uName = username.trim();
+    this.state.currentUser = { username: uName };
+    this.saveCurrentUser(this.state.currentUser);
+    this.loadUserData();
     return true;
   }
 
   logoutUser() {
     this.state.currentUser = null;
     this.saveCurrentUser(null);
-
-    // Scoped loaders
-    this.state.myRecipes = this.loadMyRecipes();
-    this.state.deletedDefaultIds = this.loadDeletedDefaultIds();
-    this.state.selectedIngredients = this.loadSelectedIngredients();
-    this.state.shoppingList = this.loadShoppingList();
-    this.state.mealPlan = this.loadMealPlan();
-
-    this.updateCombinedRecipes();
-    this.notify();
+    this.loadUserData();
   }
 
-  addMealToPlan(day, slot, recipeId) {
-    const recipe = this.state.recipes.find(r => r.id === recipeId);
-    if (recipe && this.state.mealPlan[day]) {
+  addMealToPlan(day, slot, recipeId, customTitle = "") {
+    if (!this.state.mealPlan[day]) return;
+    
+    if (recipeId === "custom" && customTitle.trim()) {
       this.state.mealPlan[day][slot] = {
-        id: recipe.id,
-        title: recipe.title,
-        category: recipe.category,
-        image: recipe.image,
-        prepTime: recipe.prepTime,
-        cookTime: recipe.cookTime,
-        difficulty: recipe.difficulty,
-        ingredients: recipe.ingredients
+        id: "custom_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+        title: customTitle.trim(),
+        category: "Custom",
+        image: null,
+        prepTime: 5,
+        cookTime: 5,
+        difficulty: "Easy",
+        ingredients: [],
+        isCustom: true
       };
       this.saveMealPlan();
       this.notify();
+    } else {
+      const recipe = this.state.recipes.find(r => r.id === recipeId);
+      if (recipe) {
+        this.state.mealPlan[day][slot] = {
+          id: recipe.id,
+          title: recipe.title,
+          category: recipe.category,
+          image: recipe.image,
+          prepTime: recipe.prepTime,
+          cookTime: recipe.cookTime,
+          difficulty: recipe.difficulty,
+          ingredients: recipe.ingredients
+        };
+        this.saveMealPlan();
+        this.notify();
+      }
     }
   }
 
