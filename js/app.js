@@ -1479,6 +1479,7 @@ function bindGlobalEvents() {
         alert("Your weekly meal plan is currently empty! Add recipes to it first.");
       }
     });
+  }
   if (elements.btnPlannerToday) {
     elements.btnPlannerToday.addEventListener("click", () => {
       store.setWeeklyOffset(0);
