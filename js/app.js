@@ -1613,15 +1613,15 @@ function bindGlobalEvents() {
             <button class="btn-card-secondary btn-admin-reset" data-username="${escapeHtml(user.username)}" style="padding: 6px 10px; font-size: 0.75rem; border-radius: var(--radius-md); margin-right: 6px; cursor: pointer;">
               Reset PW
             </button>
-            \${isSystemAdmin ? \`
+            ${isSystemAdmin ? `
               <button disabled style="padding: 6px 10px; font-size: 0.75rem; border-radius: var(--radius-md); opacity: 0.4; cursor: not-allowed; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted);">
                 System
               </button>
-            \` : \`
-              <button class="view-imported-btn btn-admin-delete" data-username="\${escapeHtml(user.username)}" style="padding: 6px 10px; font-size: 0.75rem; border-radius: var(--radius-md); background-color: var(--color-danger); border-color: var(--color-danger); color: white; cursor: pointer;">
+            ` : `
+              <button class="view-imported-btn btn-admin-delete" data-username="${escapeHtml(user.username)}" style="padding: 6px 10px; font-size: 0.75rem; border-radius: var(--radius-md); background-color: var(--color-danger); border-color: var(--color-danger); color: white; cursor: pointer;">
                 Delete
               </button>
-            \`}
+            `}
           </td>
         </tr>
       `;
@@ -1631,7 +1631,7 @@ function bindGlobalEvents() {
     elements.adminUsersList.querySelectorAll(".btn-admin-reset").forEach(btn => {
       btn.addEventListener("click", () => {
         const username = btn.getAttribute("data-username");
-        const newPassword = prompt(\`Enter new password for chef "\${username}":\`);
+        const newPassword = prompt(`Enter new password for chef "${username}":`);
         if (newPassword === null) return; // User cancelled
         if (newPassword.trim().length < 4) {
           showAdminMsg("Password must be at least 4 characters long.", "error");
@@ -1640,7 +1640,7 @@ function bindGlobalEvents() {
         
         const res = store.resetUserPassword(username, newPassword.trim());
         if (res.success) {
-          showAdminMsg(\`Password for chef "\${username}" reset successfully.\`, "success");
+          showAdminMsg(`Password for chef "${username}" reset successfully.`, "success");
           renderAdminUsers();
         } else {
           showAdminMsg(res.error, "error");
@@ -1652,10 +1652,10 @@ function bindGlobalEvents() {
     elements.adminUsersList.querySelectorAll(".btn-admin-delete").forEach(btn => {
       btn.addEventListener("click", () => {
         const username = btn.getAttribute("data-username");
-        if (confirm(\`Are you sure you want to delete chef "\${username}"? All their saved recipes and settings will be permanently lost!\`)) {
+        if (confirm(`Are you sure you want to delete chef "${username}"? All their saved recipes and settings will be permanently lost!`)) {
           const res = store.deleteUser(username);
           if (res.success) {
-            showAdminMsg(\`Chef "\${username}" deleted successfully.\`, "success");
+            showAdminMsg(`Chef "${username}" deleted successfully.`, "success");
             renderAdminUsers();
           } else {
             showAdminMsg(res.error, "error");
