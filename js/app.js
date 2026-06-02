@@ -200,6 +200,25 @@ const elements = {
   settingsErrorMsg: document.getElementById("settings-error-msg"),
   settingsSuccessMsg: document.getElementById("settings-success-msg"),
 
+  // Admin Panel
+  btnDropdownAdmin: document.getElementById("btn-dropdown-admin"),
+  adminPanelModal: document.getElementById("admin-panel-modal"),
+  adminPanelCloseBtn: document.getElementById("admin-panel-close-btn"),
+  adminUsersList: document.getElementById("admin-users-list"),
+  adminPanelErrorMsg: document.getElementById("admin-panel-error-msg"),
+  adminPanelSuccessMsg: document.getElementById("admin-panel-success-msg"),
+
+  // Password Recovery
+  linkForgotPassword: document.getElementById("link-forgot-password"),
+  loginResetSection: document.getElementById("login-reset-section"),
+  loginResetForm: document.getElementById("login-reset-form"),
+  loginResetUsername: document.getElementById("login-reset-username"),
+  loginResetPassword: document.getElementById("login-reset-password"),
+  btnLoginResetCancel: document.getElementById("btn-login-reset-cancel"),
+
+  // Today Button
+  btnPlannerToday: document.getElementById("btn-planner-today"),
+
   // Write Custom Recipe
   btnTabWrite: document.getElementById("btn-tab-write"),
   fabBtnCustom: document.getElementById("fab-btn-custom"),
@@ -1460,7 +1479,210 @@ function bindGlobalEvents() {
         alert("Your weekly meal plan is currently empty! Add recipes to it first.");
       }
     });
+  if (elements.btnPlannerToday) {
+    elements.btnPlannerToday.addEventListener("click", () => {
+      store.setWeeklyOffset(0);
+      store.setMonthlyOffset(0);
+    });
   }
+
+  /* --- Password Recovery Events --- */
+  if (elements.linkForgotPassword) {
+    elements.linkForgotPassword.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (elements.loginResetSection) {
+        elements.loginResetSection.classList.remove("hidden");
+        if (elements.loginResetUsername) {
+          if (elements.loginUsernameInput && elements.loginUsernameInput.value) {
+            elements.loginResetUsername.value = elements.loginUsernameInput.value;
+          }
+          elements.loginResetUsername.focus();
+        }
+      }
+    });
+  }
+
+  if (elements.btnLoginResetCancel) {
+    elements.btnLoginResetCancel.addEventListener("click", () => {
+      if (elements.loginResetSection) {
+        elements.loginResetSection.classList.add("hidden");
+      }
+      if (elements.loginResetForm) {
+        elements.loginResetForm.reset();
+      }
+    });
+  }
+
+  if (elements.loginResetForm) {
+    elements.loginResetForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const username = elements.loginResetUsername.value.trim();
+      const newPassword = elements.loginResetPassword.value;
+      if (!username || !newPassword) return;
+
+      const result = store.resetUserPassword(username, newPassword);
+      if (result.success) {
+        alert("Password reset successfully! You can now log in.");
+        if (elements.loginResetSection) {
+          elements.loginResetSection.classList.add("hidden");
+        }
+        elements.loginResetForm.reset();
+        if (elements.loginUsernameInput) {
+          elements.loginUsernameInput.value = username;
+        }
+        if (elements.loginPasswordInput) {
+          elements.loginPasswordInput.value = "";
+          elements.loginPasswordInput.focus();
+        }
+        if (elements.loginErrorMsg) {
+          elements.loginErrorMsg.classList.add("hidden");
+          elements.loginErrorMsg.innerText = "";
+        }
+      } else {
+        if (elements.loginErrorMsg) {
+          elements.loginErrorMsg.innerText = result.error;
+          elements.loginErrorMsg.classList.remove("hidden");
+        } else {
+          alert(result.error);
+        }
+      }
+    });
+  }
+
+  /* --- Admin Panel Events --- */
+  function getSavedRecipeCount(username) {
+    try {
+      const stored = localStorage.getItem(`cookbook_my_recipes_${username.toLowerCase().trim()}`);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed.length;
+      }
+    } catch (e) {
+      console.error("Failed to parse recipes count for " + username, e);
+    }
+    return 0;
+  }
+
+  function showAdminMsg(msg, type) {
+    if (type === "success") {
+      if (elements.adminPanelErrorMsg) elements.adminPanelErrorMsg.classList.add("hidden");
+      if (elements.adminPanelSuccessMsg) {
+        elements.adminPanelSuccessMsg.innerText = msg;
+        elements.adminPanelSuccessMsg.classList.remove("hidden");
+      }
+    } else {
+      if (elements.adminPanelSuccessMsg) elements.adminPanelSuccessMsg.classList.add("hidden");
+      if (elements.adminPanelErrorMsg) {
+        elements.adminPanelErrorMsg.innerText = msg;
+        elements.adminPanelErrorMsg.classList.remove("hidden");
+      }
+    }
+    
+    setTimeout(() => {
+      if (elements.adminPanelSuccessMsg) elements.adminPanelSuccessMsg.classList.add("hidden");
+      if (elements.adminPanelErrorMsg) {
+        elements.adminPanelErrorMsg.classList.add("hidden");
+      }
+    }, 4000);
+  }
+
+  function renderAdminUsers() {
+    if (!elements.adminUsersList) return;
+    const users = store.loadUsers();
+    
+    elements.adminUsersList.innerHTML = users.map(user => {
+      const isSystemAdmin = user.username.toLowerCase() === "admin";
+      const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FFD166'/><circle cx='50' cy='58' r='30' fill='%23FFE3A8'/><path d='M25 40 L25 15 L45 30 Z' fill='%23FFE3A8'/><path d='M75 40 L75 15 L55 30 Z' fill='%23FFE3A8'/><circle cx='40' cy='48' r='4' fill='%233D2723'/><circle cx='60' cy='48' r='4' fill='%233D2723'/><path d='M45 60 Q50 63 55 60' stroke='%233D2723' stroke-width='3' fill='none'/><path d='M50 55 L50 58' stroke='%233D2723' stroke-width='2'/><path d='M35 15 Q50 5 65 15 L50 25 Z' fill='%23FFFFFF' stroke='%233D2723' stroke-width='2'/></svg>";
+      const avatarSrc = user.profilePic || defaultAvatar;
+      const recipeCount = getSavedRecipeCount(user.username);
+      const bioText = user.bio ? escapeHtml(user.bio) : "<span style='color: var(--text-muted); font-style: italic;'>No bio written yet.</span>";
+      
+      return `
+        <tr style="border-bottom: 1px solid var(--border-color); background: var(--bg-secondary);">
+          <td style="padding: 12px 16px; display: flex; align-items: center; gap: 10px;">
+            <img src="${escapeHtml(avatarSrc)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);" alt="${escapeHtml(user.username)}'s Avatar">
+            <span style="font-weight: 600;">${escapeHtml(user.username)}</span>
+          </td>
+          <td style="padding: 12px 16px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${bioText}
+          </td>
+          <td style="padding: 12px 16px; text-align: center; font-weight: 600;">
+            ${recipeCount}
+          </td>
+          <td style="padding: 12px 16px; text-align: right; white-space: nowrap;">
+            <button class="btn-card-secondary btn-admin-reset" data-username="${escapeHtml(user.username)}" style="padding: 6px 10px; font-size: 0.75rem; border-radius: var(--radius-md); margin-right: 6px; cursor: pointer;">
+              Reset PW
+            </button>
+            \${isSystemAdmin ? \`
+              <button disabled style="padding: 6px 10px; font-size: 0.75rem; border-radius: var(--radius-md); opacity: 0.4; cursor: not-allowed; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted);">
+                System
+              </button>
+            \` : \`
+              <button class="view-imported-btn btn-admin-delete" data-username="\${escapeHtml(user.username)}" style="padding: 6px 10px; font-size: 0.75rem; border-radius: var(--radius-md); background-color: var(--color-danger); border-color: var(--color-danger); color: white; cursor: pointer;">
+                Delete
+              </button>
+            \`}
+          </td>
+        </tr>
+      `;
+    }).join("");
+    
+    // Attach event listeners to reset buttons
+    elements.adminUsersList.querySelectorAll(".btn-admin-reset").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const username = btn.getAttribute("data-username");
+        const newPassword = prompt(\`Enter new password for chef "\${username}":\`);
+        if (newPassword === null) return; // User cancelled
+        if (newPassword.trim().length < 4) {
+          showAdminMsg("Password must be at least 4 characters long.", "error");
+          return;
+        }
+        
+        const res = store.resetUserPassword(username, newPassword.trim());
+        if (res.success) {
+          showAdminMsg(\`Password for chef "\${username}" reset successfully.\`, "success");
+          renderAdminUsers();
+        } else {
+          showAdminMsg(res.error, "error");
+        }
+      });
+    });
+
+    // Attach event listeners to delete buttons
+    elements.adminUsersList.querySelectorAll(".btn-admin-delete").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const username = btn.getAttribute("data-username");
+        if (confirm(\`Are you sure you want to delete chef "\${username}"? All their saved recipes and settings will be permanently lost!\`)) {
+          const res = store.deleteUser(username);
+          if (res.success) {
+            showAdminMsg(\`Chef "\${username}" deleted successfully.\`, "success");
+            renderAdminUsers();
+          } else {
+            showAdminMsg(res.error, "error");
+          }
+        }
+      });
+    });
+  }
+
+  if (elements.btnDropdownAdmin) {
+    elements.btnDropdownAdmin.addEventListener("click", () => {
+      if (elements.profileDropdown) {
+        elements.profileDropdown.classList.add("hidden");
+      }
+      if (elements.adminPanelSuccessMsg) elements.adminPanelSuccessMsg.classList.add("hidden");
+      if (elements.adminPanelErrorMsg) elements.adminPanelErrorMsg.classList.add("hidden");
+      renderAdminUsers();
+      openModal(elements.adminPanelModal);
+    });
+  }
+
+  if (elements.adminPanelCloseBtn) {
+    elements.adminPanelCloseBtn.addEventListener("click", () => {
+      closeModal(elements.adminPanelModal);
+    });
+  }
+
 
   // Bind new interactive premium features (Audio, Timers, Story Exporter, Cook Mode, Slider)
   bindPremiumFeatures();
@@ -1697,14 +1919,14 @@ function openMealPlannerModal(recipeId = null, preSelectedDay = null, preSelecte
     if (elements.plannerCustomInputGroup) elements.plannerCustomInputGroup.classList.add("hidden");
     if (elements.plannerCustomName) elements.plannerCustomName.value = "";
 
-    // Lock selected Day and Slot
+    // Enable selected Day and Slot
     if (elements.plannerDaySelect) {
       if (preSelectedDay) elements.plannerDaySelect.value = preSelectedDay;
-      elements.plannerDaySelect.disabled = true;
+      elements.plannerDaySelect.disabled = false;
     }
     if (elements.plannerSlotSelect) {
       if (preSelectedSlot) elements.plannerSlotSelect.value = preSelectedSlot;
-      elements.plannerSlotSelect.disabled = true;
+      elements.plannerSlotSelect.disabled = false;
     }
   }
 
@@ -1928,12 +2150,6 @@ function resetImporterState() {
 
 function renderUI(state) {
   // -1. Render User Authentication state
-  const userCount = store.loadUsers().length;
-  const userCountEl = document.getElementById("dropdown-user-count");
-  if (userCountEl) {
-    userCountEl.innerHTML = `Registered Chefs: <strong style="color: var(--accent-primary);">${userCount}</strong>`;
-  }
-
   if (state.currentUser) {
     const profile = store.getCurrentUserProfile();
     if (elements.headerUserAvatar) {
@@ -1952,6 +2168,14 @@ function renderUI(state) {
     if (elements.btnDropdownLogout) elements.btnDropdownLogout.classList.remove("hidden");
     if (elements.btnDropdownEditProfile) elements.btnDropdownEditProfile.classList.remove("hidden");
     if (elements.btnDropdownSettings) elements.btnDropdownSettings.classList.remove("hidden");
+    
+    if (elements.btnDropdownAdmin) {
+      if (state.currentUser.username.toLowerCase() === "admin") {
+        elements.btnDropdownAdmin.classList.remove("hidden");
+      } else {
+        elements.btnDropdownAdmin.classList.add("hidden");
+      }
+    }
   } else {
     if (elements.headerUserAvatar) elements.headerUserAvatar.innerText = "G";
     if (elements.headerUserName) elements.headerUserName.innerText = "Login";
@@ -1960,6 +2184,7 @@ function renderUI(state) {
     if (elements.btnDropdownLogout) elements.btnDropdownLogout.classList.add("hidden");
     if (elements.btnDropdownEditProfile) elements.btnDropdownEditProfile.classList.add("hidden");
     if (elements.btnDropdownSettings) elements.btnDropdownSettings.classList.add("hidden");
+    if (elements.btnDropdownAdmin) elements.btnDropdownAdmin.classList.add("hidden");
   }
 
   // 0. Toggle active tab visual styling and sections

@@ -61,6 +61,19 @@ class Store {
     this.state.shoppingList = this.loadShoppingList();
     this.state.mealPlan = this.loadMealPlan();
 
+    // Seed admin account if it does not exist
+    const users = this.loadUsers();
+    if (!users.some(u => u.username.toLowerCase() === "admin")) {
+      users.push({
+        username: "admin",
+        password: "admin",
+        bio: "Platform Administrator",
+        profilePic: "",
+        settings: { weekStartDay: "Sunday" }
+      });
+      this.saveUsers(users);
+    }
+
     this.updateCombinedRecipes();
   }
 
@@ -458,6 +471,51 @@ class Store {
     
     users[idx].password = newPassword;
     this.saveUsers(users);
+    return { success: true };
+  }
+
+  resetUserPassword(username, newPassword) {
+    if (!username || !newPassword || newPassword.length < 4) {
+      return { success: false, error: "Password must be at least 4 characters long" };
+    }
+    const users = this.loadUsers();
+    const idx = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase().trim());
+    if (idx === -1) {
+      return { success: false, error: "Chef account not found." };
+    }
+    users[idx].password = newPassword;
+    this.saveUsers(users);
+    return { success: true };
+  }
+
+  deleteUser(username) {
+    if (username.toLowerCase().trim() === "admin") {
+      return { success: false, error: "Cannot delete the administrator account." };
+    }
+    const users = this.loadUsers();
+    const idx = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase().trim());
+    if (idx === -1) {
+      return { success: false, error: "User not found." };
+    }
+    
+    // Remove from registry
+    users.splice(idx, 1);
+    this.saveUsers(users);
+    
+    // Clear user data in localStorage
+    const suffix = `_${username.toLowerCase().trim()}`;
+    const keysToRemove = [
+      "cookbook_my_recipes",
+      "cookbook_deleted_defaults",
+      "cookbook_selected_ingredients",
+      "cookbook_shopping_list",
+      "cookbook_meal_plan"
+    ];
+    keysToRemove.forEach(key => {
+      localStorage.removeItem(`${key}${suffix}`);
+    });
+    
+    this.notify();
     return { success: true };
   }
 
