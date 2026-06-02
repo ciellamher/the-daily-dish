@@ -129,7 +129,8 @@ export function copyToClipboard(text) {
  * Escape HTML utility to prevent injection when rendering text
  */
 export function escapeHtml(str) {
-  if (typeof str !== "string") return str;
+  if (str === null || str === undefined) return "";
+  if (typeof str !== "string") return String(str);
   return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -205,6 +206,7 @@ export function getGourmetFoodImage(query, category) {
  * Clean SVG icons dictionary to avoid using raw emojis.
  */
 export const ICONS = {
+  cooking: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><path d="M3 10h18v9a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-9z"></path><path d="M6 6h12v4H6V6z"></path><path d="M12 2v4"></path><path d="M1 12h2"></path><path d="M21 12h2"></path></svg>`,
   search: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
   cart: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`,
   clock: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,

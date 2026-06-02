@@ -4,7 +4,7 @@ import { store } from "./store.js";
 import { renderRecipeCard } from "./components/recipe-card.js";
 import { renderRecipeDetail, handleDetailModalClick, INGREDIENT_SUBSTITUTIONS, renderRecipeEditForm } from "./components/recipe-detail.js";
 import { renderShoppingList, exportShoppingList } from "./components/shopping-list.js";
-import { simulateRecipeImport } from "./components/importer.js";
+import { simulateRecipeImport, parseSchemaIngredients } from "./components/importer.js";
 import { generateRecipeOnSpot } from "./components/generator.js";
 import { escapeHtml, ICONS, startAmbientAudio, stopAmbientAudio } from "./utils.js";
 
@@ -166,7 +166,69 @@ const elements = {
   plannerSlotSelect: document.getElementById("planner-slot-select"),
   plannerRecipeSelect: document.getElementById("planner-recipe-select"),
   plannerCustomInputGroup: document.getElementById("planner-custom-input-group"),
-  plannerCustomName: document.getElementById("planner-custom-name")
+  plannerCustomName: document.getElementById("planner-custom-name"),
+  btnPlannerToggleWeek: document.getElementById("btn-planner-toggle-week"),
+  btnPlannerToggleMonth: document.getElementById("btn-planner-toggle-month"),
+  btnPlannerPrev: document.getElementById("btn-planner-prev"),
+  btnPlannerNext: document.getElementById("btn-planner-next"),
+  plannerRangeLabel: document.getElementById("planner-range-label"),
+  mealPlannerMonthView: document.getElementById("meal-planner-month-view"),
+  monthGridHeader: document.getElementById("month-grid-header"),
+  monthGridBody: document.getElementById("month-grid-body"),
+
+  // Edit Profile
+  btnDropdownEditProfile: document.getElementById("btn-dropdown-edit-profile"),
+  editProfileModal: document.getElementById("edit-profile-modal"),
+  editProfileCloseBtn: document.getElementById("edit-profile-close-btn"),
+  editProfileForm: document.getElementById("edit-profile-form"),
+  editProfileUsernameInput: document.getElementById("edit-profile-username-input"),
+  editProfileBioInput: document.getElementById("edit-profile-bio-input"),
+  editProfilePicInput: document.getElementById("edit-profile-pic-input"),
+  editProfileCurrentPassword: document.getElementById("edit-profile-current-password"),
+  editProfileErrorMsg: document.getElementById("edit-profile-error-msg"),
+  editProfileSuccessMsg: document.getElementById("edit-profile-success-msg"),
+
+  // Settings
+  btnDropdownSettings: document.getElementById("btn-dropdown-settings"),
+  settingsModal: document.getElementById("settings-modal"),
+  settingsCloseBtn: document.getElementById("settings-close-btn"),
+  settingsForm: document.getElementById("settings-form"),
+  settingsWeekStartSelect: document.getElementById("settings-week-start"),
+  settingsCurrentPasswordInput: document.getElementById("settings-current-password"),
+  settingsNewPasswordInput: document.getElementById("settings-new-password"),
+  settingsConfirmPasswordInput: document.getElementById("settings-confirm-password"),
+  settingsErrorMsg: document.getElementById("settings-error-msg"),
+  settingsSuccessMsg: document.getElementById("settings-success-msg"),
+
+  // Write Custom Recipe
+  btnTabWrite: document.getElementById("btn-tab-write"),
+  fabBtnCustom: document.getElementById("fab-btn-custom"),
+  customRecipeModal: document.getElementById("custom-recipe-modal"),
+  customRecipeCloseBtn: document.getElementById("custom-recipe-close-btn"),
+  customRecipeForm: document.getElementById("custom-recipe-form"),
+  customTitle: document.getElementById("custom-title"),
+  customDesc: document.getElementById("custom-desc"),
+  customPrep: document.getElementById("custom-prep"),
+  customCook: document.getElementById("custom-cook"),
+  customServings: document.getElementById("custom-servings"),
+  customDifficulty: document.getElementById("custom-difficulty"),
+  customCategory: document.getElementById("custom-category"),
+  customImage: document.getElementById("custom-image"),
+  customIngredients: document.getElementById("custom-ingredients"),
+  customInstructions: document.getElementById("custom-instructions"),
+
+  // Image Upload / Photo Scanner
+  searchUploadBtn: document.getElementById("search-upload-btn"),
+  imageUploadModal: document.getElementById("image-upload-modal"),
+  imageUploadCloseBtn: document.getElementById("image-upload-close-btn"),
+  imageUploadDropzone: document.getElementById("image-upload-dropzone"),
+  imageUploadInput: document.getElementById("image-upload-input"),
+  imageAnalysisArea: document.getElementById("image-analysis-area"),
+  imageAnalysisPreview: document.getElementById("image-analysis-preview"),
+  imageScanLaser: document.getElementById("image-scan-laser"),
+  imageUploadStatusCard: document.getElementById("image-upload-status-card"),
+  imageUploadStatusText: document.getElementById("image-upload-status-text"),
+  btnStartAnalysis: document.getElementById("btn-start-analysis")
 };
 
 // Global Staple Ingredients for Fridge Picker Quick-Add
@@ -366,6 +428,17 @@ function bindGlobalEvents() {
       closeModal(elements.mealPlannerAddModal);
       elements.plannerAddForm.reset();
     }
+    if (e.target === elements.editProfileModal) {
+      closeModal(elements.editProfileModal);
+      elements.editProfileForm.reset();
+    }
+    if (e.target === elements.customRecipeModal) {
+      closeModal(elements.customRecipeModal);
+      elements.customRecipeForm.reset();
+    }
+    if (e.target === elements.imageUploadModal) {
+      closeModal(elements.imageUploadModal);
+    }
   });
 
   window.addEventListener("keydown", (e) => {
@@ -375,7 +448,12 @@ function bindGlobalEvents() {
       closeModal(elements.generatorModal);
       closeModal(elements.loginModal);
       closeModal(elements.mealPlannerAddModal);
+      closeModal(elements.editProfileModal);
+      closeModal(elements.customRecipeModal);
+      closeModal(elements.imageUploadModal);
       if (elements.plannerAddForm) elements.plannerAddForm.reset();
+      if (elements.editProfileForm) elements.editProfileForm.reset();
+      if (elements.customRecipeForm) elements.customRecipeForm.reset();
       elements.shoppingListDrawer.classList.remove("active");
       store.setSelectedRecipe(null);
       closeSuggestions();
@@ -745,6 +823,330 @@ function bindGlobalEvents() {
     });
   }
 
+  /* --- 15.5. Edit Profile Events --- */
+  if (elements.btnDropdownEditProfile) {
+    elements.btnDropdownEditProfile.addEventListener("click", () => {
+      elements.profileDropdown.classList.add("hidden");
+      
+      if (elements.editProfileErrorMsg) {
+        elements.editProfileErrorMsg.classList.add("hidden");
+        elements.editProfileErrorMsg.innerText = "";
+      }
+      if (elements.editProfileSuccessMsg) {
+        elements.editProfileSuccessMsg.classList.add("hidden");
+        elements.editProfileSuccessMsg.innerText = "";
+      }
+      
+      const profile = store.getCurrentUserProfile();
+      if (profile) {
+        if (elements.editProfileUsernameInput) elements.editProfileUsernameInput.value = profile.username;
+        if (elements.editProfileBioInput) elements.editProfileBioInput.value = profile.bio || "";
+        if (elements.editProfilePicInput) elements.editProfilePicInput.value = profile.profilePic || "";
+        
+        document.querySelectorAll(".preset-avatar-btn").forEach(b => {
+          if (b.getAttribute("data-url") === profile.profilePic) {
+            b.classList.add("selected");
+          } else {
+            b.classList.remove("selected");
+          }
+        });
+      }
+      
+      openModal(elements.editProfileModal);
+    });
+  }
+
+  // Preset avatar click handler
+  document.querySelectorAll(".preset-avatar-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".preset-avatar-btn").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      const url = btn.getAttribute("data-url");
+      if (elements.editProfilePicInput) {
+        elements.editProfilePicInput.value = url;
+      }
+    });
+  });
+
+  if (elements.editProfileCloseBtn) {
+    elements.editProfileCloseBtn.addEventListener("click", () => {
+      closeModal(elements.editProfileModal);
+      elements.editProfileForm.reset();
+    });
+  }
+
+  if (elements.editProfileForm) {
+    elements.editProfileForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const newUsername = elements.editProfileUsernameInput.value.trim();
+      const bio = elements.editProfileBioInput.value.trim();
+      const profilePic = elements.editProfilePicInput.value.trim();
+      const currentPassword = elements.editProfileCurrentPassword.value;
+
+      if (!newUsername || !currentPassword) return;
+
+      const result = store.updateProfileDetails(newUsername, bio, profilePic, currentPassword);
+
+      if (result.success) {
+        if (elements.editProfileErrorMsg) elements.editProfileErrorMsg.classList.add("hidden");
+        if (elements.editProfileSuccessMsg) {
+          elements.editProfileSuccessMsg.innerText = "Chef profile updated successfully!";
+          elements.editProfileSuccessMsg.classList.remove("hidden");
+        }
+        setTimeout(() => {
+          closeModal(elements.editProfileModal);
+          elements.editProfileForm.reset();
+        }, 1500);
+      } else {
+        if (elements.editProfileSuccessMsg) elements.editProfileSuccessMsg.classList.add("hidden");
+        if (elements.editProfileErrorMsg) {
+          elements.editProfileErrorMsg.innerText = result.error;
+          elements.editProfileErrorMsg.classList.remove("hidden");
+        }
+      }
+    });
+  }
+
+  /* --- 15.6. Write Custom Recipe Events --- */
+  if (elements.btnTabWrite) {
+    elements.btnTabWrite.addEventListener("click", () => {
+      openModal(elements.customRecipeModal);
+    });
+  }
+
+  if (elements.fabBtnCustom) {
+    elements.fabBtnCustom.addEventListener("click", () => {
+      elements.fabContainer.classList.remove("active");
+      openModal(elements.customRecipeModal);
+    });
+  }
+
+  if (elements.customRecipeCloseBtn) {
+    elements.customRecipeCloseBtn.addEventListener("click", () => {
+      closeModal(elements.customRecipeModal);
+      elements.customRecipeForm.reset();
+    });
+  }
+
+  if (elements.customRecipeForm) {
+    elements.customRecipeForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      
+      const title = elements.customTitle.value.trim();
+      const description = elements.customDesc.value.trim();
+      const prepTime = parseInt(elements.customPrep.value, 10) || 15;
+      const cookTime = parseInt(elements.customCook.value, 10) || 20;
+      const servings = parseInt(elements.customServings.value, 10) || 4;
+      const difficulty = elements.customDifficulty.value;
+      const category = elements.customCategory.value;
+      const image = elements.customImage.value.trim();
+      
+      const rawIngredients = elements.customIngredients.value.split("\n").map(l => l.trim()).filter(Boolean);
+      const parsedIngredients = parseSchemaIngredients(rawIngredients);
+      
+      const rawInstructions = elements.customInstructions.value.split("\n").map(l => l.trim()).filter(Boolean);
+      const parsedInstructions = rawInstructions.map((text, idx) => ({
+        step: idx + 1,
+        text: text,
+        tip: ""
+      }));
+
+      const newRecipe = {
+        id: `custom-${Date.now()}`,
+        title,
+        description,
+        prepTime,
+        cookTime,
+        servings,
+        difficulty,
+        category,
+        tags: ["Custom", category].filter(Boolean),
+        image: image || null,
+        equipment: [],
+        ingredients: parsedIngredients,
+        instructions: parsedInstructions
+      };
+
+      const success = store.addRecipe(newRecipe);
+      if (success) {
+        closeModal(elements.customRecipeModal);
+        elements.customRecipeForm.reset();
+        store.setActiveTab("my-recipes");
+        
+        // Force scroll to grid
+        const targetGrid = document.getElementById("recipes-list-anchor");
+        if (targetGrid) {
+          targetGrid.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    });
+  }
+
+  /* --- 15.7. Image Upload / Photo Recognition Events --- */
+  let recognizedDishName = "";
+
+  if (elements.searchUploadBtn) {
+    elements.searchUploadBtn.addEventListener("click", () => {
+      // Reset modal state
+      elements.imageAnalysisArea.classList.add("hidden");
+      elements.imageAnalysisPreview.src = "";
+      elements.imageScanLaser.classList.add("hidden");
+      elements.imageUploadStatusCard.classList.add("hidden");
+      elements.imageUploadStatusText.innerText = "";
+      elements.btnStartAnalysis.classList.add("hidden");
+      recognizedDishName = "";
+      
+      openModal(elements.imageUploadModal);
+    });
+  }
+
+  if (elements.imageUploadCloseBtn) {
+    elements.imageUploadCloseBtn.addEventListener("click", () => {
+      closeModal(elements.imageUploadModal);
+    });
+  }
+
+  // Dropzone click triggers input click
+  if (elements.imageUploadDropzone) {
+    elements.imageUploadDropzone.addEventListener("click", () => {
+      elements.imageUploadInput.click();
+    });
+    
+    // Drag & drop handlers
+    elements.imageUploadDropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      elements.imageUploadDropzone.style.borderColor = "var(--accent-primary)";
+    });
+    
+    elements.imageUploadDropzone.addEventListener("dragleave", () => {
+      elements.imageUploadDropzone.style.borderColor = "var(--border-color)";
+    });
+    
+    elements.imageUploadDropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      elements.imageUploadDropzone.style.borderColor = "var(--border-color)";
+      
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleSelectedFile(e.dataTransfer.files[0]);
+      }
+    });
+  }
+
+  if (elements.imageUploadInput) {
+    elements.imageUploadInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleSelectedFile(e.target.files[0]);
+      }
+    });
+  }
+
+  // Handle selected file details
+  function handleSelectedFile(file) {
+    // Show image preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      elements.imageAnalysisPreview.src = event.target.result;
+      elements.imageAnalysisArea.classList.remove("hidden");
+      elements.btnStartAnalysis.classList.remove("hidden");
+    };
+    reader.readAsDataURL(file);
+
+    // Guess recipe from file name
+    const fileName = file.name.toLowerCase();
+    if (fileName.includes("cupcake")) {
+      recognizedDishName = "Cupcake";
+    } else if (fileName.includes("burger") || fileName.includes("hamburger")) {
+      recognizedDishName = "Cheeseburger";
+    } else if (fileName.includes("pizza")) {
+      recognizedDishName = "Pepperoni Pizza";
+    } else if (fileName.includes("salmon")) {
+      recognizedDishName = "Salmon";
+    } else if (fileName.includes("curry")) {
+      recognizedDishName = "Spicy Seafood Curry";
+    } else if (fileName.includes("steak")) {
+      recognizedDishName = "Steak";
+    } else if (fileName.includes("salad")) {
+      recognizedDishName = "Salad";
+    } else if (fileName.includes("soup")) {
+      recognizedDishName = "Soup";
+    } else if (fileName.includes("spaghetti") || fileName.includes("pasta")) {
+      recognizedDishName = "Spaghetti";
+    } else {
+      // fallback guess by removing extension
+      const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ").trim();
+      recognizedDishName = baseName || "Warm Chocolate Lava Cake";
+    }
+  }
+
+  // Handle sample photo selections
+  document.querySelectorAll(".btn-sample-photo").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const dish = btn.getAttribute("data-dish");
+      let title = "Cupcake";
+      if (dish === "cheeseburger") title = "Cheeseburger";
+      else if (dish === "pizza") title = "Pepperoni Pizza";
+      else if (dish === "salmon") title = "Salmon";
+
+      recognizedDishName = title;
+
+      // Show mock picture preview (using database or visual illustration)
+      elements.imageAnalysisPreview.src = store.state.recipes.find(r => r.title.toLowerCase().includes(dish))?.image || "assets/images/gourmet_plate.png";
+      elements.imageAnalysisArea.classList.remove("hidden");
+      elements.btnStartAnalysis.classList.remove("hidden");
+    });
+  });
+
+  // Handle scanner trigger
+  if (elements.btnStartAnalysis) {
+    elements.btnStartAnalysis.addEventListener("click", () => {
+      elements.btnStartAnalysis.classList.add("hidden");
+      elements.imageScanLaser.classList.remove("hidden");
+      elements.imageUploadStatusCard.classList.remove("hidden");
+      
+      const statuses = [
+        { text: "Scanning photo textures and colors...", time: 0 },
+        { text: "Comparing visual signature with culinary database...", time: 1500 },
+        { text: `Dish Identified: "${recognizedDishName}"! Searching recipe index...`, time: 3000 }
+      ];
+
+      statuses.forEach(stage => {
+        setTimeout(() => {
+          elements.imageUploadStatusText.innerText = stage.text;
+        }, stage.time);
+      });
+
+      // Complete simulation and trigger recipe opening/generation
+      setTimeout(() => {
+        elements.imageScanLaser.classList.add("hidden");
+        
+        // Search first! Check if we have this recipe in default or myRecipes
+        const queryClean = recognizedDishName.toLowerCase().trim();
+        const existingRecipe = store.state.recipes.find(r => 
+          r.title.toLowerCase().includes(queryClean) || 
+          queryClean.includes(r.title.toLowerCase())
+        );
+
+        if (existingRecipe) {
+          elements.imageUploadStatusText.innerText = "Match found! Opening recipe details...";
+          setTimeout(() => {
+            closeModal(elements.imageUploadModal);
+            // Open recipe details modal
+            store.setSelectedRecipe(existingRecipe.id);
+            openModal(elements.recipeDetailModal);
+          }, 1200);
+        } else {
+          elements.imageUploadStatusText.innerText = "Recipe not indexed. Building customized recipe with AI...";
+          setTimeout(() => {
+            closeModal(elements.imageUploadModal);
+            // Open AI generator modal with the dish name
+            triggerAiRecipeGeneration(recognizedDishName);
+          }, 1200);
+        }
+      }, 4200);
+    });
+  }
+
   /* --- 16. Weekly Meal Planner Events --- */
   if (elements.btnShowPlanner) {
     elements.btnShowPlanner.addEventListener("click", (e) => {
@@ -853,10 +1255,160 @@ function bindGlobalEvents() {
     });
   }
 
+  if (elements.mealPlannerMonthView) {
+    elements.mealPlannerMonthView.addEventListener("click", (e) => {
+      // Handle delete click
+      const removeBtn = e.target.closest(".month-meal-delete");
+      if (removeBtn) {
+        const day = removeBtn.getAttribute("data-day");
+        const slot = removeBtn.getAttribute("data-slot");
+        if (day && slot) {
+          store.removeMealFromPlan(day, slot);
+        }
+        return;
+      }
+      
+      // Handle click to add meal
+      const addBtn = e.target.closest(".btn-add-slot-meal");
+      if (addBtn) {
+        const day = addBtn.getAttribute("data-day");
+        const slot = addBtn.getAttribute("data-slot");
+        if (day && slot) {
+          openMealPlannerModal(null, day, slot);
+        }
+        return;
+      }
+
+      // Handle clicking meal item to show recipe detail modal
+      const item = e.target.closest(".month-meal-item");
+      if (item && !e.target.closest("button")) {
+        const id = item.getAttribute("data-id");
+        if (id && !id.startsWith("custom_")) {
+          store.setSelectedRecipe(id);
+          openModal(elements.recipeDetailModal);
+        }
+      }
+    });
+  }
+
+  if (elements.btnPlannerToggleWeek) {
+    elements.btnPlannerToggleWeek.addEventListener("click", () => {
+      store.setPlannerViewMode("week");
+    });
+  }
+  if (elements.btnPlannerToggleMonth) {
+    elements.btnPlannerToggleMonth.addEventListener("click", () => {
+      store.setPlannerViewMode("month");
+    });
+  }
+
+  if (elements.btnPlannerPrev) {
+    elements.btnPlannerPrev.addEventListener("click", () => {
+      if (store.state.plannerViewMode === "week") {
+        store.setWeeklyOffset(store.state.weeklyOffset - 1);
+      } else {
+        store.setMonthlyOffset(store.state.monthlyOffset - 1);
+      }
+    });
+  }
+  if (elements.btnPlannerNext) {
+    elements.btnPlannerNext.addEventListener("click", () => {
+      if (store.state.plannerViewMode === "week") {
+        store.setWeeklyOffset(store.state.weeklyOffset + 1);
+      } else {
+        store.setMonthlyOffset(store.state.monthlyOffset + 1);
+      }
+    });
+  }
+
+  if (elements.btnDropdownSettings) {
+    elements.btnDropdownSettings.addEventListener("click", () => {
+      elements.profileDropdown.classList.add("hidden");
+      
+      const weekStart = store.getCurrentUserWeekStartDay();
+      if (elements.settingsWeekStartSelect) {
+        elements.settingsWeekStartSelect.value = weekStart;
+      }
+      
+      if (elements.settingsErrorMsg) elements.settingsErrorMsg.classList.add("hidden");
+      if (elements.settingsSuccessMsg) elements.settingsSuccessMsg.classList.add("hidden");
+      if (elements.settingsForm) {
+        elements.settingsForm.reset();
+        elements.settingsWeekStartSelect.value = weekStart;
+      }
+
+      openModal(elements.settingsModal);
+    });
+  }
+  
+  if (elements.settingsCloseBtn) {
+    elements.settingsCloseBtn.addEventListener("click", () => {
+      closeModal(elements.settingsModal);
+      if (elements.settingsForm) elements.settingsForm.reset();
+    });
+  }
+
+  if (elements.settingsForm) {
+    elements.settingsForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      
+      const weekStart = elements.settingsWeekStartSelect.value;
+      const currentPassword = elements.settingsCurrentPasswordInput.value;
+      const newPassword = elements.settingsNewPasswordInput.value;
+      const confirmPassword = elements.settingsConfirmPasswordInput.value;
+
+      store.updateWeekStartDay(weekStart);
+
+      if (currentPassword || newPassword || confirmPassword) {
+        if (!currentPassword || !newPassword || !confirmPassword) {
+          showSettingsError("To change password, please fill in all password fields.");
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          showSettingsError("New passwords do not match.");
+          return;
+        }
+        
+        const result = store.changePassword(currentPassword, newPassword);
+        if (!result.success) {
+          showSettingsError(result.error);
+          return;
+        }
+      }
+
+      if (elements.settingsErrorMsg) elements.settingsErrorMsg.classList.add("hidden");
+      if (elements.settingsSuccessMsg) {
+        elements.settingsSuccessMsg.innerText = "Settings updated successfully!";
+        elements.settingsSuccessMsg.classList.remove("hidden");
+      }
+      setTimeout(() => {
+        closeModal(elements.settingsModal);
+        if (elements.settingsForm) elements.settingsForm.reset();
+      }, 1500);
+    });
+  }
+
+  function showSettingsError(msg) {
+    if (elements.settingsSuccessMsg) elements.settingsSuccessMsg.classList.add("hidden");
+    if (elements.settingsErrorMsg) {
+      elements.settingsErrorMsg.innerText = msg;
+      elements.settingsErrorMsg.classList.remove("hidden");
+    }
+  }
+
   if (elements.btnClearPlanner) {
     elements.btnClearPlanner.addEventListener("click", () => {
-      if (confirm("Are you sure you want to clear your weekly meal plan?")) {
-        store.clearMealPlan();
+      if (confirm("Are you sure you want to clear this view's meal plan?")) {
+        const weekStartDay = store.getCurrentUserWeekStartDay();
+        let dateStrings = [];
+        if (store.state.plannerViewMode === "week") {
+          const offset = store.state.weeklyOffset || 0;
+          dateStrings = getWeekDates(weekStartDay, offset).map(d => d.dateStr);
+        } else {
+          const offset = store.state.monthlyOffset || 0;
+          dateStrings = getMonthDates(weekStartDay, offset).dates.map(d => d.dateStr);
+        }
+        store.clearWeeklyMealPlan(dateStrings);
       }
     });
   }
@@ -864,16 +1416,25 @@ function bindGlobalEvents() {
   if (elements.btnPlannerToGrocery) {
     elements.btnPlannerToGrocery.addEventListener("click", () => {
       let addedAny = false;
-      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      const weekStartDay = store.getCurrentUserWeekStartDay();
       const slots = ["breakfast", "lunch", "dinner"];
+      let dateItems = [];
       
-      days.forEach(day => {
-        const plannedMeals = store.state.mealPlan[day];
+      if (store.state.plannerViewMode === "week") {
+        const offset = store.state.weeklyOffset || 0;
+        dateItems = getWeekDates(weekStartDay, offset).map(d => ({ dateStr: d.dateStr, label: `${d.dayName} ${d.label}` }));
+      } else {
+        const offset = store.state.monthlyOffset || 0;
+        dateItems = getMonthDates(weekStartDay, offset).dates.map(d => ({ dateStr: d.dateStr, label: d.dateStr }));
+      }
+
+      dateItems.forEach(item => {
+        const plannedMeals = store.state.mealPlan[item.dateStr];
         if (plannedMeals) {
           slots.forEach(slot => {
             const meal = plannedMeals[slot];
             if (meal && meal.ingredients) {
-              store.addMultipleIngredientsToShoppingList(meal.ingredients, `${meal.title} (${day} ${slot})`);
+              store.addMultipleIngredientsToShoppingList(meal.ingredients, `${meal.title} (${item.label} ${slot})`);
               addedAny = true;
             }
           });
@@ -957,39 +1518,135 @@ function setAuthModalMode(mode) {
   }
 }
 
-function getWeekDates() {
+function getWeekDates(weekStartDay = "Sunday", offset = 0) {
   const today = new Date();
-  const currentDay = today.getDay(); // 0 is Sunday, 1 is Monday...
   
-  // Calculate difference to Monday. Monday is day 1, Sunday is day 7 or 0.
-  // If it's Sunday (0), distance to Monday is -6. Otherwise, 1 - currentDay.
-  const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+  // Apply week offset
+  const baseDate = new Date(today);
+  baseDate.setDate(today.getDate() + offset * 7);
   
-  const monday = new Date(today);
-  monday.setDate(today.getDate() + distanceToMonday);
+  const currentDay = baseDate.getDay(); // 0 is Sunday, 1 is Monday...
   
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-  const weekDates = {};
+  const startDate = new Date(baseDate);
+  if (weekStartDay === "Sunday") {
+    // Distance to Sunday. Sunday is 0.
+    const distanceToSunday = -currentDay;
+    startDate.setDate(baseDate.getDate() + distanceToSunday);
+  } else {
+    // Distance to Monday. Monday is 1, Sunday is 0.
+    const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+    startDate.setDate(baseDate.getDate() + distanceToMonday);
+  }
   
+  // Array of days based on start preference
+  const days = weekStartDay === "Sunday"
+    ? ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    : ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    
+  const weekDates = [];
   days.forEach((dayName, index) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + index);
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + index);
     
     const month = d.toLocaleDateString("en-US", { month: "short" });
     const dateNum = d.getDate();
     const isToday = d.toDateString() === today.toDateString();
     
-    weekDates[dayName] = {
+    const y = d.getFullYear();
+    const mStr = String(d.getMonth() + 1).padStart(2, '0');
+    const dStr = String(d.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${mStr}-${dStr}`;
+    
+    weekDates.push({
+      dayName: dayName,
+      dateStr: dateStr,
       label: `${month} ${dateNum}`,
-      isToday: isToday
-    };
+      isToday: isToday,
+      dateObj: d
+    });
   });
   
   return weekDates;
 }
 
+function getMonthDates(weekStartDay = "Sunday", offset = 0) {
+  const today = new Date();
+  
+  // Calculate base month
+  const baseDate = new Date(today.getFullYear(), today.getMonth() + offset, 1);
+  const year = baseDate.getFullYear();
+  const month = baseDate.getMonth();
+  
+  const monthName = baseDate.toLocaleDateString("en-US", { month: "long" });
+  
+  // First day of the month
+  const firstDay = new Date(year, month, 1);
+  const firstDayIndex = firstDay.getDay(); // 0 is Sunday, 1 is Monday...
+  
+  // Find how many days we need to backfill from the previous month
+  let backfillDays = 0;
+  if (weekStartDay === "Sunday") {
+    backfillDays = firstDayIndex;
+  } else {
+    // Week starts on Monday
+    backfillDays = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+  }
+  
+  // Start date of our calendar grid
+  const gridStartDate = new Date(firstDay);
+  gridStartDate.setDate(firstDay.getDate() - backfillDays);
+  
+  // Render a standard 6-week grid (42 days)
+  const gridDates = [];
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(gridStartDate);
+    d.setDate(gridStartDate.getDate() + i);
+    
+    const isCurrentMonth = d.getMonth() === month;
+    const isToday = d.toDateString() === today.toDateString();
+    
+    const y = d.getFullYear();
+    const mStr = String(d.getMonth() + 1).padStart(2, '0');
+    const dStr = String(d.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${mStr}-${dStr}`;
+    
+    gridDates.push({
+      dateStr: dateStr,
+      dateNum: d.getDate(),
+      isCurrentMonth: isCurrentMonth,
+      isToday: isToday,
+      dateObj: d
+    });
+  }
+  
+  return {
+    year: year,
+    monthName: monthName,
+    dates: gridDates
+  };
+}
+
 function openMealPlannerModal(recipeId = null, preSelectedDay = null, preSelectedSlot = null) {
   const allRecipes = store.state.recipes;
+  const weekStartDay = store.getCurrentUserWeekStartDay();
+  const offset = store.state.weeklyOffset || 0;
+  const weekDates = getWeekDates(weekStartDay, offset);
+
+  if (elements.plannerDaySelect) {
+    let optionsHtml = weekDates.map(dayInfo => `
+      <option value="${dayInfo.dateStr}">${dayInfo.dayName} (${dayInfo.label})</option>
+    `).join("");
+    
+    if (preSelectedDay && !weekDates.some(d => d.dateStr === preSelectedDay)) {
+      const dObj = new Date(preSelectedDay + "T00:00:00");
+      if (!isNaN(dObj.getTime())) {
+        const dayName = dObj.toLocaleDateString("en-US", { weekday: "long" });
+        const label = dObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        optionsHtml += `<option value="${preSelectedDay}">${dayName} (${label})</option>`;
+      }
+    }
+    elements.plannerDaySelect.innerHTML = optionsHtml;
+  }
 
   if (recipeId) {
     // Adding from Recipe Detail modal
@@ -1271,18 +1928,38 @@ function resetImporterState() {
 
 function renderUI(state) {
   // -1. Render User Authentication state
+  const userCount = store.loadUsers().length;
+  const userCountEl = document.getElementById("dropdown-user-count");
+  if (userCountEl) {
+    userCountEl.innerHTML = `Registered Chefs: <strong style="color: var(--accent-primary);">${userCount}</strong>`;
+  }
+
   if (state.currentUser) {
-    if (elements.headerUserAvatar) elements.headerUserAvatar.innerText = state.currentUser.username[0].toUpperCase();
+    const profile = store.getCurrentUserProfile();
+    if (elements.headerUserAvatar) {
+      if (profile && profile.profilePic) {
+        elements.headerUserAvatar.innerHTML = `<img src="${escapeHtml(profile.profilePic)}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+      } else {
+        elements.headerUserAvatar.innerText = state.currentUser.username[0].toUpperCase();
+      }
+    }
     if (elements.headerUserName) elements.headerUserName.innerText = state.currentUser.username;
-    if (elements.dropdownUsername) elements.dropdownUsername.innerText = state.currentUser.username;
+    if (elements.dropdownUsername) {
+      const bioText = profile && profile.bio ? `<p class="dropdown-bio" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; font-style: italic; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(profile.bio)}</p>` : "";
+      elements.dropdownUsername.innerHTML = `${escapeHtml(state.currentUser.username)}${bioText}`;
+    }
     if (elements.btnDropdownLogin) elements.btnDropdownLogin.classList.add("hidden");
     if (elements.btnDropdownLogout) elements.btnDropdownLogout.classList.remove("hidden");
+    if (elements.btnDropdownEditProfile) elements.btnDropdownEditProfile.classList.remove("hidden");
+    if (elements.btnDropdownSettings) elements.btnDropdownSettings.classList.remove("hidden");
   } else {
     if (elements.headerUserAvatar) elements.headerUserAvatar.innerText = "G";
     if (elements.headerUserName) elements.headerUserName.innerText = "Login";
     if (elements.dropdownUsername) elements.dropdownUsername.innerText = "Guest Chef";
     if (elements.btnDropdownLogin) elements.btnDropdownLogin.classList.remove("hidden");
     if (elements.btnDropdownLogout) elements.btnDropdownLogout.classList.add("hidden");
+    if (elements.btnDropdownEditProfile) elements.btnDropdownEditProfile.classList.add("hidden");
+    if (elements.btnDropdownSettings) elements.btnDropdownSettings.classList.add("hidden");
   }
 
   // 0. Toggle active tab visual styling and sections
@@ -1451,58 +2128,153 @@ function renderUI(state) {
   // 3.5. Render Meal Planner Calendar
   if (state.activeTab === "meal-planner") {
     const calendarEl = document.getElementById("meal-planner-calendar");
-    if (calendarEl) {
-      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-      const slots = ["breakfast", "lunch", "dinner"];
-      const weekDates = getWeekDates();
-      
-      calendarEl.innerHTML = days.map(day => {
-        const plannedMeals = state.mealPlan[day] || { breakfast: null, lunch: null, dinner: null };
-        const dayInfo = weekDates[day] || { label: "", isToday: false };
-        
-        const slotsHtml = slots.map(slot => {
-          const meal = plannedMeals[slot];
-          if (meal) {
-            const metaText = meal.isCustom 
-              ? `<span class="meal-recipe-meta" style="color: var(--accent-primary); font-weight: 700;">Custom Meal</span>`
-              : `<span class="meal-recipe-meta">${meal.prepTime + meal.cookTime} mins | ${meal.difficulty}</span>`;
-              
-            return `
-              <div class="planner-meal-slot">
-                <span class="meal-slot-label">${slot}</span>
-                <div class="meal-slot-card filled" data-id="${meal.id}" data-day="${day}" data-slot="${slot}">
-                  <button class="btn-remove-meal" data-day="${day}" data-slot="${slot}" title="Remove from plan">&times;</button>
-                  <h5 class="meal-recipe-title">${escapeHtml(meal.title)}</h5>
-                  ${metaText}
+    const monthViewEl = document.getElementById("meal-planner-month-view");
+    const rangeLabelEl = document.getElementById("planner-range-label");
+    const toggleWeekBtn = document.getElementById("btn-planner-toggle-week");
+    const toggleMonthBtn = document.getElementById("btn-planner-toggle-month");
+
+    const weekStartDay = store.getCurrentUserWeekStartDay();
+    const slots = ["breakfast", "lunch", "dinner"];
+
+    if (state.plannerViewMode === "week") {
+      if (calendarEl) calendarEl.classList.remove("hidden");
+      if (monthViewEl) monthViewEl.classList.add("hidden");
+      if (toggleWeekBtn) {
+        toggleWeekBtn.classList.add("active");
+        toggleWeekBtn.style.background = "var(--accent-primary)";
+        toggleWeekBtn.style.color = "white";
+      }
+      if (toggleMonthBtn) {
+        toggleMonthBtn.classList.remove("active");
+        toggleMonthBtn.style.background = "transparent";
+        toggleMonthBtn.style.color = "var(--text-secondary)";
+      }
+
+      const offset = state.weeklyOffset || 0;
+      const weekDates = getWeekDates(weekStartDay, offset);
+
+      if (rangeLabelEl && weekDates.length > 0) {
+        const firstDate = weekDates[0];
+        const lastDate = weekDates[weekDates.length - 1];
+        rangeLabelEl.innerText = `${firstDate.label} – ${lastDate.label}, ${firstDate.dateObj.getFullYear()}`;
+      }
+
+      if (calendarEl) {
+        calendarEl.innerHTML = weekDates.map(dayInfo => {
+          const dateStr = dayInfo.dateStr;
+          const plannedMeals = state.mealPlan[dateStr] || { breakfast: null, lunch: null, dinner: null };
+
+          const slotsHtml = slots.map(slot => {
+            const meal = plannedMeals[slot];
+            if (meal) {
+              const metaText = meal.isCustom 
+                ? `<span class="meal-recipe-meta" style="color: var(--accent-primary); font-weight: 700;">Custom Meal</span>`
+                : `<span class="meal-recipe-meta">${meal.prepTime + meal.cookTime} mins | ${meal.difficulty}</span>`;
+                
+              return `
+                <div class="planner-meal-slot">
+                  <span class="meal-slot-label">${slot}</span>
+                  <div class="meal-slot-card filled" data-id="${meal.id}" data-day="${dateStr}" data-slot="${slot}">
+                    <button class="btn-remove-meal" data-day="${dateStr}" data-slot="${slot}" title="Remove from plan">&times;</button>
+                    <h5 class="meal-recipe-title">${escapeHtml(meal.title)}</h5>
+                    ${metaText}
+                  </div>
                 </div>
-              </div>
-            `;
-          } else {
-            return `
-              <div class="planner-meal-slot">
-                <span class="meal-slot-label">${slot}</span>
-                <button class="meal-slot-card empty btn-add-slot-meal" data-day="${day}" data-slot="${slot}" title="Add meal to ${day} ${slot}">
-                  <span class="meal-slot-empty">+ Plan ${slot}</span>
-                </button>
-              </div>
-            `;
-          }
+              `;
+            } else {
+              return `
+                <div class="planner-meal-slot">
+                  <span class="meal-slot-label">${slot}</span>
+                  <button class="meal-slot-card empty btn-add-slot-meal" data-day="${dateStr}" data-slot="${slot}" title="Add meal to ${dayInfo.dayName} ${slot}">
+                    <span class="meal-slot-empty">+ Plan ${slot}</span>
+                  </button>
+                </div>
+              `;
+            }
+          }).join("");
+
+          const todayClass = dayInfo.isToday ? "today-column" : "";
+          const todayBadge = dayInfo.isToday ? `<span class="today-badge">Today</span>` : "";
+
+          return `
+            <div class="planner-day-column ${todayClass}">
+              <h4 class="day-name-heading">
+                ${dayInfo.dayName}
+                <span class="day-date-label">${dayInfo.label}</span>
+                ${todayBadge}
+              </h4>
+              ${slotsHtml}
+            </div>
+          `;
         }).join("");
+      }
+    } else {
+      // MONTH VIEW
+      if (calendarEl) calendarEl.classList.add("hidden");
+      if (monthViewEl) monthViewEl.classList.remove("hidden");
+      if (toggleWeekBtn) {
+        toggleWeekBtn.classList.remove("active");
+        toggleWeekBtn.style.background = "transparent";
+        toggleWeekBtn.style.color = "var(--text-secondary)";
+      }
+      if (toggleMonthBtn) {
+        toggleMonthBtn.classList.add("active");
+        toggleMonthBtn.style.background = "var(--accent-primary)";
+        toggleMonthBtn.style.color = "white";
+      }
 
-        const todayClass = dayInfo.isToday ? "today-column" : "";
-        const todayBadge = dayInfo.isToday ? `<span class="today-badge">Today</span>` : "";
+      const offset = state.monthlyOffset || 0;
+      const monthData = getMonthDates(weekStartDay, offset);
 
-        return `
-          <div class="planner-day-column ${todayClass}">
-            <h4 class="day-name-heading">
-              ${day}
-              <span class="day-date-label">${dayInfo.label}</span>
-              ${todayBadge}
-            </h4>
-            ${slotsHtml}
-          </div>
-        `;
-      }).join("");
+      if (rangeLabelEl) {
+        rangeLabelEl.innerText = `${monthData.monthName} ${monthData.year}`;
+      }
+
+      const headerEl = document.getElementById("month-grid-header");
+      const bodyEl = document.getElementById("month-grid-body");
+
+      if (headerEl) {
+        const days = weekStartDay === "Sunday"
+          ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+          : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        headerEl.innerHTML = days.map(d => `<div>${d}</div>`).join("");
+      }
+
+      if (bodyEl) {
+        bodyEl.innerHTML = monthData.dates.map(dateInfo => {
+          const dateStr = dateInfo.dateStr;
+          const plannedMeals = state.mealPlan[dateStr] || { breakfast: null, lunch: null, dinner: null };
+          
+          let mealsHtml = "";
+          slots.forEach(slot => {
+            const meal = plannedMeals[slot];
+            if (meal) {
+              mealsHtml += `
+                <div class="month-meal-item ${slot}" title="${slot.toUpperCase()}: ${escapeHtml(meal.title)}" data-id="${meal.id}" data-day="${dateStr}" data-slot="${slot}">
+                  <span class="month-meal-text"><strong>${slot[0].toUpperCase()}:</strong> ${escapeHtml(meal.title)}</span>
+                  <button class="month-meal-delete" data-day="${dateStr}" data-slot="${slot}" title="Remove from plan">&times;</button>
+                </div>
+              `;
+            }
+          });
+
+          const cellClass = [
+            "month-grid-cell",
+            dateInfo.isCurrentMonth ? "" : "other-month",
+            dateInfo.isToday ? "today-cell" : ""
+          ].filter(Boolean).join(" ");
+
+          return `
+            <div class="${cellClass}">
+              <span class="month-date-number">${dateInfo.dateNum}</span>
+              <div class="month-meal-list">
+                ${mealsHtml}
+              </div>
+              <button class="btn-month-add-meal btn-add-slot-meal" data-day="${dateStr}" data-slot="breakfast">+ Plan Meal</button>
+            </div>
+          `;
+        }).join("");
+      }
     }
   }
   

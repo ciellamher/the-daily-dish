@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Daily Dish | AI Generated Cookbook & Meal Planner</title>
   <!-- SEO Meta Tags -->
-  <meta name="description" content="Organize your favorite recipes, match ingredients in your fridge, auto-generate weekly meal plans, customize servings, and create grocery lists with The Daily Dish.">
-  
+  <meta name="description"
+    content="Organize your favorite recipes, match ingredients in your fridge, auto-generate weekly meal plans, customize servings, and create grocery lists with The Daily Dish.">
+
   <!-- Premium Fonts: Playfair Display (Serif for titles) & Outfit (Modern Sans for UI) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap"
+    rel="stylesheet">
+
   <!-- CSS Stylesheets -->
   <link rel="stylesheet" href="css/main.css?v=1.2">
   <link rel="stylesheet" href="css/components/header.css?v=1.2">
@@ -23,6 +27,7 @@
   <link rel="stylesheet" href="css/components/meal-planner.css?v=1.2">
   <link rel="icon" type="image/png" href="assets/images/daily_dish.png">
 </head>
+
 <body>
 
   <!-- Ambient background elements -->
@@ -43,13 +48,24 @@
         <button id="btn-show-home" class="nav-btn active">Home</button>
         <button id="btn-show-my-recipes" class="nav-btn" data-target="my-recipes-view">
           <span class="icon-svg-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+              </path>
+            </svg>
           </span>
           <span>My Recipes</span>
         </button>
         <button id="btn-show-planner" class="nav-btn" data-target="planner-view">
           <span class="icon-svg-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
           </span>
           <span>Meal Planner</span>
         </button>
@@ -65,11 +81,25 @@
             <div class="dropdown-user-info">
               <p class="dropdown-greet">Hello,</p>
               <h4 class="dropdown-username" id="dropdown-username">Guest Chef</h4>
+              <p id="dropdown-user-count" class="dropdown-user-count"
+                style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-color);">
+              </p>
             </div>
             <hr>
             <div class="theme-mood-selector">
               <span class="mood-icon-svg">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
               </span>
               <select id="theme-mood-select" class="mood-select" aria-label="Select Mood Theme">
                 <option value="cozy-cream">Cozy Cream</option>
@@ -79,6 +109,8 @@
               </select>
             </div>
             <hr>
+            <button id="btn-dropdown-edit-profile" class="dropdown-item hidden">Edit Profile</button>
+            <button id="btn-dropdown-settings" class="dropdown-item hidden">Settings</button>
             <button id="btn-dropdown-login" class="dropdown-item">Log In</button>
             <button id="btn-dropdown-logout" class="dropdown-item hidden">Log Out</button>
           </div>
@@ -86,7 +118,12 @@
 
         <button id="btn-toggle-cart" class="cart-toggle-icon-btn" aria-label="Open Shopping List" title="Shopping List">
           <span class="cart-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
           </span>
           <span id="cart-badge-count" class="cart-badge">0</span>
         </button>
@@ -96,13 +133,14 @@
 
   <!-- Main Workspace Area -->
   <main class="main-content">
-    
+
     <!-- Hero Banner (FOODEAT Mockup Style) -->
     <section class="hero-banner">
       <div class="hero-banner-container">
         <div class="hero-text-content">
           <h2 class="hero-banner-title">Delicious Food Is Waiting For You</h2>
-          <p class="hero-banner-subtitle">AI-generated cookbook & smart meal planner. Match ingredients you have, scale servings dynamically, and create clean grocery checklists.</p>
+          <p class="hero-banner-subtitle">AI-generated cookbook & smart meal planner. Match ingredients you have, scale
+            servings dynamically, and create clean grocery checklists.</p>
           <div class="hero-actions">
             <button id="btn-hero-menu" class="hero-btn-primary">Food Menu</button>
             <button id="btn-hero-generate" class="hero-btn-secondary">Generate AI</button>
@@ -115,31 +153,60 @@
         </div>
       </div>
     </section>
-    
+
     <!-- Search / Fridge Section -->
     <section class="hero-section" id="search-section-anchor">
       <div class="hero-container">
-        
+
         <!-- Search Bar Area with Direct Generator Button -->
         <div class="search-bar-wrapper">
           <div class="search-bar-flex">
             <div class="input-icon-wrapper">
               <span class="search-input-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
               </span>
-              <input type="text" id="recipe-search-input" placeholder="Search for dishes (e.g. Pasta, Cheeseburger, Salad)..." autocomplete="off">
+              <input type="text" id="recipe-search-input"
+                placeholder="Search for dishes (e.g. Pasta, Cheeseburger, Salad)..." autocomplete="off">
               <button id="search-clear-btn" class="search-clear-btn hidden">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
             <button id="search-generate-btn" class="search-generate-btn" title="Generate AI recipe instantly!">
               <span class="btn-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="2" x2="22" y2="6"></line><path d="m2 22 10-10"></path><path d="M12 2v2"></path><path d="M20 12h2"></path><path d="m19 19-2.5-2.5"></path><path d="m7.5 7.5L5 5"></path><path d="m18 8 3-3"></path><path d="m19 16-1.5-1.5"></path><path d="m8 18-3 3"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+                  <line x1="18" y1="2" x2="22" y2="6"></line>
+                  <path d="m2 22 10-10"></path>
+                  <path d="M12 2v2"></path>
+                  <path d="M20 12h2"></path>
+                  <path d="m19 19-2.5-2.5"></path>
+                  <path d="m7.5 7.5L5 5"></path>
+                  <path d="m18 8 3-3"></path>
+                  <path d="m19 16-1.5-1.5"></path>
+                  <path d="m8 18-3 3"></path>
+                </svg>
               </span>
               <span>Generate AI</span>
             </button>
+            <button id="search-upload-btn" class="search-generate-btn" title="Identify recipe from photo!"
+              style="border-radius: var(--radius-full); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); border: 1.5px solid var(--border-color); color: var(--accent-primary); cursor: pointer; transition: all var(--transition-normal); padding: 0; flex-shrink: 0;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"
+                style="width: 20px; height: 20px;">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+            </button>
           </div>
-          
+
           <!-- Ingredient Autocomplete Dropdown -->
           <div id="ingredient-suggestions" class="suggestions-dropdown hidden"></div>
         </div>
@@ -159,7 +226,7 @@
             </div>
             <button id="btn-clear-fridge" class="clear-fridge-btn">Clear All</button>
           </div>
-          
+
           <!-- Active Selected Ingredients -->
           <div id="active-ingredients-container" class="chips-container active-ingredients">
             <!-- Active ingredient chips will be placed here -->
@@ -188,33 +255,83 @@
             <!-- Populated dynamically by JS -->
           </div>
         </div>
-        <button id="btn-tab-import" class="btn-card-secondary" style="padding: 8px 18px; font-size: 0.85rem; border-radius: var(--radius-full); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width: 14px; height: 14px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-          <span>Import Recipe</span>
-        </button>
+        <div class="boards-right-group" style="display: flex; gap: 10px; align-items: center;">
+          <button id="btn-tab-import" class="btn-card-secondary"
+            style="padding: 8px 18px; font-size: 0.85rem; border-radius: var(--radius-full); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"
+              style="width: 14px; height: 14px;">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            <span>Import Recipe</span>
+          </button>
+          <button id="btn-tab-write" class="btn-card-primary"
+            style="padding: 8px 18px; font-size: 0.85rem; border-radius: var(--radius-full); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; background: var(--accent-primary); border-color: var(--accent-primary); color: white;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width: 14px; height: 14px;">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+            </svg>
+            <span>Write Recipe</span>
+          </button>
+        </div>
       </div>
 
       <!-- Recipes Grid -->
       <div id="recipes-grid" class="recipes-grid">
         <!-- Recipe cards injected by JS -->
       </div>
+    </section>
+
     <!-- Meal Planner Section -->
     <section class="recipes-results-section hidden" id="meal-planner-view">
-      <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; margin-bottom: 24px;">
-        <div class="heading-with-count">
-          <h3 class="results-heading" style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0;">Weekly Meal Planner</h3>
+      <div class="section-header"
+        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <h3 class="results-heading" style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0;">Meal Planner</h3>
+          <div class="planner-view-toggle" style="display: flex; background: var(--bg-tertiary); padding: 4px; border-radius: var(--radius-full); border: 1px solid var(--border-color);">
+            <button id="btn-planner-toggle-week" class="nav-btn active" style="padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.8rem; border: none; background: var(--accent-primary); color: white; cursor: pointer; font-weight: 700; transition: all 0.2s;">Week</button>
+            <button id="btn-planner-toggle-month" class="nav-btn" style="padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.8rem; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; font-weight: 700; transition: all 0.2s;">Month</button>
+          </div>
         </div>
+        
+        <div class="planner-navigation" style="display: flex; align-items: center; gap: 12px; background: var(--bg-secondary); padding: 4px 12px; border-radius: var(--radius-full); border: 1px solid var(--border-color);">
+          <button id="btn-planner-prev" class="btn-card-secondary" style="border: none; background: transparent; cursor: pointer; padding: 4px 8px; font-weight: 700; font-size: 1rem; color: var(--accent-primary);" title="Previous">&larr;</button>
+          <span id="planner-range-label" style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary); min-width: 140px; text-align: center;">This Week</span>
+          <button id="btn-planner-next" class="btn-card-secondary" style="border: none; background: transparent; cursor: pointer; padding: 4px 8px; font-weight: 700; font-size: 1rem; color: var(--accent-primary);" title="Next">&rarr;</button>
+        </div>
+
         <div class="planner-actions" style="display: flex; gap: 10px;">
-          <button id="btn-clear-planner" class="btn-card-secondary danger" style="padding: 8px 16px; font-size: 0.85rem; border-radius: var(--radius-full); cursor: pointer; border: 1px solid var(--border-color); font-weight: 600;">Clear Weekly Plan</button>
-          <button id="btn-planner-to-grocery" class="btn-card-primary" style="padding: 8px 18px; font-size: 0.85rem; border-radius: var(--radius-full); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width: 14px; height: 14px;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-            <span>Add Plan to Grocery List</span>
+          <button id="btn-clear-planner" class="btn-card-secondary danger"
+            style="padding: 8px 16px; font-size: 0.85rem; border-radius: var(--radius-full); cursor: pointer; border: 1px solid var(--border-color); font-weight: 600;">Clear Plan</button>
+          <button id="btn-planner-to-grocery" class="btn-card-primary"
+            style="padding: 8px 18px; font-size: 0.85rem; border-radius: var(--radius-full); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"
+              style="width: 14px; height: 14px;">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span>Add to Grocery List</span>
           </button>
         </div>
       </div>
 
+      <!-- Weekly View Calendar Container -->
       <div class="meal-planner-calendar" id="meal-planner-calendar">
         <!-- Will be populated dynamically with 7 days and breakfast/lunch/dinner slots -->
+      </div>
+
+      <!-- Monthly View Calendar Container -->
+      <div class="meal-planner-month-view hidden" id="meal-planner-month-view" style="margin-top: 24px;">
+        <div class="month-grid-header" id="month-grid-header" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 700; color: var(--text-secondary); margin-bottom: 12px; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
+          <!-- Populated by JS based on start day setting (Sun, Mon...) -->
+        </div>
+        <div class="month-grid-body" id="month-grid-body" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px;">
+          <!-- 42 day cells populated by JS -->
+        </div>
       </div>
     </section>
 
@@ -231,9 +348,13 @@
   <div id="recipe-detail-modal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-container">
       <button class="modal-close-btn" id="modal-close-btn" aria-label="Close Modal">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
       </button>
-      
+
       <!-- Recipe details content inserted dynamically by JS -->
       <div id="modal-recipe-content" class="modal-recipe-content">
         <!-- Dynamic content goes here -->
@@ -245,16 +366,25 @@
   <div id="importer-modal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-container importer-container">
       <button class="modal-close-btn" id="importer-close-btn" aria-label="Close Modal">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
       </button>
-      
+
       <div class="importer-content">
         <div class="importer-header">
           <span class="importer-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
           </span>
           <h2>Import Recipe from URL</h2>
-          <p>Paste any web recipe link and The Daily Dish will automatically extract ingredients, instructions, and measurements instantly.</p>
+          <p>Paste any web recipe link and The Daily Dish will automatically extract ingredients, instructions, and
+            measurements instantly.</p>
         </div>
 
         <div class="importer-form-group">
@@ -270,8 +400,8 @@
             <div id="importer-progress-fill" class="progress-bar-fill"></div>
           </div>
           <div class="loader-steps">
-            <span class="loader-step" id="step-connect">Connecting</span> &rarr; 
-            <span class="loader-step" id="step-extract">Extracting</span> &rarr; 
+            <span class="loader-step" id="step-connect">Connecting</span> &rarr;
+            <span class="loader-step" id="step-extract">Extracting</span> &rarr;
             <span class="loader-step" id="step-structure">Structuring</span>
           </div>
         </div>
@@ -281,7 +411,10 @@
           <div class="success-checkmark">
             <div class="checkmark-circle">
               <span class="checkmark-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </span>
             </div>
           </div>
@@ -297,13 +430,28 @@
   <div id="generator-modal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-container importer-container">
       <button class="modal-close-btn" id="generator-close-btn" aria-label="Close Modal">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
       </button>
-      
+
       <div class="importer-content">
         <div class="importer-header">
           <span class="importer-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="2" x2="22" y2="6"></line><path d="m2 22 10-10"></path><path d="M12 2v2"></path><path d="M20 12h2"></path><path d="m19 19-2.5-2.5"></path><path d="m7.5 7.5L5 5"></path><path d="m18 8 3-3"></path><path d="m19 16-1.5-1.5"></path><path d="m8 18-3 3"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+              <line x1="18" y1="2" x2="22" y2="6"></line>
+              <path d="m2 22 10-10"></path>
+              <path d="M12 2v2"></path>
+              <path d="M20 12h2"></path>
+              <path d="m19 19-2.5-2.5"></path>
+              <path d="m7.5 7.5L5 5"></path>
+              <path d="m18 8 3-3"></path>
+              <path d="m19 16-1.5-1.5"></path>
+              <path d="m8 18-3 3"></path>
+            </svg>
           </span>
           <h2>AI Recipe Generator</h2>
           <p>The Daily Dish is formulating a customized, easy-to-follow recipe for you on the spot!</p>
@@ -317,8 +465,8 @@
             <div id="generator-progress-fill" class="progress-bar-fill"></div>
           </div>
           <div class="loader-steps">
-            <span class="loader-step" id="gen-step-connect">Formulating</span> &rarr; 
-            <span class="loader-step" id="gen-step-extract">Measuring</span> &rarr; 
+            <span class="loader-step" id="gen-step-connect">Formulating</span> &rarr;
+            <span class="loader-step" id="gen-step-extract">Measuring</span> &rarr;
             <span class="loader-step" id="gen-step-structure">Writing Steps</span>
           </div>
         </div>
@@ -328,7 +476,10 @@
           <div class="success-checkmark">
             <div class="checkmark-circle">
               <span class="checkmark-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </span>
             </div>
           </div>
@@ -339,20 +490,39 @@
 
         <!-- Failure State -->
         <div id="generator-failure-state" class="importer-success hidden" style="text-align: center;">
-          <div style="width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--accent-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width: 28px; height: 28px; color: var(--accent-primary);"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <div
+            style="width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--accent-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"
+              style="width: 28px; height: 28px; color: var(--accent-primary);">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </div>
           <h3 style="font-family: var(--font-serif); margin-bottom: 8px;">Recipe Not Found</h3>
-          <p id="generator-failure-message" style="margin-bottom: 12px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.4;">We couldn't find a verified recipe for this dish online.</p>
-          
+          <p id="generator-failure-message"
+            style="margin-bottom: 12px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.4;">We couldn't
+            find a verified recipe for this dish online.</p>
+
           <div style="margin-bottom: 16px;">
-            <a id="btn-search-external-link" href="#" target="_blank" class="btn-card-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 0.85rem; border-radius: var(--radius-full); margin-bottom: 12px;">
+            <a id="btn-search-external-link" href="#" target="_blank" class="btn-card-secondary"
+              style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 0.85rem; border-radius: var(--radius-full); margin-bottom: 12px;">
               <span>Search on Google</span>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width:12px;height:12px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"
+                style="width:12px;height:12px;">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
             </a>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Found a link? Paste it below to import it into your Cookbook!</p>
-            <input type="url" id="generator-failure-import-url" placeholder="Paste recipe URL here..." style="width: 100%; max-width: 320px; margin: 0 auto 10px auto; display: block; border-radius: var(--radius-full); padding: 8px 16px; border: 1px solid var(--border-color); font-family: var(--font-sans); font-size: 0.85rem; background: var(--bg-secondary); color: var(--text-primary); outline: none; text-align: center;">
-            <button id="btn-generator-failure-import" class="view-imported-btn" style="width: auto; padding: 10px 24px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">Import & Save</button>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Found a link? Paste it below to
+              import it into your Cookbook!</p>
+            <input type="url" id="generator-failure-import-url" placeholder="Paste recipe URL here..."
+              style="width: 100%; max-width: 320px; margin: 0 auto 10px auto; display: block; border-radius: var(--radius-full); padding: 8px 16px; border: 1px solid var(--border-color); font-family: var(--font-sans); font-size: 0.85rem; background: var(--bg-secondary); color: var(--text-primary); outline: none; text-align: center;">
+            <button id="btn-generator-failure-import" class="view-imported-btn"
+              style="width: auto; padding: 10px 24px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">Import &
+              Save</button>
           </div>
         </div>
       </div>
@@ -367,12 +537,21 @@
       <div class="drawer-header">
         <div class="drawer-title">
           <span class="drawer-icon-svg">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
           </span>
           <h2>My Grocery List</h2>
         </div>
         <button id="btn-close-cart" class="drawer-close-btn" aria-label="Close Shopping List">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
 
@@ -380,12 +559,19 @@
       <div class="drawer-body">
         <div id="shopping-list-empty" class="shopping-empty-state">
           <span class="empty-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width: 48px; height: 48px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="9"></line><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="15" y2="17"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"
+              style="width: 48px; height: 48px;">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="9" x2="15" y2="9"></line>
+              <line x1="9" y1="13" x2="15" y2="13"></line>
+              <line x1="9" y1="17" x2="15" y2="17"></line>
+            </svg>
           </span>
           <p>Your shopping list is empty.</p>
           <p class="empty-subtext">Add ingredients directly from recipe pages or type custom items below.</p>
         </div>
-        
+
         <div id="shopping-list-items-container" class="shopping-items-list hidden">
           <!-- Items grouped by category will be injected here by JS -->
         </div>
@@ -396,7 +582,12 @@
         <form id="add-custom-item-form" class="custom-item-form">
           <input type="text" id="custom-item-name" placeholder="Add custom item (e.g. Milk, Bread)..." required>
           <button type="submit" class="add-custom-btn" aria-label="Add Item">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width: 14px; height: 14px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"
+              style="width: 14px; height: 14px;">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
           </button>
         </form>
       </div>
@@ -405,19 +596,33 @@
       <div class="drawer-footer">
         <button id="btn-export-list" class="footer-action-btn primary-action">
           <span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+              <polyline points="16 6 12 2 8 6"></polyline>
+              <line x1="12" y1="2" x2="12" y2="15"></line>
+            </svg>
           </span>
           <span>Export List</span>
         </button>
         <button id="btn-clear-checked" class="footer-action-btn">
           <span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><path d="m3 21 18-18"></path><path d="m11 17 4-4"></path><path d="M19 13.5c-1-1-3-.5-4 1.5s-2.5 3-1.5 4c1 1 3 .5 4-1.5s2.5-3 1.5-4z"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+              <path d="m3 21 18-18"></path>
+              <path d="m11 17 4-4"></path>
+              <path d="M19 13.5c-1-1-3-.5-4 1.5s-2.5 3-1.5 4c1 1 3 .5 4-1.5s2.5-3 1.5-4z"></path>
+            </svg>
           </span>
           <span>Clear Checked</span>
         </button>
         <button id="btn-clear-all" class="footer-action-btn danger-action">
           <span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
           </span>
           <span>Clear All</span>
         </button>
@@ -431,19 +636,48 @@
       <button class="fab-option-btn" id="fab-btn-generate" title="Generate AI Recipe">
         <span class="fab-option-label">Generate with AI</span>
         <span class="fab-option-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="2" x2="22" y2="6"></line><path d="m2 22 10-10"></path><path d="M12 2v2"></path><path d="M20 12h2"></path><path d="m19 19-2.5-2.5"></path><path d="m7.5 7.5L5 5"></path><path d="m18 8 3-3"></path><path d="m19 16-1.5-1.5"></path><path d="m8 18-3 3"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+            <line x1="18" y1="2" x2="22" y2="6"></line>
+            <path d="m2 22 10-10"></path>
+            <path d="M12 2v2"></path>
+            <path d="M20 12h2"></path>
+            <path d="m19 19-2.5-2.5"></path>
+            <path d="m7.5 7.5L5 5"></path>
+            <path d="m18 8 3-3"></path>
+            <path d="m19 16-1.5-1.5"></path>
+            <path d="m8 18-3 3"></path>
+          </svg>
         </span>
       </button>
       <button class="fab-option-btn" id="fab-btn-import" title="Import from URL">
         <span class="fab-option-label">Import URL</span>
         <span class="fab-option-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </span>
+      </button>
+      <button class="fab-option-btn" id="fab-btn-custom" title="Write Own Recipe">
+        <span class="fab-option-label">Write Recipe</span>
+        <span class="fab-option-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+          </svg>
         </span>
       </button>
     </div>
     <button class="fab-main-btn" id="fab-main-btn" aria-label="Add Recipe Menu">
       <span class="fab-main-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
       </span>
     </button>
   </div>
@@ -462,7 +696,11 @@
             <span class="wake-lock-text">Keep Awake</span>
           </div>
           <button id="btn-close-cook-mode" class="cook-mode-close-btn" aria-label="Exit Cook Mode">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </button>
         </div>
       </header>
@@ -477,7 +715,13 @@
           <p id="cook-mode-step-text" class="cook-mode-large-text">Step instruction goes here...</p>
           <div id="cook-mode-tip-box" class="cook-mode-tip-box hidden">
             <div class="cook-mode-tip-title">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width:16px;height:16px;color:var(--accent-primary);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"
+                style="width:16px;height:16px;color:var(--accent-primary);">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
               <span>Chef's Tip</span>
             </div>
             <p id="cook-mode-tip-text">Tip goes here</p>
@@ -486,12 +730,20 @@
       </div>
       <footer class="cook-mode-footer">
         <button id="btn-cook-prev" class="cook-nav-btn secondary-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width:18px;height:18px;margin-right:6px;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"
+            style="width:18px;height:18px;margin-right:6px;">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
           <span>Previous</span>
         </button>
         <button id="btn-cook-next" class="cook-nav-btn primary-btn">
           <span>Next Step</span>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width:18px;height:18px;margin-left:6px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"
+            style="width:18px;height:18px;margin-left:6px;">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
         </button>
       </footer>
     </div>
@@ -501,7 +753,11 @@
   <div id="floating-timer-bar" class="floating-timer-bar hidden">
     <div class="timer-bar-content">
       <span class="timer-bar-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
       </span>
       <div class="timer-text-group">
         <span id="timer-bar-label" class="timer-bar-label">Cooking Timer:</span>
@@ -509,13 +765,24 @@
       </div>
       <div class="timer-bar-actions">
         <button id="btn-timer-toggle" class="timer-action-btn" title="Pause Timer">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" id="timer-toggle-icon"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" id="timer-toggle-icon">
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
         </button>
         <button id="btn-timer-reset" class="timer-action-btn" title="Reset Timer">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+          </svg>
         </button>
         <button id="btn-timer-close" class="timer-action-btn danger" title="Dismiss Timer">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
     </div>
@@ -525,20 +792,29 @@
   <div id="story-exporter-modal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-container story-container" style="max-width: 420px; padding: 24px;">
       <button class="modal-close-btn" id="story-close-btn" aria-label="Close Modal">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
       </button>
       <div class="story-exporter-content" style="text-align: center;">
         <h3 style="font-family: var(--font-serif); margin-bottom: 8px; font-size: 1.5rem;">Share to Story</h3>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">Here is your visually optimized 9:16 story card graphic.</p>
-        
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">Here is your visually
+          optimized 9:16 story card graphic.</p>
+
         <!-- Preview Container -->
-        <div id="story-preview-wrapper" class="story-preview-wrapper" style="width: 270px; height: 480px; margin: 0 auto 20px auto; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); position: relative; border: 1px solid var(--border-color);">
-          <canvas id="story-canvas" width="1080" height="1920" style="width: 100%; height: 100%; object-fit: contain; display: block;"></canvas>
+        <div id="story-preview-wrapper" class="story-preview-wrapper"
+          style="width: 270px; height: 480px; margin: 0 auto 20px auto; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); position: relative; border: 1px solid var(--border-color);">
+          <canvas id="story-canvas" width="1080" height="1920"
+            style="width: 100%; height: 100%; object-fit: contain; display: block;"></canvas>
         </div>
 
         <div style="display: flex; gap: 10px; justify-content: center;">
-          <a id="btn-download-story" class="btn-card-primary" style="text-decoration: none; padding: 12px 24px; font-size: 0.9rem; cursor: pointer;">Download PNG</a>
-          <button id="btn-copy-story-tip" class="btn-card-secondary" style="padding: 12px 18px; font-size: 0.9rem;">Copy Card</button>
+          <a id="btn-download-story" class="btn-card-primary"
+            style="text-decoration: none; padding: 12px 24px; font-size: 0.9rem; cursor: pointer;">Download PNG</a>
+          <button id="btn-copy-story-tip" class="btn-card-secondary" style="padding: 12px 18px; font-size: 0.9rem;">Copy
+            Card</button>
         </div>
       </div>
     </div>
@@ -548,32 +824,46 @@
   <div id="meal-planner-add-modal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-container planner-add-container" style="max-width: 400px; padding: 32px;">
       <button class="modal-close-btn" id="planner-add-close-btn" aria-label="Close Modal">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
       </button>
       <div class="planner-add-content" style="text-align: center;">
         <h3 style="font-family: var(--font-serif); margin-bottom: 8px; font-size: 1.6rem;">Plan Your Meal</h3>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 24px;" id="planner-add-instructions">Select the recipe, day, and time slot to add to your plan.</p>
-        
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 24px;" id="planner-add-instructions">
+          Select the recipe, day, and time slot to add to your plan.</p>
+
         <form id="planner-add-form">
           <input type="hidden" id="planner-add-recipe-id" value="">
-          
+
           <!-- Recipe Selection Group (Visible when adding from calendar) -->
           <div id="planner-source-selector-group" style="margin-bottom: 16px; text-align: left;">
-            <label for="planner-recipe-select" style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Select Recipe</label>
-            <select id="planner-recipe-select" style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
+            <label for="planner-recipe-select"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Select
+              Recipe</label>
+            <select id="planner-recipe-select"
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
               <!-- Dynamically populated by JS -->
             </select>
           </div>
 
           <!-- Custom Meal Name (Visible when "Custom Meal" is selected in dropdown) -->
           <div id="planner-custom-input-group" style="margin-bottom: 16px; text-align: left;" class="hidden">
-            <label for="planner-custom-name" style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Custom Meal Name</label>
-            <input type="text" id="planner-custom-name" placeholder="E.g., Scrambled Eggs & Toast" style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none; color: var(--text-primary);">
+            <label for="planner-custom-name"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Custom
+              Meal Name</label>
+            <input type="text" id="planner-custom-name" placeholder="E.g., Scrambled Eggs & Toast"
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none; color: var(--text-primary);">
           </div>
 
           <div style="margin-bottom: 16px; text-align: left;">
-            <label for="planner-day-select" style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Day of the Week</label>
-            <select id="planner-day-select" style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
+            <label for="planner-day-select"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Day
+              of the Week</label>
+            <select id="planner-day-select"
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
               <option value="Monday">Monday</option>
               <option value="Tuesday">Tuesday</option>
               <option value="Wednesday">Wednesday</option>
@@ -583,17 +873,22 @@
               <option value="Sunday">Sunday</option>
             </select>
           </div>
-          
+
           <div style="margin-bottom: 24px; text-align: left;">
-            <label for="planner-slot-select" style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Meal Slot</label>
-            <select id="planner-slot-select" style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
+            <label for="planner-slot-select"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Meal
+              Slot</label>
+            <select id="planner-slot-select"
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
               <option value="breakfast">Breakfast</option>
               <option value="lunch">Lunch</option>
               <option value="dinner">Dinner</option>
             </select>
           </div>
-          
-          <button type="submit" class="view-imported-btn" style="width: 100%; font-weight: 700; padding: 12px; font-size: 0.95rem; border-radius: var(--radius-full); cursor: pointer;">Add to Weekly Plan</button>
+
+          <button type="submit" class="view-imported-btn"
+            style="width: 100%; font-weight: 700; padding: 12px; font-size: 0.95rem; border-radius: var(--radius-full); cursor: pointer;">Add
+            to Weekly Plan</button>
         </form>
       </div>
     </div>
@@ -603,28 +898,45 @@
   <div id="login-modal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-container login-container" style="max-width: 400px; padding: 32px;">
       <button class="modal-close-btn" id="login-close-btn" aria-label="Close Modal">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
       </button>
       <div class="login-content" style="text-align: center;">
-        <h3 style="font-family: var(--font-serif); margin-bottom: 8px; font-size: 1.8rem;" id="login-modal-title">Welcome Back</h3>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 24px;" id="login-modal-subtitle">Login to sync your custom recipes, shopping lists, and meal plans.</p>
-        
-        <div id="login-error-msg" class="hidden" style="color: var(--color-danger); background-color: var(--color-danger-glass); border: 1px solid rgba(201,74,74,0.2); border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.85rem; margin-bottom: 18px; text-align: left; font-weight: 600;"></div>
+        <h3 style="font-family: var(--font-serif); margin-bottom: 8px; font-size: 1.8rem;" id="login-modal-title">
+          Welcome Back</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 24px;" id="login-modal-subtitle">
+          Login to sync your custom recipes, shopping lists, and meal plans.</p>
+
+        <div id="login-error-msg" class="hidden"
+          style="color: var(--color-danger); background-color: var(--color-danger-glass); border: 1px solid rgba(201,74,74,0.2); border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.85rem; margin-bottom: 18px; text-align: left; font-weight: 600;">
+        </div>
 
         <form id="login-form">
           <div style="margin-bottom: 16px; text-align: left;">
-            <label for="login-username-input" style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Username</label>
-            <input type="text" id="login-username-input" placeholder="Enter your chef name..." required style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
+            <label for="login-username-input"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Username</label>
+            <input type="text" id="login-username-input" placeholder="Enter your chef name..." required
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
           </div>
           <div style="margin-bottom: 24px; text-align: left;">
-            <label for="login-password-input" style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;" id="login-password-label">Password</label>
-            <input type="password" id="login-password-input" placeholder="••••••••" required style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
+            <label for="login-password-input"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;"
+              id="login-password-label">Password</label>
+            <input type="password" id="login-password-input" placeholder="••••••••" required
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
           </div>
-          
-          <button type="submit" id="btn-login-submit" class="view-imported-btn" style="width: 100%; font-weight: 700; padding: 12px; font-size: 0.95rem; border-radius: var(--radius-full); cursor: pointer;">Log In</button>
+
+          <button type="submit" id="btn-login-submit" class="view-imported-btn"
+            style="width: 100%; font-weight: 700; padding: 12px; font-size: 0.95rem; border-radius: var(--radius-full); cursor: pointer;">Log
+            In</button>
         </form>
-        
-        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 20px;" id="login-toggle-prompt">Don't have a chef profile? <a href="#" id="link-toggle-register" style="font-weight:700; color: var(--accent-primary);">Sign Up</a></p>
+
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 20px;" id="login-toggle-prompt">Don't
+          have a chef profile? <a href="#" id="link-toggle-register"
+            style="font-weight:700; color: var(--accent-primary);">Sign Up</a></p>
 
         <div style="margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 8px;">
           <hr style="flex: 1; border: 0; border-top: 1px solid var(--border-color);">
@@ -633,9 +945,361 @@
         </div>
 
         <div style="margin-top: 16px; display: flex; gap: 10px; justify-content: center;">
-          <button type="button" class="btn-card-secondary mock-oauth-btn" id="btn-oauth-google" style="padding: 8px 16px; font-size: 0.8rem; border-radius: var(--radius-full); display: flex; align-items: center; gap: 6px; cursor: pointer;">Google</button>
-          <button type="button" class="btn-card-secondary mock-oauth-btn" id="btn-oauth-apple" style="padding: 8px 16px; font-size: 0.8rem; border-radius: var(--radius-full); display: flex; align-items: center; gap: 6px; cursor: pointer;">Apple</button>
+          <button type="button" class="btn-card-secondary mock-oauth-btn" id="btn-oauth-google"
+            style="padding: 8px 16px; font-size: 0.8rem; border-radius: var(--radius-full); display: flex; align-items: center; gap: 6px; cursor: pointer;">Google</button>
+          <button type="button" class="btn-card-secondary mock-oauth-btn" id="btn-oauth-apple"
+            style="padding: 8px 16px; font-size: 0.8rem; border-radius: var(--radius-full); display: flex; align-items: center; gap: 6px; cursor: pointer;">Apple</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Profile Modal -->
+  <div id="edit-profile-modal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-container login-container" style="max-width: 440px; padding: 32px;">
+      <button class="modal-close-btn" id="edit-profile-close-btn" aria-label="Close Modal">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="login-content" style="text-align: center;">
+        <h3 style="font-family: var(--font-serif); margin-bottom: 8px; font-size: 1.8rem;">Edit Chef Profile</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">Update your chef identity and biography details.</p>
+
+        <div id="edit-profile-error-msg" class="hidden"
+          style="color: var(--color-danger); background-color: var(--color-danger-glass); border: 1px solid rgba(201,74,74,0.2); border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.85rem; margin-bottom: 18px; text-align: left; font-weight: 600;">
+        </div>
+        <div id="edit-profile-success-msg" class="hidden"
+          style="color: var(--color-success); background-color: rgba(40, 167, 69, 0.1); border: 1px solid rgba(40,167,69,0.2); border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.85rem; margin-bottom: 18px; text-align: left; font-weight: 600;">
+        </div>
+
+        <form id="edit-profile-form">
+          <div style="margin-bottom: 14px; text-align: left;">
+            <label for="edit-profile-username-input"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Username</label>
+            <input type="text" id="edit-profile-username-input" placeholder="Chef username..." required
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
+          </div>
+
+          <div style="margin-bottom: 14px; text-align: left;">
+            <label for="edit-profile-bio-input"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Chef Bio</label>
+            <textarea id="edit-profile-bio-input" placeholder="Tell us about your culinary journey..." rows="3"
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none; resize: vertical;"></textarea>
+          </div>
+
+          <div style="margin-bottom: 14px; text-align: left;">
+            <label for="edit-profile-pic-input"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Profile Picture URL</label>
+            <input type="url" id="edit-profile-pic-input" placeholder="https://unsplash.com/... (optional)"
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
+          </div>
+
+          <div style="margin-bottom: 18px; text-align: left;">
+            <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Or Select a Preset Avatar</label>
+            <div class="avatar-presets-grid" style="display: flex; justify-content: space-between; gap: 8px; margin-top: 4px;">
+              <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=80&auto=format&fit=crop&q=60" 
+                class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=120&auto=format&fit=crop&q=60" 
+                style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: all 0.2s;" title="Chef Alex">
+              <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=80&auto=format&fit=crop&q=60" 
+                class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=120&auto=format&fit=crop&q=60" 
+                style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: all 0.2s;" title="Chef Sarah">
+              <img src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=80&auto=format&fit=crop&q=60" 
+                class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=120&auto=format&fit=crop&q=60" 
+                style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: all 0.2s;" title="Chef Kai">
+              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=60" 
+                class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=60" 
+                style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: all 0.2s;" title="Chef Mia">
+              <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&auto=format&fit=crop&q=60" 
+                class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&auto=format&fit=crop&q=60" 
+                style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: all 0.2s;" title="Chef Emma">
+            </div>
+          </div>
+
+          <div style="margin-bottom: 20px; text-align: left;">
+            <label for="edit-profile-current-password"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Password Verification (required)</label>
+            <input type="password" id="edit-profile-current-password" placeholder="••••••••" required
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
+          </div>
+
+          <button type="submit" class="view-imported-btn"
+            style="width: 100%; font-weight: 700; padding: 12px; font-size: 0.95rem; border-radius: var(--radius-full); cursor: pointer;">Save Profile Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-container login-container" style="max-width: 400px; padding: 32px;">
+      <button class="modal-close-btn" id="settings-close-btn" aria-label="Close Modal">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="login-content" style="text-align: center;">
+        <h3 style="font-family: var(--font-serif); margin-bottom: 8px; font-size: 1.8rem;">Chef Settings</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 24px;">Configure your kitchen preferences and change password.</p>
+
+        <div id="settings-error-msg" class="hidden"
+          style="color: var(--color-danger); background-color: var(--color-danger-glass); border: 1px solid rgba(201,74,74,0.2); border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.85rem; margin-bottom: 18px; text-align: left; font-weight: 600;">
+        </div>
+        <div id="settings-success-msg" class="hidden"
+          style="color: var(--color-success); background-color: rgba(40, 167, 69, 0.1); border: 1px solid rgba(40,167,69,0.2); border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.85rem; margin-bottom: 18px; text-align: left; font-weight: 600;">
+        </div>
+
+        <form id="settings-form">
+          <!-- Calendar Start Preference -->
+          <div style="margin-bottom: 20px; text-align: left;">
+            <label for="settings-week-start"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Week Starts On</label>
+            <select id="settings-week-start"
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
+              <option value="Sunday">Sunday</option>
+              <option value="Monday">Monday</option>
+            </select>
+          </div>
+
+          <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
+          <h4 style="font-family: var(--font-serif); text-align: left; font-size: 1.15rem; margin-bottom: 12px;">Change Password</h4>
+
+          <div style="margin-bottom: 16px; text-align: left;">
+            <label for="settings-current-password"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Current Password</label>
+            <input type="password" id="settings-current-password" placeholder="••••••••"
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
+          </div>
+          <div style="margin-bottom: 16px; text-align: left;">
+            <label for="settings-new-password"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">New Password</label>
+            <input type="password" id="settings-new-password" placeholder="••••••••"
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
+          </div>
+          <div style="margin-bottom: 24px; text-align: left;">
+            <label for="settings-confirm-password"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Confirm New Password</label>
+            <input type="password" id="settings-confirm-password" placeholder="••••••••"
+              style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: var(--font-sans); outline: none;">
+          </div>
+
+          <button type="submit" class="view-imported-btn"
+            style="width: 100%; font-weight: 700; padding: 12px; font-size: 0.95rem; border-radius: var(--radius-full); cursor: pointer;">Save Settings</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Write Custom Recipe Modal -->
+  <div id="custom-recipe-modal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-container importer-container" style="max-width: 600px; padding: 32px;">
+      <button class="modal-close-btn" id="custom-recipe-close-btn" aria-label="Close Modal">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="importer-content">
+        <div class="importer-header">
+          <span class="importer-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+            </svg>
+          </span>
+          <h2>Write Your Own Recipe</h2>
+          <p>Add a personal creation to your digital cookbook collection.</p>
+        </div>
+
+        <form id="custom-recipe-form">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div style="grid-column: span 2;">
+              <label for="custom-title"
+                style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Recipe
+                Title</label>
+              <input type="text" id="custom-title" placeholder="e.g. Grandma's Famous Lasagna" required
+                style="width: 100%; box-sizing: border-box; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary);">
+            </div>
+
+            <div style="grid-column: span 2;">
+              <label for="custom-desc"
+                style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Short
+                Description</label>
+              <input type="text" id="custom-desc"
+                placeholder="e.g. Flaky layers of cheese, pasta, and rich meat sauce baked to golden perfection."
+                style="width: 100%; box-sizing: border-box; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary);">
+            </div>
+
+            <div>
+              <label for="custom-prep"
+                style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Prep
+                Time (minutes)</label>
+              <input type="number" id="custom-prep" min="0" value="15" required
+                style="width: 100%; box-sizing: border-box; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary);">
+            </div>
+            <div>
+              <label for="custom-cook"
+                style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Cook
+                Time (minutes)</label>
+              <input type="number" id="custom-cook" min="0" value="30" required
+                style="width: 100%; box-sizing: border-box; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary);">
+            </div>
+
+            <div>
+              <label for="custom-servings"
+                style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Servings</label>
+              <input type="number" id="custom-servings" min="1" value="4" required
+                style="width: 100%; box-sizing: border-box; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary);">
+            </div>
+            <div>
+              <label for="custom-difficulty"
+                style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Difficulty</label>
+              <select id="custom-difficulty"
+                style="width: 100%; box-sizing: border-box; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); outline: none;">
+                <option value="Easy">Easy</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="custom-category"
+                style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Category</label>
+              <select id="custom-category"
+                style="width: 100%; box-sizing: border-box; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); outline: none;">
+                <option value="Mains">Mains</option>
+                <option value="Salad">Salad</option>
+                <option value="Baking">Baking</option>
+                <option value="Soup">Soup</option>
+                <option value="Breakfast">Breakfast</option>
+              </select>
+            </div>
+            <div>
+              <label for="custom-image"
+                style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Photo
+                URL (Optional)</label>
+              <input type="url" id="custom-image" placeholder="Leave blank for dynamic plate image"
+                style="width: 100%; box-sizing: border-box; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary);">
+            </div>
+
+            <div style="grid-column: span 2;">
+              <label for="custom-ingredients"
+                style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Ingredients
+                (One per line)</label>
+              <textarea id="custom-ingredients"
+                placeholder="e.g.&#10;400 g spaghetti&#10;2 large eggs&#10;1/2 cup grated parmesan cheese&#10;1 tbsp olive oil"
+                rows="5" required
+                style="width: 100%; box-sizing: border-box; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: var(--font-sans); outline: none; line-height: 1.4;"></textarea>
+            </div>
+
+            <div style="grid-column: span 2;">
+              <label for="custom-instructions"
+                style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Cooking
+                Steps (One per line)</label>
+              <textarea id="custom-instructions"
+                placeholder="e.g.&#10;Boil water and cook spaghetti until al dente.&#10;Whisk eggs and cheese together in a small bowl.&#10;Drain pasta and mix hot noodles immediately with egg sauce."
+                rows="5" required
+                style="width: 100%; box-sizing: border-box; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: var(--font-sans); outline: none; line-height: 1.4;"></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="view-imported-btn"
+            style="width: 100%; font-weight: 700; padding: 12px; font-size: 0.95rem; border-radius: var(--radius-full); cursor: pointer;">Save
+            Recipe to Cookbook</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Upload / Dish Recognition Modal -->
+  <div id="image-upload-modal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-container importer-container" style="max-width: 500px; padding: 32px;">
+      <button class="modal-close-btn" id="image-upload-close-btn" aria-label="Close Modal">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="importer-content">
+        <div class="importer-header">
+          <span class="importer-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+          </span>
+          <h2>Analyze Food Photo</h2>
+          <p>Scan a food picture to automatically search or generate its recipe!</p>
+        </div>
+
+        <div id="image-upload-dropzone"
+          style="border: 2px dashed var(--border-color); border-radius: var(--radius-lg); padding: 32px 16px; text-align: center; background: rgba(255, 126, 103, 0.02); cursor: pointer; transition: all var(--transition-normal); margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" class="svg-icon"
+            style="width: 44px; height: 44px; color: var(--accent-primary);">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">Click to upload or drag & drop
+            food photo</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Supports PNG, JPG, JPEG</span>
+          <input type="file" id="image-upload-input" accept="image/*" class="hidden">
+        </div>
+
+        <!-- Sample click simulators -->
+        <div style="margin-bottom: 24px; text-align: center;">
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px; font-weight: 700;">No photo
+            handy? Try these sample food cards:</p>
+          <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="btn-card-secondary btn-sample-photo" data-dish="cupcake"
+              style="padding: 6px 12px; font-size: 0.75rem; border-radius: var(--radius-full); cursor: pointer; font-weight: 600;">🧁
+              Cupcake</button>
+            <button type="button" class="btn-card-secondary btn-sample-photo" data-dish="cheeseburger"
+              style="padding: 6px 12px; font-size: 0.75rem; border-radius: var(--radius-full); cursor: pointer; font-weight: 600;">🍔
+              Cheeseburger</button>
+            <button type="button" class="btn-card-secondary btn-sample-photo" data-dish="pizza"
+              style="padding: 6px 12px; font-size: 0.75rem; border-radius: var(--radius-full); cursor: pointer; font-weight: 600;">🍕
+              Pepperoni Pizza</button>
+            <button type="button" class="btn-card-secondary btn-sample-photo" data-dish="salmon"
+              style="padding: 6px 12px; font-size: 0.75rem; border-radius: var(--radius-full); cursor: pointer; font-weight: 600;">🐟
+              Salmon Plate</button>
+          </div>
+        </div>
+
+        <!-- Preview and scanner area -->
+        <div id="image-analysis-area" class="hidden"
+          style="position: relative; border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 20px; background: #000; display: flex; align-items: center; justify-content: center; max-height: 240px;">
+          <img id="image-analysis-preview" src="" alt="Food Preview"
+            style="width: 100%; height: auto; max-height: 240px; object-fit: cover; opacity: 0.8;">
+          <div id="image-scan-laser" class="hidden"
+            style="position: absolute; left: 0; right: 0; height: 3px; background: var(--accent-primary); box-shadow: 0 0 12px var(--accent-primary); animation: scan-anim 2.5s infinite ease-in-out;">
+          </div>
+        </div>
+
+        <!-- Status area -->
+        <div id="image-upload-status-card" class="hidden"
+          style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; text-align: center; margin-bottom: 20px;">
+          <div class="loader-spinner"
+            style="border-top-color: var(--accent-primary); width: 24px; height: 24px; border-width: 3px; margin: 0 auto 10px auto;">
+          </div>
+          <p id="image-upload-status-text"
+            style="font-size: 0.85rem; color: var(--text-primary); margin: 0; font-weight: 600;"></p>
+        </div>
+
+        <button type="button" id="btn-start-analysis" class="view-imported-btn hidden"
+          style="width: 100%; font-weight: 700; padding: 12px; font-size: 0.95rem; border-radius: var(--radius-full); cursor: pointer;">Analyze
+          Food Photo</button>
       </div>
     </div>
   </div>
@@ -643,4 +1307,5 @@
   <!-- Main JavaScript File -->
   <script type="module" src="js/app.js?v=1.2"></script>
 </body>
+
 </html>

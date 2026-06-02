@@ -25,6 +25,13 @@ function getWeeklyDefaultRecipes(allRecipes, seed) {
   return selected;
 }
 
+function formatDateIso(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 class Store {
   constructor() {
     this.listeners = [];
@@ -41,7 +48,10 @@ class Store {
       searchMode: "name", // 'name' or 'ingredients'
       activeSteps: {}, // Map of recipeId -> active step index
       ambientAudioPlaying: false,
-      activeBoard: "All"
+      activeBoard: "All",
+      weeklyOffset: 0,
+      monthlyOffset: 0,
+      plannerViewMode: "week"
     };
 
     // Scoped loaders
@@ -154,20 +164,44 @@ class Store {
       const suffix = this.getUserSuffix();
       const stored = localStorage.getItem(`cookbook_meal_plan${suffix}`);
       if (stored) {
-        return JSON.parse(stored);
+        let parsed = JSON.parse(stored);
+        
+        // Migrate old day-name based entries (Monday, Tuesday, etc.) to date strings
+        const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const hasOldKeys = dayNames.some(day => day in parsed);
+        
+        if (hasOldKeys) {
+          const today = new Date();
+          const currentDay = today.getDay();
+          const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+          const monday = new Date(today);
+          monday.setDate(today.getDate() + distanceToMonday);
+          
+          const migrated = {};
+          dayNames.forEach((dayName, index) => {
+            const d = new Date(monday);
+            d.setDate(monday.getDate() + index);
+            const dateStr = formatDateIso(d);
+            if (parsed[dayName]) {
+              migrated[dateStr] = parsed[dayName];
+            }
+          });
+          
+          // Copy over any existing date-based keys that might be there
+          for (const key in parsed) {
+            if (!dayNames.includes(key)) {
+              migrated[key] = parsed[key];
+            }
+          }
+          parsed = migrated;
+          localStorage.setItem(`cookbook_meal_plan${suffix}`, JSON.stringify(parsed));
+        }
+        return parsed;
       }
     } catch (e) {
       console.error("Failed to parse stored mealPlan", e);
     }
-    return {
-      Monday: { breakfast: null, lunch: null, dinner: null },
-      Tuesday: { breakfast: null, lunch: null, dinner: null },
-      Wednesday: { breakfast: null, lunch: null, dinner: null },
-      Thursday: { breakfast: null, lunch: null, dinner: null },
-      Friday: { breakfast: null, lunch: null, dinner: null },
-      Saturday: { breakfast: null, lunch: null, dinner: null },
-      Sunday: { breakfast: null, lunch: null, dinner: null }
-    };
+    return {};
   }
 
   // Persisters
@@ -337,7 +371,13 @@ class Store {
     }
     
     // Create user
-    users.push({ username: uName, password });
+    users.push({ 
+      username: uName, 
+      password, 
+      bio: "", 
+      profilePic: "", 
+      settings: { weekStartDay: "Sunday" } 
+    });
     this.saveUsers(users);
     
     // Log in
@@ -353,12 +393,14 @@ class Store {
     this.state.selectedIngredients = this.loadSelectedIngredients();
     this.state.shoppingList = this.loadShoppingList();
     this.state.mealPlan = this.loadMealPlan();
+    this.state.weeklyOffset = 0;
+    this.state.monthlyOffset = 0;
+    this.state.plannerViewMode = "week";
     this.updateCombinedRecipes();
     this.notify();
   }
 
   loginUser(username) {
-    // OAuth/simulate bypass
     if (!username || !username.trim()) return false;
     const uName = username.trim();
     this.state.currentUser = { username: uName };
@@ -373,11 +415,136 @@ class Store {
     this.loadUserData();
   }
 
-  addMealToPlan(day, slot, recipeId, customTitle = "") {
-    if (!this.state.mealPlan[day]) return;
+  getCurrentUserProfile() {
+    if (!this.state.currentUser) return null;
+    const users = this.loadUsers();
+    return users.find(u => u.username.toLowerCase() === this.state.currentUser.username.toLowerCase()) || null;
+  }
+
+  getCurrentUserWeekStartDay() {
+    if (!this.state.currentUser) return "Sunday";
+    const profile = this.getCurrentUserProfile();
+    if (profile && profile.settings && profile.settings.weekStartDay) {
+      return profile.settings.weekStartDay;
+    }
+    return "Sunday";
+  }
+
+  updateWeekStartDay(day) {
+    if (!this.state.currentUser) return;
+    const users = this.loadUsers();
+    const idx = users.findIndex(u => u.username.toLowerCase() === this.state.currentUser.username.toLowerCase());
+    if (idx !== -1) {
+      if (!users[idx].settings) users[idx].settings = {};
+      users[idx].settings.weekStartDay = day;
+      this.saveUsers(users);
+      this.notify();
+    }
+  }
+
+  changePassword(currentPassword, newPassword) {
+    if (!this.state.currentUser) return { success: false, error: "Not logged in" };
+    const users = this.loadUsers();
+    const idx = users.findIndex(u => u.username.toLowerCase() === this.state.currentUser.username.toLowerCase());
+    if (idx === -1) return { success: false, error: "User profile not found." };
+    
+    const user = users[idx];
+    if (user.password !== currentPassword) {
+      return { success: false, error: "Incorrect current password" };
+    }
+    if (newPassword.length < 4) {
+      return { success: false, error: "New password must be at least 4 characters long" };
+    }
+    
+    users[idx].password = newPassword;
+    this.saveUsers(users);
+    return { success: true };
+  }
+
+  updateProfileDetails(newUsername, bio, profilePic, currentPassword) {
+    if (!this.state.currentUser) return { success: false, error: "Not logged in" };
+    
+    const oldUsername = this.state.currentUser.username;
+    const cleanNewUsername = newUsername.trim();
+    
+    if (!cleanNewUsername) return { success: false, error: "Username cannot be empty" };
+    if (cleanNewUsername.length < 3) return { success: false, error: "Username must be at least 3 characters long" };
+    
+    const users = this.loadUsers();
+    const userIndex = users.findIndex(u => u.username.toLowerCase() === oldUsername.toLowerCase());
+    if (userIndex === -1) return { success: false, error: "User profile not found in database." };
+    
+    const user = users[userIndex];
+    if (user.password !== currentPassword) {
+      return { success: false, error: "Incorrect password verification" };
+    }
+    
+    // Check if new username is already taken by someone else
+    if (cleanNewUsername.toLowerCase() !== oldUsername.toLowerCase()) {
+      const exists = users.some(u => u.username.toLowerCase() === cleanNewUsername.toLowerCase());
+      if (exists) {
+        return { success: false, error: "Username is already taken by another chef" };
+      }
+    }
+    
+    // If username changes, we migrate the keys
+    if (cleanNewUsername.toLowerCase() !== oldUsername.toLowerCase()) {
+      const oldSuffix = `_${oldUsername.toLowerCase().trim()}`;
+      const newSuffix = `_${cleanNewUsername.toLowerCase().trim()}`;
+      
+      const keysToMigrate = [
+        "cookbook_my_recipes",
+        "cookbook_deleted_defaults",
+        "cookbook_selected_ingredients",
+        "cookbook_shopping_list",
+        "cookbook_meal_plan"
+      ];
+      
+      keysToMigrate.forEach(key => {
+        const val = localStorage.getItem(`${key}${oldSuffix}`);
+        if (val !== null) {
+          localStorage.setItem(`${key}${newSuffix}`, val);
+          localStorage.removeItem(`${key}${oldSuffix}`);
+        }
+      });
+    }
+    
+    // Update user record
+    users[userIndex].username = cleanNewUsername;
+    users[userIndex].bio = bio || "";
+    users[userIndex].profilePic = profilePic || "";
+    this.saveUsers(users);
+    
+    // Update current user session
+    this.state.currentUser = { username: cleanNewUsername };
+    this.saveCurrentUser(this.state.currentUser);
+    this.loadUserData();
+    
+    return { success: true };
+  }
+
+  setWeeklyOffset(offset) {
+    this.state.weeklyOffset = offset;
+    this.notify();
+  }
+
+  setMonthlyOffset(offset) {
+    this.state.monthlyOffset = offset;
+    this.notify();
+  }
+
+  setPlannerViewMode(mode) {
+    this.state.plannerViewMode = mode;
+    this.notify();
+  }
+
+  addMealToPlan(dateStr, slot, recipeId, customTitle = "") {
+    if (!this.state.mealPlan[dateStr]) {
+      this.state.mealPlan[dateStr] = { breakfast: null, lunch: null, dinner: null };
+    }
     
     if (recipeId === "custom" && customTitle.trim()) {
-      this.state.mealPlan[day][slot] = {
+      this.state.mealPlan[dateStr][slot] = {
         id: "custom_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
         title: customTitle.trim(),
         category: "Custom",
@@ -393,7 +560,7 @@ class Store {
     } else {
       const recipe = this.state.recipes.find(r => r.id === recipeId);
       if (recipe) {
-        this.state.mealPlan[day][slot] = {
+        this.state.mealPlan[dateStr][slot] = {
           id: recipe.id,
           title: recipe.title,
           category: recipe.category,
@@ -409,24 +576,31 @@ class Store {
     }
   }
 
-  removeMealFromPlan(day, slot) {
-    if (this.state.mealPlan[day]) {
-      this.state.mealPlan[day][slot] = null;
+  removeMealFromPlan(dateStr, slot) {
+    if (this.state.mealPlan[dateStr]) {
+      this.state.mealPlan[dateStr][slot] = null;
+      if (!this.state.mealPlan[dateStr].breakfast && 
+          !this.state.mealPlan[dateStr].lunch && 
+          !this.state.mealPlan[dateStr].dinner) {
+        delete this.state.mealPlan[dateStr];
+      }
       this.saveMealPlan();
       this.notify();
     }
   }
 
   clearMealPlan() {
-    this.state.mealPlan = {
-      Monday: { breakfast: null, lunch: null, dinner: null },
-      Tuesday: { breakfast: null, lunch: null, dinner: null },
-      Wednesday: { breakfast: null, lunch: null, dinner: null },
-      Thursday: { breakfast: null, lunch: null, dinner: null },
-      Friday: { breakfast: null, lunch: null, dinner: null },
-      Saturday: { breakfast: null, lunch: null, dinner: null },
-      Sunday: { breakfast: null, lunch: null, dinner: null }
-    };
+    this.state.mealPlan = {};
+    this.saveMealPlan();
+    this.notify();
+  }
+
+  clearWeeklyMealPlan(dateStrings) {
+    dateStrings.forEach(dateStr => {
+      if (this.state.mealPlan[dateStr]) {
+        delete this.state.mealPlan[dateStr];
+      }
+    });
     this.saveMealPlan();
     this.notify();
   }

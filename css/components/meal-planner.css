@@ -185,3 +185,137 @@
   font-weight: 700;
   font-style: normal;
 }
+
+/* Monthly view layout styling */
+.meal-planner-month-view {
+  margin-top: 24px;
+}
+.month-grid-cell {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px 8px;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+  position: relative;
+}
+.month-grid-cell:hover {
+  border-color: var(--accent-primary);
+  box-shadow: 0 4px 10px rgba(62, 39, 35, 0.05);
+}
+.month-grid-cell.other-month {
+  background: var(--bg-tertiary);
+  opacity: 0.55;
+}
+.month-grid-cell.today-cell {
+  border: 2px solid var(--accent-primary);
+  box-shadow: 0 4px 12px rgba(231, 111, 81, 0.08);
+}
+.month-date-number {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  align-self: flex-start;
+  margin-bottom: 2px;
+}
+.month-grid-cell.today-cell .month-date-number {
+  color: #ffffff;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.month-meal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+.month-meal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.1;
+  border-left: 3px solid transparent;
+  transition: background var(--transition-fast);
+}
+.month-meal-item.breakfast {
+  background: rgba(40, 167, 69, 0.08);
+  border-left-color: #28a745;
+  color: #1e5c2c;
+}
+.month-meal-item.lunch {
+  background: rgba(23, 162, 184, 0.08);
+  border-left-color: #17a2b8;
+  color: #0f5c69;
+}
+.month-meal-item.dinner {
+  background: rgba(231, 111, 81, 0.08);
+  border-left-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+.month-meal-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 82%;
+}
+.month-meal-delete {
+  cursor: pointer;
+  color: var(--color-danger);
+  font-weight: 800;
+  font-size: 0.85rem;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-left: auto;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+.month-meal-delete:hover {
+  opacity: 1;
+}
+.btn-month-add-meal {
+  display: none;
+  width: 100%;
+  padding: 3px;
+  font-size: 0.7rem;
+  border: 1px dashed var(--border-color);
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  margin-top: auto;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+.btn-month-add-meal:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: rgba(231, 111, 81, 0.02);
+}
+.month-grid-cell:hover .btn-month-add-meal {
+  display: block;
+}
+.preset-avatar-btn:hover {
+  border-color: var(--accent-primary) !important;
+  transform: scale(1.08);
+}
+.preset-avatar-btn.selected {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
+}

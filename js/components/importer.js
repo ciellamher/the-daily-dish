@@ -355,7 +355,7 @@ function extractImage(imageField) {
   return "";
 }
 
-function parseSchemaIngredients(ingredients) {
+export function parseSchemaIngredients(ingredients) {
   if (!ingredients || !Array.isArray(ingredients)) return [];
   
   const COMMON_UNITS = new Set([

@@ -8,14 +8,21 @@ import { escapeHtml, ICONS, getGourmetFoodImage } from "../utils.js";
 export function renderRecipeCard(recipe, isSaved = false, activeTab = "home") {
   const { id, title, description, image, prepTime, cookTime, difficulty, category, tags, matchStats } = recipe;
   
+  const cleanTitle = title || "Untitled Recipe";
+  const cleanDescription = description || "No description provided.";
+  const cleanCategory = category || "Mains";
+  const cleanDifficulty = difficulty || "Easy";
+  const cleanPrepTime = prepTime || 0;
+  const cleanCookTime = cookTime || 0;
+
   // Robust image sourcing: If image is empty or invalid, pull dynamically from Unsplash helper
-  const resolvedImage = image ? image : getGourmetFoodImage(title, category);
+  const resolvedImage = image ? image : getGourmetFoodImage(cleanTitle, cleanCategory);
 
   // Generate a mock rating (8.0 - 9.9) based on the title's character codes
   let rating = 8.5;
-  if (title) {
+  if (cleanTitle) {
     let charSum = 0;
-    for (let i = 0; i < title.length; i++) charSum += title.charCodeAt(i);
+    for (let i = 0; i < cleanTitle.length; i++) charSum += cleanTitle.charCodeAt(i);
     rating = (8.0 + (charSum % 20) / 10).toFixed(1);
   }
 
@@ -35,7 +42,7 @@ export function renderRecipeCard(recipe, isSaved = false, activeTab = "home") {
   // Cover image: circle bowl wrapper
   const imageHtml = `
     <div class="card-circle-plate-wrapper">
-      <img src="${escapeHtml(resolvedImage)}" alt="${escapeHtml(title)}" class="card-circle-plate-img" loading="lazy">
+      <img src="${escapeHtml(resolvedImage)}" alt="${escapeHtml(cleanTitle)}" class="card-circle-plate-img" loading="lazy">
     </div>
   `;
 
@@ -51,7 +58,7 @@ export function renderRecipeCard(recipe, isSaved = false, activeTab = "home") {
     }
   }
 
-  const totalTime = prepTime + cookTime;
+  const totalTime = cleanPrepTime + cleanCookTime;
 
   // Render floating save/delete icons
   let floatActionsHtml = "";
@@ -81,18 +88,18 @@ export function renderRecipeCard(recipe, isSaved = false, activeTab = "home") {
       ${floatActionsHtml}
       <div class="card-image-wrapper">
         ${imageHtml}
-        <span class="card-category-badge">${escapeHtml(category)}</span>
+        <span class="card-category-badge">${escapeHtml(cleanCategory)}</span>
         ${matchBadgeHtml}
       </div>
       <div class="card-body">
         
         <!-- Title & Rating Inline Row -->
         <div class="card-title-row">
-          <h4 class="card-title">${escapeHtml(title)}</h4>
+          <h4 class="card-title">${escapeHtml(cleanTitle)}</h4>
           <span class="card-rating-badge">${rating}</span>
         </div>
 
-        <p class="card-desc">${escapeHtml(description)}</p>
+        <p class="card-desc">${escapeHtml(cleanDescription)}</p>
         
         <!-- Stars Row (Mockup style) -->
         <div class="card-stars-price-row">
@@ -108,7 +115,7 @@ export function renderRecipeCard(recipe, isSaved = false, activeTab = "home") {
           </span>
           <span class="card-meta-item">
             <span class="meta-icon">${ICONS.fire}</span>
-            <span>${escapeHtml(difficulty)}</span>
+            <span>${escapeHtml(cleanDifficulty)}</span>
           </span>
         </div>
 

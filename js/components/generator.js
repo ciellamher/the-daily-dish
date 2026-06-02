@@ -312,6 +312,45 @@ const PREDEFINED_AI_TEMPLATES = {
       { step: 6, text: "Let cool for 1 minute. Place a plate over a ramekin and invert it carefully. Lift the ramekin, dust the cake with powdered sugar, and serve warm.", tip: "The cake is best enjoyed immediately while the center is still warm and liquid!" }
     ]
   },
+  cupcake: {
+    title: "Classic Vanilla Cupcakes",
+    description: "Fluffy and moist vanilla cupcakes topped with a rich, silky vanilla buttercream frosting and colorful sprinkles.",
+    prepTime: 20,
+    cookTime: 18,
+    servings: 12,
+    difficulty: "Medium",
+    category: "Baking",
+    tags: ["Cupcake", "Dessert", "Baking"],
+    equipment: [
+      { name: "12-cup muffin pan", icon: "sheet" },
+      { name: "Paper cupcake liners", icon: "paper" },
+      { name: "Hand or stand mixer", icon: "bowl" },
+      { name: "Piping bag and tip", icon: "spoon" },
+      { name: "Wire cooling rack", icon: "rack" }
+    ],
+    ingredients: [
+      { name: "all-purpose flour", quantity: 1.5, unit: "cups", category: "Pantry" },
+      { name: "baking powder", quantity: 1.5, unit: "tsp", category: "Pantry" },
+      { name: "fine salt", quantity: 0.25, unit: "tsp", category: "Pantry" },
+      { name: "unsalted butter, softened", quantity: 0.5, unit: "cup", category: "Dairy" },
+      { name: "granulated white sugar", quantity: 0.75, unit: "cup", category: "Pantry" },
+      { name: "large egg", quantity: 2, unit: "pcs", category: "Dairy" },
+      { name: "pure vanilla extract", quantity: 2, unit: "tsp", category: "Pantry" },
+      { name: "whole milk", quantity: 0.5, unit: "cup", category: "Dairy" },
+      { name: "powdered sugar", quantity: 2.5, unit: "cups", category: "Pantry" },
+      { name: "unsalted butter, softened (for frosting)", quantity: 0.5, unit: "cup", category: "Dairy" },
+      { name: "heavy cream (for frosting)", quantity: 2, unit: "tbsp", category: "Dairy" }
+    ],
+    instructions: [
+      { step: 1, text: "Preheat your oven to 350°F (177°C) and line a 12-cup muffin pan with paper cupcake liners.", tip: "Liners keep the cupcakes from sticking and help them bake evenly." },
+      { step: 2, text: "In a medium bowl, whisk together the flour, baking powder, and salt. Set aside.", tip: "Whisking dry ingredients aerates them, making the cupcakes fluffier." },
+      { step: 3, text: "In a large bowl, beat the softened butter and granulated sugar together on high speed for 2 minutes until light and fluffy.", tip: "Creaming butter and sugar creates tiny air pockets that rise during baking." },
+      { step: 4, text: "Add the eggs one at a time, beating well after each addition, then stir in the vanilla extract.", tip: "Egg proteins lock in the structure. Make sure eggs are room temperature so the batter doesn't curdle." },
+      { step: 5, text: "Add dry ingredients and milk alternately in 3 batches, mixing on low speed just until combined.", tip: "Alternating dry and wet ingredients prevents overmixing and ensures a smooth batter." },
+      { step: 6, text: "Divide batter evenly among liners. Bake for 18-20 minutes until a toothpick inserted in the center comes out clean. Cool completely.", tip: "Cupcakes must be 100% cool before frosting, or the buttercream will melt off!" },
+      { step: 7, text: "To make the frosting, beat the butter for 2 minutes until creamy. Add powdered sugar, cream, and vanilla. Beat on high for 3 minutes, then pipe onto cupcakes.", tip: "Beat the frosting until it is light and airy. Garnish with sprinkles immediately after piping so they stick." }
+    ]
+  },
   soup: {
     title: "Cozy Chicken Noodle Soup",
     description: "A comforting bowl of soup loaded with tender shredded chicken, egg noodles, sliced carrots, celery, and onions simmered in a savory broth.",
@@ -752,6 +791,11 @@ export function generateRecipeOnSpot(query, onStepChange, onComplete) {
     recipe.id = `generated-${Date.now()}`;
     recipe.sourceUrl = "https://www.seriouseats.com/easy-bolognese-sauce-recipe";
     recipe.sourceName = "Serious Eats";
+  } else if (normalizedQuery.includes("cupcake") || normalizedQuery.includes("cupcakes")) {
+    recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.cupcake));
+    recipe.id = `generated-${Date.now()}`;
+    recipe.sourceUrl = "https://sallysbakingaddiction.com/simply-vanilla-cupcakes/";
+    recipe.sourceName = "Sally's Baking Addiction";
   } else if (normalizedQuery.includes("cake") || normalizedQuery.includes("brownie") || normalizedQuery.includes("lava cake")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.cake));
     recipe.id = `generated-${Date.now()}`;
