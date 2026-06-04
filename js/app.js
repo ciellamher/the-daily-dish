@@ -139,6 +139,8 @@ const elements = {
   loginCloseBtn: document.getElementById("login-close-btn"),
   loginForm: document.getElementById("login-form"),
   loginUsernameInput: document.getElementById("login-username-input"),
+  loginEmailGroup: document.getElementById("login-email-group"),
+  loginEmailInput: document.getElementById("login-email-input"),
   loginPasswordInput: document.getElementById("login-password-input"),
   linkToggleRegister: document.getElementById("link-toggle-register"),
   loginModalTitle: document.getElementById("login-modal-title"),
@@ -205,6 +207,8 @@ const elements = {
   adminPanelModal: document.getElementById("admin-panel-modal"),
   adminPanelCloseBtn: document.getElementById("admin-panel-close-btn"),
   adminUsersList: document.getElementById("admin-users-list"),
+  adminTotalUsers: document.getElementById("admin-total-users"),
+  adminTotalRecipes: document.getElementById("admin-total-recipes"),
   adminPanelErrorMsg: document.getElementById("admin-panel-error-msg"),
   adminPanelSuccessMsg: document.getElementById("admin-panel-success-msg"),
 
@@ -247,7 +251,13 @@ const elements = {
   imageScanLaser: document.getElementById("image-scan-laser"),
   imageUploadStatusCard: document.getElementById("image-upload-status-card"),
   imageUploadStatusText: document.getElementById("image-upload-status-text"),
-  btnStartAnalysis: document.getElementById("btn-start-analysis")
+  btnStartAnalysis: document.getElementById("btn-start-analysis"),
+  imageUploadSpinner: document.getElementById("image-upload-spinner"),
+  imageUploadPromptCard: document.getElementById("image-upload-prompt-card"),
+  imageUploadPromptText: document.getElementById("image-upload-prompt-text"),
+  imageUploadDetectedName: document.getElementById("image-upload-detected-name"),
+  btnProceedRecipe: document.getElementById("btn-proceed-recipe"),
+  btnCancelProceed: document.getElementById("btn-cancel-proceed")
 };
 
 // Global Staple Ingredients for Fridge Picker Quick-Add
@@ -457,6 +467,7 @@ function bindGlobalEvents() {
     }
     if (e.target === elements.imageUploadModal) {
       closeModal(elements.imageUploadModal);
+      resetImageUploadModal();
     }
   });
 
@@ -470,6 +481,7 @@ function bindGlobalEvents() {
       closeModal(elements.editProfileModal);
       closeModal(elements.customRecipeModal);
       closeModal(elements.imageUploadModal);
+      resetImageUploadModal();
       if (elements.plannerAddForm) elements.plannerAddForm.reset();
       if (elements.editProfileForm) elements.editProfileForm.reset();
       if (elements.customRecipeForm) elements.customRecipeForm.reset();
@@ -786,7 +798,8 @@ function bindGlobalEvents() {
       if (authModalMode === "login") {
         result = store.authenticateUser(username, password);
       } else {
-        result = store.registerUser(username, password);
+        const email = elements.loginEmailInput ? elements.loginEmailInput.value.trim() : "";
+        result = store.registerUser(username, password, email);
       }
 
       if (result.success) {
@@ -1004,17 +1017,43 @@ function bindGlobalEvents() {
   /* --- 15.7. Image Upload / Photo Recognition Events --- */
   let recognizedDishName = "";
 
+  function resetImageUploadModal() {
+    elements.imageAnalysisArea.classList.add("hidden");
+    elements.imageAnalysisPreview.src = "";
+    elements.imageScanLaser.classList.add("hidden");
+    elements.imageUploadStatusCard.classList.add("hidden");
+    elements.imageUploadStatusText.innerText = "";
+    elements.btnStartAnalysis.classList.add("hidden");
+    if (elements.imageUploadSpinner) {
+      elements.imageUploadSpinner.style.display = ""; // restore default display
+    }
+    if (elements.imageUploadPromptCard) {
+      elements.imageUploadPromptCard.classList.add("hidden");
+    }
+    recognizedDishName = "";
+  }
+
+  // Copy-paste event handler for photo scanner
+  window.addEventListener("paste", (e) => {
+    if (!e.clipboardData) return;
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf("image") !== -1) {
+        const file = items[i].getAsFile();
+        
+        // Reset and show modal
+        resetImageUploadModal();
+        openModal(elements.imageUploadModal);
+        
+        handleSelectedFile(file);
+        break;
+      }
+    }
+  });
+
   if (elements.searchUploadBtn) {
     elements.searchUploadBtn.addEventListener("click", () => {
-      // Reset modal state
-      elements.imageAnalysisArea.classList.add("hidden");
-      elements.imageAnalysisPreview.src = "";
-      elements.imageScanLaser.classList.add("hidden");
-      elements.imageUploadStatusCard.classList.add("hidden");
-      elements.imageUploadStatusText.innerText = "";
-      elements.btnStartAnalysis.classList.add("hidden");
-      recognizedDishName = "";
-      
+      resetImageUploadModal();
       openModal(elements.imageUploadModal);
     });
   }
@@ -1022,6 +1061,7 @@ function bindGlobalEvents() {
   if (elements.imageUploadCloseBtn) {
     elements.imageUploadCloseBtn.addEventListener("click", () => {
       closeModal(elements.imageUploadModal);
+      resetImageUploadModal();
     });
   }
 
@@ -1059,8 +1099,30 @@ function bindGlobalEvents() {
     });
   }
 
+  function cleanDetectedDishName(name) {
+    if (!name) return "";
+    const clean = name.toLowerCase().trim();
+    const genericNames = ["image", "screenshot", "clipboard", "file", "download", "pasted", "upload", "pic", "photo", "captured"];
+    if (genericNames.some(g => clean.includes(g)) || clean.length <= 2) {
+      return ""; // clear generic names so they can enter custom name
+    }
+    // Capitalize first letter of words
+    return name.replace(/\b\w/g, c => c.toUpperCase());
+  }
+
   // Handle selected file details
   function handleSelectedFile(file) {
+    // Reset scanner UI state
+    elements.imageScanLaser.classList.add("hidden");
+    elements.imageUploadStatusCard.classList.add("hidden");
+    elements.imageUploadStatusText.innerText = "";
+    if (elements.imageUploadSpinner) {
+      elements.imageUploadSpinner.style.display = "";
+    }
+    if (elements.imageUploadPromptCard) {
+      elements.imageUploadPromptCard.classList.add("hidden");
+    }
+
     // Show image preview
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -1093,14 +1155,29 @@ function bindGlobalEvents() {
     } else {
       // fallback guess by removing extension
       const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ").trim();
-      recognizedDishName = baseName || "Warm Chocolate Lava Cake";
+      recognizedDishName = baseName;
     }
+
+    // Clean name to make sure we don't display generic names like 'image' or 'screenshot'
+    recognizedDishName = cleanDetectedDishName(recognizedDishName);
   }
 
   // Handle sample photo selections
   document.querySelectorAll(".btn-sample-photo").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
+      
+      // Reset scanner UI state
+      elements.imageScanLaser.classList.add("hidden");
+      elements.imageUploadStatusCard.classList.add("hidden");
+      elements.imageUploadStatusText.innerText = "";
+      if (elements.imageUploadSpinner) {
+        elements.imageUploadSpinner.style.display = "";
+      }
+      if (elements.imageUploadPromptCard) {
+        elements.imageUploadPromptCard.classList.add("hidden");
+      }
+
       const dish = btn.getAttribute("data-dish");
       let title = "Cupcake";
       if (dish === "cheeseburger") title = "Cheeseburger";
@@ -1122,11 +1199,15 @@ function bindGlobalEvents() {
       elements.btnStartAnalysis.classList.add("hidden");
       elements.imageScanLaser.classList.remove("hidden");
       elements.imageUploadStatusCard.classList.remove("hidden");
+      if (elements.imageUploadSpinner) {
+        elements.imageUploadSpinner.style.display = "";
+      }
       
+      const finalName = cleanDetectedDishName(recognizedDishName);
       const statuses = [
         { text: "Scanning photo textures and colors...", time: 0 },
         { text: "Comparing visual signature with culinary database...", time: 1500 },
-        { text: `Dish Identified: "${recognizedDishName}"! Searching recipe index...`, time: 3000 }
+        { text: finalName ? `Dish Identified: "${finalName}"!` : "Dish Identified! Please verify name below...", time: 3000 }
       ];
 
       statuses.forEach(stage => {
@@ -1135,34 +1216,76 @@ function bindGlobalEvents() {
         }, stage.time);
       });
 
-      // Complete simulation and trigger recipe opening/generation
+      // Complete simulation and trigger recipe opening/generation confirmation
       setTimeout(() => {
         elements.imageScanLaser.classList.add("hidden");
-        
-        // Search first! Check if we have this recipe in default or myRecipes
-        const queryClean = recognizedDishName.toLowerCase().trim();
-        const existingRecipe = store.state.recipes.find(r => 
-          r.title.toLowerCase().includes(queryClean) || 
-          queryClean.includes(r.title.toLowerCase())
-        );
-
-        if (existingRecipe) {
-          elements.imageUploadStatusText.innerText = "Match found! Opening recipe details...";
-          setTimeout(() => {
-            closeModal(elements.imageUploadModal);
-            // Open recipe details modal
-            store.setSelectedRecipe(existingRecipe.id);
-            openModal(elements.recipeDetailModal);
-          }, 1200);
-        } else {
-          elements.imageUploadStatusText.innerText = "Recipe not indexed. Building customized recipe with AI...";
-          setTimeout(() => {
-            closeModal(elements.imageUploadModal);
-            // Open AI generator modal with the dish name
-            triggerAiRecipeGeneration(recognizedDishName);
-          }, 1200);
+        if (elements.imageUploadSpinner) {
+          elements.imageUploadSpinner.style.display = "none";
         }
-      }, 4200);
+        
+        // Update prompt text and detected name input field
+        const finalNameClean = cleanDetectedDishName(recognizedDishName);
+        if (elements.imageUploadDetectedName) {
+          elements.imageUploadDetectedName.value = finalNameClean;
+        }
+
+        if (elements.imageUploadPromptText) {
+          if (finalNameClean) {
+            elements.imageUploadPromptText.innerText = `Would you like to proceed to generate or view the recipe for "${finalNameClean}"?`;
+          } else {
+            elements.imageUploadPromptText.innerText = `We couldn't verify the dish name from the photo name. Please confirm/edit the dish name above to proceed!`;
+          }
+        }
+        
+        // Show the prompt card
+        if (elements.imageUploadPromptCard) {
+          elements.imageUploadPromptCard.classList.remove("hidden");
+        }
+      }, 3000);
+    });
+  }
+
+  // Handle proceed and cancel in the prompt card
+  if (elements.btnProceedRecipe) {
+    elements.btnProceedRecipe.addEventListener("click", () => {
+      const finalName = elements.imageUploadDetectedName.value.trim();
+      if (!finalName) {
+        alert("Please enter a valid dish name to generate the recipe.");
+        elements.imageUploadDetectedName.focus();
+        return;
+      }
+      
+      recognizedDishName = finalName;
+      
+      closeModal(elements.imageUploadModal);
+      resetImageUploadModal();
+
+      // Search first! Check if we have this recipe in default or myRecipes
+      const queryClean = recognizedDishName.toLowerCase().trim();
+      const existingRecipe = store.state.recipes.find(r => 
+        r.title.toLowerCase().includes(queryClean) || 
+        queryClean.includes(r.title.toLowerCase())
+      );
+
+      if (existingRecipe) {
+        // Open recipe details modal
+        store.setSelectedRecipe(existingRecipe.id);
+        openModal(elements.recipeDetailModal);
+      } else {
+        // Open AI generator modal with the dish name
+        triggerAiRecipeGeneration(recognizedDishName);
+      }
+    });
+  }
+
+  if (elements.btnCancelProceed) {
+    elements.btnCancelProceed.addEventListener("click", () => {
+      // Hide the status card and prompt card, show the button to re-analyze
+      elements.imageUploadStatusCard.classList.add("hidden");
+      if (elements.imageUploadPromptCard) {
+        elements.imageUploadPromptCard.classList.add("hidden");
+      }
+      elements.btnStartAnalysis.classList.remove("hidden");
     });
   }
 
@@ -1590,12 +1713,22 @@ function bindGlobalEvents() {
   function renderAdminUsers() {
     if (!elements.adminUsersList) return;
     const users = store.loadUsers();
+
+    // Update admin stats
+    if (elements.adminTotalUsers) {
+      elements.adminTotalUsers.innerText = users.length;
+    }
+    if (elements.adminTotalRecipes) {
+      const totalRecipes = users.reduce((acc, user) => acc + getSavedRecipeCount(user.username), 0);
+      elements.adminTotalRecipes.innerText = totalRecipes;
+    }
     
     elements.adminUsersList.innerHTML = users.map(user => {
       const isSystemAdmin = user.username.toLowerCase() === "admin";
       const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FFD166'/><circle cx='50' cy='58' r='30' fill='%23FFE3A8'/><path d='M25 40 L25 15 L45 30 Z' fill='%23FFE3A8'/><path d='M75 40 L75 15 L55 30 Z' fill='%23FFE3A8'/><circle cx='40' cy='48' r='4' fill='%233D2723'/><circle cx='60' cy='48' r='4' fill='%233D2723'/><path d='M45 60 Q50 63 55 60' stroke='%233D2723' stroke-width='3' fill='none'/><path d='M50 55 L50 58' stroke='%233D2723' stroke-width='2'/><path d='M35 15 Q50 5 65 15 L50 25 Z' fill='%23FFFFFF' stroke='%233D2723' stroke-width='2'/></svg>";
       const avatarSrc = user.profilePic || defaultAvatar;
       const recipeCount = getSavedRecipeCount(user.username);
+      const emailText = user.email ? escapeHtml(user.email) : `<span style='color: var(--text-muted); font-style: italic;'>${user.username.toLowerCase()}@dailydish.com</span>`;
       const bioText = user.bio ? escapeHtml(user.bio) : "<span style='color: var(--text-muted); font-style: italic;'>No bio written yet.</span>";
       
       return `
@@ -1604,7 +1737,10 @@ function bindGlobalEvents() {
             <img src="${escapeHtml(avatarSrc)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);" alt="${escapeHtml(user.username)}'s Avatar">
             <span style="font-weight: 600;">${escapeHtml(user.username)}</span>
           </td>
-          <td style="padding: 12px 16px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          <td style="padding: 12px 16px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(user.email || (user.username.toLowerCase() + '@dailydish.com'))}">
+            ${emailText}
+          </td>
+          <td style="padding: 12px 16px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(user.bio || '')}">
             ${bioText}
           </td>
           <td style="padding: 12px 16px; text-align: center; font-weight: 600;">
@@ -1674,13 +1810,8 @@ function bindGlobalEvents() {
       if (elements.adminPanelSuccessMsg) elements.adminPanelSuccessMsg.classList.add("hidden");
       if (elements.adminPanelErrorMsg) elements.adminPanelErrorMsg.classList.add("hidden");
       renderAdminUsers();
-      openModal(elements.adminPanelModal);
-    });
-  }
-
-  if (elements.adminPanelCloseBtn) {
-    elements.adminPanelCloseBtn.addEventListener("click", () => {
-      closeModal(elements.adminPanelModal);
+      const adminView = document.getElementById("admin-dashboard-view");
+      if (adminView) adminView.scrollIntoView({ behavior: "smooth" });
     });
   }
 
@@ -1717,6 +1848,8 @@ function setAuthModalMode(mode) {
     if (elements.loginModalTitle) elements.loginModalTitle.innerText = "Welcome Back";
     if (elements.loginModalSubtitle) elements.loginModalSubtitle.innerText = "Login to sync your custom recipes, shopping lists, and meal plans.";
     if (elements.btnLoginSubmit) elements.btnLoginSubmit.innerText = "Log In";
+    if (elements.loginEmailGroup) elements.loginEmailGroup.classList.add("hidden");
+    if (elements.loginEmailInput) elements.loginEmailInput.removeAttribute("required");
     const promptEl = document.getElementById("login-toggle-prompt");
     if (promptEl) {
       promptEl.innerHTML = `Don't have a chef profile? <a href="#" id="link-toggle-register" style="font-weight:700; color: var(--accent-primary);">Sign Up</a>`;
@@ -1725,6 +1858,8 @@ function setAuthModalMode(mode) {
     if (elements.loginModalTitle) elements.loginModalTitle.innerText = "Register Chef Profile";
     if (elements.loginModalSubtitle) elements.loginModalSubtitle.innerText = "Create a new chef profile to save recipes and plan your meals.";
     if (elements.btnLoginSubmit) elements.btnLoginSubmit.innerText = "Sign Up / Register";
+    if (elements.loginEmailGroup) elements.loginEmailGroup.classList.remove("hidden");
+    if (elements.loginEmailInput) elements.loginEmailInput.setAttribute("required", "required");
     const promptEl = document.getElementById("login-toggle-prompt");
     if (promptEl) {
       promptEl.innerHTML = `Already have a chef profile? <a href="#" id="link-toggle-register" style="font-weight:700; color: var(--accent-primary);">Log In</a>`;
@@ -1852,15 +1987,26 @@ function getMonthDates(weekStartDay = "Sunday", offset = 0) {
 function openMealPlannerModal(recipeId = null, preSelectedDay = null, preSelectedSlot = null) {
   const allRecipes = store.state.recipes;
   const weekStartDay = store.getCurrentUserWeekStartDay();
-  const offset = store.state.weeklyOffset || 0;
-  const weekDates = getWeekDates(weekStartDay, offset);
+  
+  let datesToUse = [];
+  if (store.state.plannerViewMode === "month") {
+    const monthOffset = store.state.monthlyOffset || 0;
+    const monthData = getMonthDates(weekStartDay, monthOffset);
+    datesToUse = monthData.dates;
+  } else {
+    const weekOffset = store.state.weeklyOffset || 0;
+    datesToUse = getWeekDates(weekStartDay, weekOffset);
+  }
 
   if (elements.plannerDaySelect) {
-    let optionsHtml = weekDates.map(dayInfo => `
-      <option value="${dayInfo.dateStr}">${dayInfo.dayName} (${dayInfo.label})</option>
-    `).join("");
+    let optionsHtml = datesToUse.map(dayInfo => {
+      const dObj = dayInfo.dateObj || new Date(dayInfo.dateStr + "T00:00:00");
+      const dayName = dObj.toLocaleDateString("en-US", { weekday: "long" });
+      const label = dObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      return `<option value="${dayInfo.dateStr}">${dayName} (${label})</option>`;
+    }).join("");
     
-    if (preSelectedDay && !weekDates.some(d => d.dateStr === preSelectedDay)) {
+    if (preSelectedDay && !datesToUse.some(d => d.dateStr === preSelectedDay)) {
       const dObj = new Date(preSelectedDay + "T00:00:00");
       if (!isNaN(dObj.getTime())) {
         const dayName = dObj.toLocaleDateString("en-US", { weekday: "long" });
@@ -2167,11 +2313,20 @@ function renderUI(state) {
     }
     if (elements.btnDropdownLogin) elements.btnDropdownLogin.classList.add("hidden");
     if (elements.btnDropdownLogout) elements.btnDropdownLogout.classList.remove("hidden");
-    if (elements.btnDropdownEditProfile) elements.btnDropdownEditProfile.classList.remove("hidden");
-    if (elements.btnDropdownSettings) elements.btnDropdownSettings.classList.remove("hidden");
+
+    // Hide edit profile and settings for admin user
+    const isAdmin = state.currentUser.username.toLowerCase() === "admin";
+    if (elements.btnDropdownEditProfile) {
+      if (isAdmin) elements.btnDropdownEditProfile.classList.add("hidden");
+      else elements.btnDropdownEditProfile.classList.remove("hidden");
+    }
+    if (elements.btnDropdownSettings) {
+      if (isAdmin) elements.btnDropdownSettings.classList.add("hidden");
+      else elements.btnDropdownSettings.classList.remove("hidden");
+    }
     
     if (elements.btnDropdownAdmin) {
-      if (state.currentUser.username.toLowerCase() === "admin") {
+      if (isAdmin) {
         elements.btnDropdownAdmin.classList.remove("hidden");
       } else {
         elements.btnDropdownAdmin.classList.add("hidden");
@@ -2188,50 +2343,85 @@ function renderUI(state) {
     if (elements.btnDropdownAdmin) elements.btnDropdownAdmin.classList.add("hidden");
   }
 
-  // 0. Toggle active tab visual styling and sections
+  // Handle Admin Dashboard Visibility
+  const isAdminLoggedIn = state.currentUser && state.currentUser.username.toLowerCase() === "admin";
+  const adminDashboardView = document.getElementById("admin-dashboard-view");
+  const navLinks = document.querySelector(".nav-links");
+  const fabBtn = document.getElementById("fab-main-btn");
   const listAnchor = document.getElementById("recipes-list-anchor");
   const mealPlannerView = document.getElementById("meal-planner-view");
 
-  if (state.activeTab === "home") {
-    if (elements.btnShowHome) elements.btnShowHome.classList.add("active");
-    if (elements.btnShowMyRecipes) elements.btnShowMyRecipes.classList.remove("active");
-    if (elements.btnShowPlanner) elements.btnShowPlanner.classList.remove("active");
-    if (elements.heroBanner) elements.heroBanner.classList.remove("hidden");
-    if (elements.heroSection) elements.heroSection.classList.remove("hidden");
-    if (listAnchor) listAnchor.classList.remove("hidden");
-    if (mealPlannerView) mealPlannerView.classList.add("hidden");
-    if (elements.resultsHeading) elements.resultsHeading.innerHTML = "Top List &ndash; Our mainstay menu";
-  } else if (state.activeTab === "my-recipes") {
-    if (elements.btnShowHome) elements.btnShowHome.classList.remove("active");
-    if (elements.btnShowMyRecipes) elements.btnShowMyRecipes.classList.add("active");
-    if (elements.btnShowPlanner) elements.btnShowPlanner.classList.remove("active");
-    if (elements.heroBanner) elements.heroBanner.classList.add("hidden");
-    if (elements.heroSection) elements.heroSection.classList.add("hidden");
-    if (listAnchor) listAnchor.classList.remove("hidden");
-    if (mealPlannerView) mealPlannerView.classList.add("hidden");
-    if (elements.resultsHeading) elements.resultsHeading.innerHTML = "My Saved Recipes";
-  } else if (state.activeTab === "meal-planner") {
-    if (elements.btnShowHome) elements.btnShowHome.classList.remove("active");
-    if (elements.btnShowMyRecipes) elements.btnShowMyRecipes.classList.remove("active");
-    if (elements.btnShowPlanner) elements.btnShowPlanner.classList.add("active");
+  if (isAdminLoggedIn) {
+    // Hide standard user-facing features
+    if (navLinks) navLinks.classList.add("hidden");
+    if (elements.btnToggleCart) elements.btnToggleCart.classList.add("hidden");
+    if (fabBtn) fabBtn.classList.add("hidden");
     if (elements.heroBanner) elements.heroBanner.classList.add("hidden");
     if (elements.heroSection) elements.heroSection.classList.add("hidden");
     if (listAnchor) listAnchor.classList.add("hidden");
-    if (mealPlannerView) mealPlannerView.classList.remove("hidden");
-  }
+    if (mealPlannerView) mealPlannerView.classList.add("hidden");
+    if (elements.moodBoardsPanel) elements.moodBoardsPanel.classList.add("hidden");
+    
+    // Close sidebar drawer if open
+    const drawer = document.getElementById("shopping-list-drawer");
+    if (drawer) drawer.classList.remove("active");
 
-  // Visual Recipe Box / Mood Boards Filter rendering
-  const moodBoardsPanel = elements.moodBoardsPanel;
-  if (moodBoardsPanel) {
-    if (state.activeTab === "my-recipes") {
-      moodBoardsPanel.classList.remove("hidden");
-      const categories = ["All", "Mains", "Salad", "Baking", "Soup", "Breakfast"];
-      elements.boardsChipsContainer.innerHTML = categories.map(cat => {
-        const isActive = state.activeBoard === cat;
-        return `<button class="board-chip ${isActive ? 'active' : ''}" data-board="${cat}">${escapeHtml(cat)}</button>`;
-      }).join("");
-    } else {
-      moodBoardsPanel.classList.add("hidden");
+    // Show Admin Dashboard view
+    if (adminDashboardView) {
+      adminDashboardView.classList.remove("hidden");
+      renderAdminUsers();
+    }
+  } else {
+    // Show standard user-facing features
+    if (navLinks) navLinks.classList.remove("hidden");
+    if (elements.btnToggleCart) elements.btnToggleCart.classList.remove("hidden");
+    if (fabBtn) fabBtn.classList.remove("hidden");
+    
+    // Hide Admin Dashboard view
+    if (adminDashboardView) adminDashboardView.classList.add("hidden");
+
+    // 0. Toggle active tab visual styling and sections
+    if (state.activeTab === "home") {
+      if (elements.btnShowHome) elements.btnShowHome.classList.add("active");
+      if (elements.btnShowMyRecipes) elements.btnShowMyRecipes.classList.remove("active");
+      if (elements.btnShowPlanner) elements.btnShowPlanner.classList.remove("active");
+      if (elements.heroBanner) elements.heroBanner.classList.remove("hidden");
+      if (elements.heroSection) elements.heroSection.classList.remove("hidden");
+      if (listAnchor) listAnchor.classList.remove("hidden");
+      if (mealPlannerView) mealPlannerView.classList.add("hidden");
+      if (elements.resultsHeading) elements.resultsHeading.innerHTML = "Top List &ndash; Our mainstay menu";
+    } else if (state.activeTab === "my-recipes") {
+      if (elements.btnShowHome) elements.btnShowHome.classList.remove("active");
+      if (elements.btnShowMyRecipes) elements.btnShowMyRecipes.classList.add("active");
+      if (elements.btnShowPlanner) elements.btnShowPlanner.classList.remove("active");
+      if (elements.heroBanner) elements.heroBanner.classList.add("hidden");
+      if (elements.heroSection) elements.heroSection.classList.add("hidden");
+      if (listAnchor) listAnchor.classList.remove("hidden");
+      if (mealPlannerView) mealPlannerView.classList.add("hidden");
+      if (elements.resultsHeading) elements.resultsHeading.innerHTML = "My Saved Recipes";
+    } else if (state.activeTab === "meal-planner") {
+      if (elements.btnShowHome) elements.btnShowHome.classList.remove("active");
+      if (elements.btnShowMyRecipes) elements.btnShowMyRecipes.classList.remove("active");
+      if (elements.btnShowPlanner) elements.btnShowPlanner.classList.add("active");
+      if (elements.heroBanner) elements.heroBanner.classList.add("hidden");
+      if (elements.heroSection) elements.heroSection.classList.add("hidden");
+      if (listAnchor) listAnchor.classList.add("hidden");
+      if (mealPlannerView) mealPlannerView.classList.remove("hidden");
+    }
+
+    // Visual Recipe Box / Mood Boards Filter rendering
+    const moodBoardsPanel = elements.moodBoardsPanel;
+    if (moodBoardsPanel) {
+      if (state.activeTab === "my-recipes") {
+        moodBoardsPanel.classList.remove("hidden");
+        const categories = ["All", "Mains", "Salad", "Baking", "Soup", "Breakfast"];
+        elements.boardsChipsContainer.innerHTML = categories.map(cat => {
+          const isActive = state.activeBoard === cat;
+          return `<button class="board-chip ${isActive ? 'active' : ''}" data-board="${cat}">${escapeHtml(cat)}</button>`;
+        }).join("");
+      } else {
+        moodBoardsPanel.classList.add("hidden");
+      }
     }
   }
 

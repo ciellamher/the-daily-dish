@@ -63,14 +63,19 @@ class Store {
 
     // Seed admin account if it does not exist
     const users = this.loadUsers();
-    if (!users.some(u => u.username.toLowerCase() === "admin")) {
+    const adminIdx = users.findIndex(u => u.username.toLowerCase() === "admin");
+    if (adminIdx === -1) {
       users.push({
         username: "admin",
         password: "admin",
+        email: "admin@dailydish.com",
         bio: "Platform Administrator",
         profilePic: "",
         settings: { weekStartDay: "Sunday" }
       });
+      this.saveUsers(users);
+    } else if (!users[adminIdx].email) {
+      users[adminIdx].email = "admin@dailydish.com";
       this.saveUsers(users);
     }
 
@@ -364,7 +369,7 @@ class Store {
     return { success: true };
   }
 
-  registerUser(username, password) {
+  registerUser(username, password, email) {
     if (!username || !username.trim() || !password) {
       return { success: false, error: "Please enter both username and password." };
     }
@@ -383,10 +388,13 @@ class Store {
       return { success: false, error: "Username is already taken. Please choose another." };
     }
     
+    const userEmail = email && email.trim() ? email.trim() : `${uName.toLowerCase()}@dailydish.com`;
+    
     // Create user
     users.push({ 
       username: uName, 
       password, 
+      email: userEmail,
       bio: "", 
       profilePic: "", 
       settings: { weekStartDay: "Sunday" } 
