@@ -338,20 +338,28 @@
     </section>
 
     <!-- Admin Dashboard Section -->
-    <section id="admin-dashboard-view" class="hidden" style="max-width: 800px; margin: 40px auto; padding: 32px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+    <section id="admin-dashboard-view" class="hidden" style="max-width: 1100px; margin: 40px auto; padding: 32px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
       <div class="login-content" style="text-align: left;">
         <h3 style="font-family: var(--font-serif); margin-bottom: 8px; font-size: 1.8rem; text-align: center; color: var(--text-primary);">Chef Administration Panel</h3>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 24px; text-align: center;">Manage registered chef profiles, reset passwords, or delete accounts.</p>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 24px; text-align: center;">Manage registered chef profiles, view real-time database stats, or perform operations.</p>
 
         <!-- Admin Dashboard Stats -->
-        <div id="admin-stats-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <div id="admin-stats-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
           <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; text-align: center;">
-            <p style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Total Chefs Registered</p>
+            <p style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Chefs Registered</p>
             <h4 id="admin-total-users" style="font-family: var(--font-serif); font-size: 1.8rem; font-weight: 800; color: var(--accent-primary); margin: 0;">0</h4>
           </div>
           <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; text-align: center;">
-            <p style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Total Saved Recipes</p>
+            <p style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Saved Recipes</p>
             <h4 id="admin-total-recipes" style="font-family: var(--font-serif); font-size: 1.8rem; font-weight: 800; color: var(--accent-primary); margin: 0;">0</h4>
+          </div>
+          <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; text-align: center;">
+            <p style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Scheduled Meals</p>
+            <h4 id="admin-total-meals" style="font-family: var(--font-serif); font-size: 1.8rem; font-weight: 800; color: var(--accent-primary); margin: 0;">0</h4>
+          </div>
+          <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; text-align: center;">
+            <p style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Fridge Ingredients</p>
+            <h4 id="admin-total-ingredients" style="font-family: var(--font-serif); font-size: 1.8rem; font-weight: 800; color: var(--accent-primary); margin: 0;">0</h4>
           </div>
         </div>
 
@@ -362,22 +370,56 @@
           style="color: var(--color-success); background-color: rgba(40, 167, 69, 0.1); border: 1px solid rgba(40,167,69,0.2); border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.85rem; margin-bottom: 18px; text-align: left; font-weight: 600;">
         </div>
 
-        <div style="overflow-x: auto; max-height: 450px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-secondary); margin-bottom: 10px;">
-          <table style="width: 100%; border-collapse: collapse; font-family: var(--font-sans); font-size: 0.85rem;">
-             <thead>
-               <tr style="border-bottom: 2px solid var(--border-color); background: var(--bg-tertiary); text-align: left; color: var(--text-secondary); font-weight: 700;">
-                 <th style="padding: 12px 16px;">Chef</th>
-                 <th style="padding: 12px 16px;">Email</th>
-                 <th style="padding: 12px 16px;">Bio</th>
-                 <th style="padding: 12px 16px; text-align: center;">Recipes</th>
-                 <th style="padding: 12px 16px; text-align: right;">Actions</th>
-               </tr>
-             </thead>
-             <tbody id="admin-users-list" style="color: var(--text-primary);">
-               <!-- Populated dynamically by JS -->
-             </tbody>
-          </table>
+        <!-- Admin Layout Grid -->
+        <div class="admin-layout-grid" style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; align-items: start;">
+          
+          <!-- Left Column: Chef Profiles Table -->
+          <div>
+            <h4 style="font-family: var(--font-serif); font-size: 1.2rem; color: var(--text-primary); margin-bottom: 12px; font-weight: 700;">Chefs Database</h4>
+            <div style="overflow-x: auto; max-height: 480px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-secondary);">
+              <table style="width: 100%; border-collapse: collapse; font-family: var(--font-sans); font-size: 0.85rem;">
+                 <thead>
+                   <tr style="border-bottom: 2px solid var(--border-color); background: var(--bg-tertiary); text-align: left; color: var(--text-secondary); font-weight: 700;">
+                     <th style="padding: 12px 16px;">Chef</th>
+                     <th style="padding: 12px 16px;">Email</th>
+                     <th style="padding: 12px 16px;">Bio</th>
+                     <th style="padding: 12px 16px; text-align: center;">Recipes</th>
+                     <th style="padding: 12px 16px; text-align: right;">Actions</th>
+                   </tr>
+                 </thead>
+                 <tbody id="admin-users-list" style="color: var(--text-primary);">
+                   <!-- Populated dynamically by JS -->
+                 </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right Column: Analytics & Details -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- Category Distribution Card -->
+            <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px;">
+              <h4 style="font-family: var(--font-serif); font-size: 1.1rem; color: var(--text-primary); margin-bottom: 12px; font-weight: 700;">Category Breakdown</h4>
+              <div id="admin-categories-breakdown" style="display: flex; flex-direction: column; gap: 12px;">
+                <!-- Dynamically populated progress bars -->
+              </div>
+            </div>
+
+            <!-- Recipe Difficulty and Top Chefs Card -->
+            <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px;">
+              <h4 style="font-family: var(--font-serif); font-size: 1.1rem; color: var(--text-primary); margin-bottom: 12px; font-weight: 700;">Difficulty Levels</h4>
+              <div id="admin-difficulty-breakdown" style="display: flex; gap: 10px; justify-content: space-between; margin-bottom: 20px;">
+                <!-- Dynamically populated Difficulty badges -->
+              </div>
+
+              <h4 style="font-family: var(--font-serif); font-size: 1.1rem; color: var(--text-primary); margin-bottom: 12px; font-weight: 700; border-top: 1px solid var(--border-color); padding-top: 16px;">Top Chef Profiles</h4>
+              <div id="admin-top-chefs-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Dynamically populated Top Chefs -->
+              </div>
+            </div>
+          </div>
+
         </div>
+
       </div>
     </section>
 

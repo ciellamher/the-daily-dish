@@ -204,11 +204,14 @@ const elements = {
 
   // Admin Panel
   btnDropdownAdmin: document.getElementById("btn-dropdown-admin"),
-  adminPanelModal: document.getElementById("admin-panel-modal"),
-  adminPanelCloseBtn: document.getElementById("admin-panel-close-btn"),
   adminUsersList: document.getElementById("admin-users-list"),
   adminTotalUsers: document.getElementById("admin-total-users"),
   adminTotalRecipes: document.getElementById("admin-total-recipes"),
+  adminTotalMeals: document.getElementById("admin-total-meals"),
+  adminTotalIngredients: document.getElementById("admin-total-ingredients"),
+  adminCategoriesBreakdown: document.getElementById("admin-categories-breakdown"),
+  adminDifficultyBreakdown: document.getElementById("admin-difficulty-breakdown"),
+  adminTopChefsList: document.getElementById("admin-top-chefs-list"),
   adminPanelErrorMsg: document.getElementById("admin-panel-error-msg"),
   adminPanelSuccessMsg: document.getElementById("admin-panel-success-msg"),
 
@@ -1714,15 +1717,173 @@ function bindGlobalEvents() {
     if (!elements.adminUsersList) return;
     const users = store.loadUsers();
 
-    // Update admin stats
-    if (elements.adminTotalUsers) {
-      elements.adminTotalUsers.innerText = users.length;
-    }
-    if (elements.adminTotalRecipes) {
-      const totalRecipes = users.reduce((acc, user) => acc + getSavedRecipeCount(user.username), 0);
-      elements.adminTotalRecipes.innerText = totalRecipes;
-    }
+    let totalRecipes = 0;
+    let totalMealsPlanned = 0;
+    let totalPantryIngredients = 0;
+
+    // Category breakdown counters
+    const categories = { Mains: 0, Salad: 0, Baking: 0, Soup: 0, Breakfast: 0 };
     
+    // Difficulty breakdown counters
+    const difficulties = { Easy: 0, Medium: 0, Hard: 0 };
+
+    // Compile list of top chefs (sorted by saved recipes)
+    const chefRanks = [];
+
+    users.forEach(user => {
+      const username = user.username.toLowerCase().trim();
+      
+      // Saved recipe count and details
+      let userRecipeCount = 0;
+      try {
+        const storedRecipes = localStorage.getItem(`cookbook_my_recipes_${username}`);
+        if (storedRecipes) {
+          const parsed = JSON.parse(storedRecipes);
+          if (Array.isArray(parsed)) {
+            userRecipeCount = parsed.length;
+            totalRecipes += userRecipeCount;
+            parsed.forEach(r => {
+              // Category matching
+              const cat = r.category || "Mains";
+              if (categories[cat] !== undefined) {
+                categories[cat]++;
+              } else {
+                let matched = false;
+                for (const key in categories) {
+                  if (cat.toLowerCase().includes(key.toLowerCase())) {
+                    categories[key]++;
+                    matched = true;
+                    break;
+                  }
+                }
+                if (!matched) categories.Mains++;
+              }
+
+              // Difficulty matching
+              const diff = r.difficulty || "Medium";
+              if (difficulties[diff] !== undefined) {
+                difficulties[diff]++;
+              } else {
+                let matched = false;
+                for (const key in difficulties) {
+                  if (diff.toLowerCase().includes(key.toLowerCase())) {
+                    difficulties[key]++;
+                    matched = true;
+                    break;
+                  }
+                }
+                if (!matched) difficulties.Medium++;
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to parse recipes for " + user.username, e);
+      }
+
+      chefRanks.push({
+        username: user.username,
+        recipeCount: userRecipeCount,
+        profilePic: user.profilePic
+      });
+
+      // Meal plans
+      try {
+        const storedPlan = localStorage.getItem(`cookbook_meal_plan_${username}`);
+        if (storedPlan) {
+          const parsed = JSON.parse(storedPlan);
+          if (parsed && typeof parsed === "object") {
+            for (const date in parsed) {
+              const dayPlan = parsed[date];
+              if (dayPlan) {
+                if (dayPlan.breakfast) totalMealsPlanned++;
+                if (dayPlan.lunch) totalMealsPlanned++;
+                if (dayPlan.dinner) totalMealsPlanned++;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Failed to parse meal plan for " + user.username, e);
+      }
+
+      // Fridge ingredients
+      try {
+        const storedIngredients = localStorage.getItem(`cookbook_fridge_ingredients_${username}`);
+        if (storedIngredients) {
+          const parsed = JSON.parse(storedIngredients);
+          if (Array.isArray(parsed)) {
+            totalPantryIngredients += parsed.length;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to parse fridge ingredients for " + user.username, e);
+      }
+    });
+
+    // Update simple statistics elements
+    if (elements.adminTotalUsers) elements.adminTotalUsers.innerText = users.length;
+    if (elements.adminTotalRecipes) elements.adminTotalRecipes.innerText = totalRecipes;
+    if (elements.adminTotalMeals) elements.adminTotalMeals.innerText = totalMealsPlanned;
+    if (elements.adminTotalIngredients) elements.adminTotalIngredients.innerText = totalPantryIngredients;
+
+    // Render Categories Breakdown progress bars
+    if (elements.adminCategoriesBreakdown) {
+      elements.adminCategoriesBreakdown.innerHTML = Object.entries(categories).map(([cat, count]) => {
+        const percent = totalRecipes > 0 ? Math.round((count / totalRecipes) * 100) : 0;
+        return `
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px; color: var(--text-secondary);">
+              <span style="font-weight: 600;">${escapeHtml(cat)}</span>
+              <span style="font-weight: 700; color: var(--accent-primary);">${count} (${percent}%)</span>
+            </div>
+            <div style="width: 100%; height: 8px; background: var(--bg-secondary); border-radius: var(--radius-full); overflow: hidden; border: 1px solid var(--border-color);">
+              <div style="width: ${percent}%; height: 100%; background: var(--accent-primary); border-radius: var(--radius-full);"></div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // Render Difficulty Breakdown badges
+    if (elements.adminDifficultyBreakdown) {
+      elements.adminDifficultyBreakdown.innerHTML = Object.entries(difficulties).map(([diff, count]) => {
+        let badgeColor = "var(--accent-primary)";
+        if (diff === "Easy") badgeColor = "var(--color-success)";
+        else if (diff === "Hard") badgeColor = "var(--color-danger)";
+        return `
+          <div style="flex: 1; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 8px; text-align: center;">
+            <p style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 4px;">${escapeHtml(diff)}</p>
+            <h5 style="font-size: 1.1rem; font-weight: 800; color: ${badgeColor}; margin: 0;">${count}</h5>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // Render Top Chef Profiles
+    if (elements.adminTopChefsList) {
+      // Sort by recipe count desc
+      chefRanks.sort((a, b) => b.recipeCount - a.recipeCount);
+      const topChefs = chefRanks.slice(0, 3); // top 3
+      elements.adminTopChefsList.innerHTML = topChefs.map((chef, idx) => {
+        const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FFD166'/><circle cx='50' cy='58' r='30' fill='%23FFE3A8'/><path d='M25 40 L25 15 L45 30 Z' fill='%23FFE3A8'/><path d='M75 40 L75 15 L55 30 Z' fill='%23FFE3A8'/><circle cx='40' cy='48' r='4' fill='%233D2723'/><circle cx='60' cy='48' r='4' fill='%233D2723'/><path d='M45 60 Q50 63 55 60' stroke='%233D2723' stroke-width='3' fill='none'/><path d='M50 55 L50 58' stroke='%233D2723' stroke-width='2'/><path d='M35 15 Q50 5 65 15 L50 25 Z' fill='%23FFFFFF' stroke='%233D2723' stroke-width='2'/></svg>";
+        const avatarSrc = chef.profilePic || defaultAvatar;
+        let rankMedal = "🥇";
+        if (idx === 1) rankMedal = "🥈";
+        else if (idx === 2) rankMedal = "🥉";
+        return `
+          <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 8px 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.1rem;">${rankMedal}</span>
+              <img src="${escapeHtml(avatarSrc)}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);" alt="${escapeHtml(chef.username)}">
+              <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">${escapeHtml(chef.username)}</span>
+            </div>
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--accent-primary);">${chef.recipeCount} saved</span>
+          </div>
+        `;
+      }).join("");
+    }
+
     elements.adminUsersList.innerHTML = users.map(user => {
       const isSystemAdmin = user.username.toLowerCase() === "admin";
       const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FFD166'/><circle cx='50' cy='58' r='30' fill='%23FFE3A8'/><path d='M25 40 L25 15 L45 30 Z' fill='%23FFE3A8'/><path d='M75 40 L75 15 L55 30 Z' fill='%23FFE3A8'/><circle cx='40' cy='48' r='4' fill='%233D2723'/><circle cx='60' cy='48' r='4' fill='%233D2723'/><path d='M45 60 Q50 63 55 60' stroke='%233D2723' stroke-width='3' fill='none'/><path d='M50 55 L50 58' stroke='%233D2723' stroke-width='2'/><path d='M35 15 Q50 5 65 15 L50 25 Z' fill='%23FFFFFF' stroke='%233D2723' stroke-width='2'/></svg>";
@@ -2371,6 +2532,7 @@ function renderUI(state) {
       adminDashboardView.classList.remove("hidden");
       renderAdminUsers();
     }
+    return;
   } else {
     // Show standard user-facing features
     if (navLinks) navLinks.classList.remove("hidden");
