@@ -179,6 +179,9 @@ export function getGourmetFoodImage(query, category) {
   if (q.includes("sushi") || q.includes("japanese")) {
     return "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&auto=format&fit=crop&q=80";
   }
+  if (q.includes("cupcake")) {
+    return "https://images.unsplash.com/photo-1550617931-e17a7b70dce2?w=600&auto=format&fit=crop&q=80";
+  }
   if (q.includes("cake") || q.includes("cookie") || q.includes("brownie") || q.includes("sweet") || cat.includes("baking")) {
     return "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80";
   }

@@ -794,7 +794,7 @@ export function generateRecipeOnSpot(query, onStepChange, onComplete) {
   } else if (normalizedQuery.includes("cupcake") || normalizedQuery.includes("cupcakes")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.cupcake));
     recipe.id = `generated-${Date.now()}`;
-    recipe.sourceUrl = "https://sallysbakingaddiction.com/simply-vanilla-cupcakes/";
+    recipe.sourceUrl = "https://sallysbakingaddiction.com/simply-perfect-vanilla-cupcakes/";
     recipe.sourceName = "Sally's Baking Addiction";
   } else if (normalizedQuery.includes("cake") || normalizedQuery.includes("brownie") || normalizedQuery.includes("lava cake")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.cake));
