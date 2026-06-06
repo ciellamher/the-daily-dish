@@ -180,6 +180,9 @@ export function getGourmetFoodImage(query, category) {
     return "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&auto=format&fit=crop&q=80";
   }
   if (q.includes("cupcake")) {
+    if (q.includes("vanilla")) {
+      return "https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop&q=80";
+    }
     return "https://images.unsplash.com/photo-1550617931-e17a7b70dce2?w=600&auto=format&fit=crop&q=80";
   }
   if (q.includes("cake") || q.includes("cookie") || q.includes("brownie") || q.includes("sweet") || cat.includes("baking")) {
