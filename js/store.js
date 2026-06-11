@@ -32,6 +32,55 @@ function formatDateIso(date) {
   return `${y}-${m}-${d}`;
 }
 
+function validatePasswordStrength(password, username = "", email = "") {
+  if (!password) {
+    return "Password cannot be empty.";
+  }
+  if (password.length < 8) {
+    return "Password is too short (must be at least 8 characters).";
+  }
+  if (password.length > 128) {
+    return "Password is too long (maximum 128 characters).";
+  }
+  
+  const lowerPassword = password.toLowerCase();
+  
+  // Check against common easily guessed passwords
+  const commonPasswords = [
+    "123456", "12345678", "123456789", "password", "qwerty", "admin", "welcome",
+    "letmein", "111111", "123123", "password123", "iloveyou", "sunshine", "princess"
+  ];
+  if (commonPasswords.includes(lowerPassword)) {
+    return "Password is too common and can be guessed easily.";
+  }
+  
+  // Check if it's too similar to username
+  if (username) {
+    const lowerUsername = username.toLowerCase().trim();
+    if (lowerUsername && (lowerPassword === lowerUsername || lowerPassword.includes(lowerUsername))) {
+      return "Password cannot contain or be equal to your username.";
+    }
+  }
+  
+  // Check if it's too similar to email
+  if (email) {
+    const emailParts = email.toLowerCase().split('@');
+    const emailLocal = emailParts[0];
+    if (emailLocal && (lowerPassword === emailLocal || lowerPassword.includes(emailLocal))) {
+      return "Password cannot be too similar to your email address.";
+    }
+  }
+  
+  // Check complexity (must contain both letters and numbers)
+  const hasLetter = /[a-zA-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  if (!hasLetter || !hasNumber) {
+    return "Password must contain both letters and numbers to ensure it cannot be easily guessed.";
+  }
+  
+  return null;
+}
+
 class Store {
   constructor() {
     this.listeners = [];
@@ -376,8 +425,10 @@ class Store {
     if (username.trim().length < 3) {
       return { success: false, error: "Username must be at least 3 characters long." };
     }
-    if (password.length < 4) {
-      return { success: false, error: "Password must be at least 4 characters long." };
+    
+    const strengthError = validatePasswordStrength(password, username, email);
+    if (strengthError) {
+      return { success: false, error: strengthError };
     }
     
     const uName = username.trim();
@@ -473,8 +524,10 @@ class Store {
     if (user.password !== currentPassword) {
       return { success: false, error: "Incorrect current password" };
     }
-    if (newPassword.length < 4) {
-      return { success: false, error: "New password must be at least 4 characters long" };
+    
+    const strengthError = validatePasswordStrength(newPassword, user.username, user.email);
+    if (strengthError) {
+      return { success: false, error: strengthError };
     }
     
     users[idx].password = newPassword;
@@ -483,13 +536,18 @@ class Store {
   }
 
   resetUserPassword(username, newPassword) {
-    if (!username || !newPassword || newPassword.length < 4) {
-      return { success: false, error: "Password must be at least 4 characters long" };
+    if (!username) {
+      return { success: false, error: "Username is required." };
     }
     const users = this.loadUsers();
     const idx = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase().trim());
     if (idx === -1) {
       return { success: false, error: "Chef account not found." };
+    }
+    const user = users[idx];
+    const strengthError = validatePasswordStrength(newPassword, user.username, user.email);
+    if (strengthError) {
+      return { success: false, error: strengthError };
     }
     users[idx].password = newPassword;
     this.saveUsers(users);

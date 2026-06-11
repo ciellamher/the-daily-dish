@@ -1931,10 +1931,6 @@ function bindGlobalEvents() {
         const username = btn.getAttribute("data-username");
         const newPassword = prompt(`Enter new password for chef "${username}":`);
         if (newPassword === null) return; // User cancelled
-        if (newPassword.trim().length < 4) {
-          showAdminMsg("Password must be at least 4 characters long.", "error");
-          return;
-        }
         
         const res = store.resetUserPassword(username, newPassword.trim());
         if (res.success) {
