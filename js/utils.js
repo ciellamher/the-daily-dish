@@ -181,7 +181,7 @@ export function getGourmetFoodImage(query, category) {
   }
   if (q.includes("cupcake")) {
     if (q.includes("vanilla")) {
-      return "https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop&q=80";
+      return "https://images.unsplash.com/photo-1486428128344-5413e434ad35?w=600&auto=format&fit=crop&q=80";
     }
     return "https://images.unsplash.com/photo-1550617931-e17a7b70dce2?w=600&auto=format&fit=crop&q=80";
   }
