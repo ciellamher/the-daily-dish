@@ -462,3 +462,28 @@ export function extractEquipment(title, ingredients, instructions) {
   return equipmentList;
 }
 
+/**
+ * Fetches HTML from a URL bypassing CORS using public proxy fallback logic.
+ * Tries cors.lol first (which works on duckduckgo), and falls back to allorigins.win.
+ */
+export function fetchHtmlThroughProxy(url) {
+  return fetch(`https://api.cors.lol/?url=${encodeURIComponent(url)}`)
+    .then(res => {
+      if (!res.ok) throw new Error("cors.lol failed with status " + res.status);
+      return res.text();
+    })
+    .catch(err => {
+      console.warn("cors.lol proxy failed, trying AllOrigins fallback...", err);
+      return fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
+        .then(res => {
+          if (!res.ok) throw new Error("AllOrigins failed with status " + res.status);
+          return res.json();
+        })
+        .then(json => {
+          if (!json || !json.contents) throw new Error("Invalid response from AllOrigins");
+          return json.contents;
+        });
+    });
+}
+
+

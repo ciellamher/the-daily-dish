@@ -1,7 +1,7 @@
 // URL Recipe Importer Logic & Scraper Simulator
 
 import { store } from "../store.js";
-import { getGourmetFoodImage, extractEquipment } from "../utils.js";
+import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy } from "../utils.js";
 
 // Mock database of recipes to return based on URL keyword searches
 const MOCK_IMPORTED_RECIPES = {
@@ -142,7 +142,7 @@ const MOCK_IMPORTED_RECIPES = {
  * Simulates importing a recipe from a URL by fetching its HTML via a CORS proxy,
  * extracting Recipe schema metadata (JSON-LD), or falling back to search API / stubs.
  */
-export function simulateRecipeImport(url, onStepChange, onComplete) {
+export function simulateRecipeImport(url, onStepChange, onComplete, skipSave = false) {
   onStepChange({ step: "connect", status: "Connecting to recipe server...", progress: 15 });
   
   // Clean URL to ensure it starts with http
@@ -151,12 +151,8 @@ export function simulateRecipeImport(url, onStepChange, onComplete) {
     targetUrl = "https://" + targetUrl;
   }
   
-  // Use public CORS proxy to fetch the HTML (using codetabs to bypass Cloudflare 522 errors)
-  fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`)
-    .then(res => {
-      if (!res.ok) throw new Error("Network response was not ok");
-      return res.text();
-    })
+  // Use public CORS proxy fallback logic
+  fetchHtmlThroughProxy(targetUrl)
     .then(html => {
       if (!html || html.trim().startsWith("Error") || html.length < 100) {
         throw new Error("Invalid or empty response from proxy");
@@ -259,22 +255,22 @@ export function simulateRecipeImport(url, onStepChange, onComplete) {
               
               onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
               setTimeout(() => {
-                store.addRecipe(parsedRecipe);
+                if (!skipSave) store.addRecipe(parsedRecipe);
                 onComplete(parsedRecipe);
               }, 100);
             } else {
-              serveFinalMetaFallback(meta, targetUrl, onStepChange, onComplete);
+              serveFinalMetaFallback(meta, targetUrl, onStepChange, onComplete, skipSave);
             }
           })
           .catch(() => {
-            serveFinalMetaFallback(meta, targetUrl, onStepChange, onComplete);
+            serveFinalMetaFallback(meta, targetUrl, onStepChange, onComplete, skipSave);
           });
       } else {
         onStepChange({ step: "structure", status: "Formulating cooking instructions...", progress: 90 });
         setTimeout(() => {
           onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
           setTimeout(() => {
-            store.addRecipe(importedRecipe);
+            if (!skipSave) store.addRecipe(importedRecipe);
             onComplete(importedRecipe);
           }, 100);
         }, 150);
@@ -288,7 +284,7 @@ export function simulateRecipeImport(url, onStepChange, onComplete) {
         description: `Imported recipe from ${targetUrl}`,
         image: getGourmetFoodImage(domain, "Mains")
       };
-      serveFinalMetaFallback(fallbackMeta, targetUrl, onStepChange, onComplete);
+      serveFinalMetaFallback(fallbackMeta, targetUrl, onStepChange, onComplete, skipSave);
     });
 }
 
@@ -583,7 +579,7 @@ function cleanPathQuery(url) {
   }
 }
 
-function serveFinalMetaFallback(meta, url, onStepChange, onComplete) {
+function serveFinalMetaFallback(meta, url, onStepChange, onComplete, skipSave = false) {
   const title = decodeHTMLEntities(meta.title) || `Recipe from ${extractDomain(url)}`;
   const finalRecipe = {
     id: `imported-${Date.now()}`,
@@ -608,7 +604,7 @@ function serveFinalMetaFallback(meta, url, onStepChange, onComplete) {
   };
   onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
   setTimeout(() => {
-    store.addRecipe(finalRecipe);
+    if (!skipSave) store.addRecipe(finalRecipe);
     onComplete(finalRecipe);
   }, 100);
 }

@@ -194,6 +194,16 @@
               </span>
               <span>Generate AI</span>
             </button>
+            <button id="search-link-import-btn" class="search-generate-btn" title="Import recipe from a link!"
+              style="border-radius: var(--radius-full); padding: 0 18px; height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255, 126, 103, 0.08); border: 2px solid var(--accent-primary); color: var(--accent-primary); cursor: pointer; transition: all var(--transition-normal); flex-shrink: 0; font-weight: 700; font-size: 0.9rem; box-shadow: 0 0 12px rgba(255, 126, 103, 0.2);">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon"
+                style="width: 20px; height: 20px;">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+              <span>Import Link</span>
+            </button>
             <button id="search-upload-btn" class="search-generate-btn" title="Identify recipe from photo!"
               style="border-radius: var(--radius-full); padding: 0 18px; height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255, 126, 103, 0.08); border: 2px solid var(--accent-primary); color: var(--accent-primary); cursor: pointer; transition: all var(--transition-normal); flex-shrink: 0; font-weight: 700; font-size: 0.9rem; box-shadow: 0 0 12px rgba(255, 126, 103, 0.2);">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -574,6 +584,29 @@
           <h3>New Recipe Created!</h3>
           <p id="generated-recipe-title-preview" class="recipe-preview-title">Savory Beef Tacos</p>
           <button id="btn-view-generated" class="view-imported-btn">View Recipe</button>
+        </div>
+
+        <!-- Confirmation State -->
+        <div id="generator-confirmation-state" class="importer-success hidden" style="text-align: center;">
+          <div class="success-checkmark">
+            <div class="checkmark-circle" style="border-color: var(--accent-primary);">
+              <span class="checkmark-icon" style="color: var(--accent-primary);">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="width: 32px; height: 32px;">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              </span>
+            </div>
+          </div>
+          <h3>Is this what you're looking for?</h3>
+          <p id="generator-confirm-title-preview" class="recipe-preview-title">Savory Beef Tacos</p>
+          <p id="generator-confirm-domain-preview" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; margin-top: -8px;">allrecipes.com</p>
+          <div style="display: flex; gap: 12px; justify-content: center; margin-top: 15px;">
+            <button id="btn-generator-confirm-yes" class="view-imported-btn" style="flex: 1; max-width: 150px; padding: 10px 0;">Yes</button>
+            <button id="btn-generator-confirm-no" class="view-imported-btn" style="flex: 1; max-width: 150px; padding: 10px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-primary);">No</button>
+          </div>
         </div>
 
         <!-- Failure State -->
@@ -1442,7 +1475,7 @@
   </div>
 
   <!-- Main JavaScript File -->
-  <script type="module" src="js/app.js?v=1.4"></script>
+  <script type="module" src="js/app.js?v=1.5"></script>
 </body>
 
 </html>

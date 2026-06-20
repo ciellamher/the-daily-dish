@@ -4,8 +4,8 @@ import { store } from "./store.js";
 import { renderRecipeCard } from "./components/recipe-card.js";
 import { renderRecipeDetail, handleDetailModalClick, INGREDIENT_SUBSTITUTIONS, renderRecipeEditForm } from "./components/recipe-detail.js";
 import { renderShoppingList, exportShoppingList } from "./components/shopping-list.js";
-import { simulateRecipeImport, parseSchemaIngredients } from "./components/importer.js";
-import { generateRecipeOnSpot } from "./components/generator.js";
+import { simulateRecipeImport, parseSchemaIngredients } from "./components/importer.js?v=1.5";
+import { generateRecipeOnSpot } from "./components/generator.js?v=1.5";
 import { escapeHtml, ICONS, startAmbientAudio, stopAmbientAudio } from "./utils.js";
 
 // DOM Selector Elements
@@ -21,6 +21,7 @@ const elements = {
   btnHeroMenu: document.getElementById("btn-hero-menu"),
   btnHeroGenerate: document.getElementById("btn-hero-generate"),
   searchGenerateBtn: document.getElementById("search-generate-btn"),
+  searchLinkImportBtn: document.getElementById("search-link-import-btn"),
   
   // Fridge Panel
   fridgePickerPanel: document.getElementById("fridge-picker-panel"),
@@ -85,6 +86,11 @@ const elements = {
   btnSearchExternalLink: document.getElementById("btn-search-external-link"),
   generatorFailureImportUrl: document.getElementById("generator-failure-import-url"),
   btnGeneratorFailureImport: document.getElementById("btn-generator-failure-import"),
+  generatorConfirmationState: document.getElementById("generator-confirmation-state"),
+  generatorConfirmTitlePreview: document.getElementById("generator-confirm-title-preview"),
+  generatorConfirmDomainPreview: document.getElementById("generator-confirm-domain-preview"),
+  btnGeneratorConfirmYes: document.getElementById("btn-generator-confirm-yes"),
+  btnGeneratorConfirmNo: document.getElementById("btn-generator-confirm-no"),
   
   // Floating Action Button
   fabContainer: document.getElementById("fab-container"),
@@ -358,6 +364,13 @@ function bindGlobalEvents() {
         alert("The Daily Dish needs you to type a dish name first! Try 'Pizza' or 'French Fries'.");
         elements.recipeSearchInput.focus();
       }
+    });
+  }
+
+  /* --- 4b. Direct search link import button click --- */
+  if (elements.searchLinkImportBtn) {
+    elements.searchLinkImportBtn.addEventListener("click", () => {
+      openModal(elements.importerModal);
     });
   }
 
@@ -671,6 +684,36 @@ function bindGlobalEvents() {
       openModal(elements.recipeDetailModal);
     }
   });
+
+  // Yes - confirm auto-searched recipe
+  elements.btnGeneratorConfirmYes.addEventListener("click", () => {
+    if (pendingGeneratedRecipe) {
+      store.addRecipe(pendingGeneratedRecipe);
+      
+      elements.generatorConfirmationState.classList.add("hidden");
+      elements.generatorSuccessState.classList.remove("hidden");
+      elements.generatedRecipeTitlePreview.innerText = pendingGeneratedRecipe.title;
+      
+      pendingGeneratedRecipe = null;
+      
+      // Force scroll to grid result so they can see the generated card easily when closed
+      const targetGrid = document.getElementById("recipes-list-anchor");
+      if (targetGrid) {
+        targetGrid.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  });
+
+  // No - reject auto-searched recipe and show custom URL paste
+  elements.btnGeneratorConfirmNo.addEventListener("click", () => {
+    elements.generatorConfirmationState.classList.add("hidden");
+    if (elements.generatorFailureState) {
+      elements.generatorFailureState.classList.remove("hidden");
+      elements.generatorFailureMessage.innerText = "No problem! You can paste a direct recipe link below to import it into your Cookbook.";
+    }
+    pendingGeneratedRecipe = null;
+  });
+
   if (elements.btnGeneratorFailureImport) {
     elements.btnGeneratorFailureImport.addEventListener("click", () => {
       const url = elements.generatorFailureImportUrl.value.trim();
@@ -2873,6 +2916,8 @@ function renderUI(state) {
    AI GENERATOR PROCESS LOGIC
    ========================================================================== */
 
+let pendingGeneratedRecipe = null;
+
 function triggerAiRecipeGeneration(query) {
   if (!query || !query.trim()) return;
 
@@ -2880,11 +2925,15 @@ function triggerAiRecipeGeneration(query) {
   openModal(elements.generatorModal);
   elements.generatorLoadingState.classList.remove("hidden");
   elements.generatorSuccessState.classList.add("hidden");
+  if (elements.generatorConfirmationState) {
+    elements.generatorConfirmationState.classList.add("hidden");
+  }
   if (elements.generatorFailureState) {
     elements.generatorFailureState.classList.add("hidden");
   }
   
   resetGeneratorStepsUI();
+  pendingGeneratedRecipe = null;
 
   generateRecipeOnSpot(
     query,
@@ -2915,6 +2964,9 @@ function triggerAiRecipeGeneration(query) {
       if (!generatedRecipe) {
         elements.generatorLoadingState.classList.add("hidden");
         elements.generatorSuccessState.classList.add("hidden");
+        if (elements.generatorConfirmationState) {
+          elements.generatorConfirmationState.classList.add("hidden");
+        }
         if (elements.generatorFailureState) {
           elements.generatorFailureState.classList.remove("hidden");
           elements.generatorFailureMessage.innerText = `We couldn't find a verified recipe for "${query}" online.`;
@@ -2922,17 +2974,32 @@ function triggerAiRecipeGeneration(query) {
         }
         return;
       }
+
       elements.generatorLoadingState.classList.add("hidden");
-      elements.generatorSuccessState.classList.remove("hidden");
-      if (elements.generatorFailureState) {
-        elements.generatorFailureState.classList.add("hidden");
-      }
-      elements.generatedRecipeTitlePreview.innerText = generatedRecipe.title;
-      
-      // Force scroll to grid result so they can see the generated card easily when closed
-      const targetGrid = document.getElementById("recipes-list-anchor");
-      if (targetGrid) {
-        targetGrid.scrollIntoView({ behavior: "smooth" });
+
+      if (generatedRecipe.isConfirmationPending) {
+        pendingGeneratedRecipe = generatedRecipe.recipe;
+        elements.generatorSuccessState.classList.add("hidden");
+        if (elements.generatorConfirmationState) {
+          elements.generatorConfirmationState.classList.remove("hidden");
+          elements.generatorConfirmTitlePreview.innerText = generatedRecipe.recipe.title;
+          elements.generatorConfirmDomainPreview.innerText = generatedRecipe.recipe.sourceName || generatedRecipe.recipe.sourceUrl;
+        }
+      } else {
+        elements.generatorSuccessState.classList.remove("hidden");
+        if (elements.generatorConfirmationState) {
+          elements.generatorConfirmationState.classList.add("hidden");
+        }
+        if (elements.generatorFailureState) {
+          elements.generatorFailureState.classList.add("hidden");
+        }
+        elements.generatedRecipeTitlePreview.innerText = generatedRecipe.title;
+        
+        // Force scroll to grid result so they can see the generated card easily when closed
+        const targetGrid = document.getElementById("recipes-list-anchor");
+        if (targetGrid) {
+          targetGrid.scrollIntoView({ behavior: "smooth" });
+        }
       }
     }
   );
@@ -2952,12 +3019,16 @@ function resetGeneratorStepsUI() {
 function resetGeneratorState() {
   elements.generatorLoadingState.classList.add("hidden");
   elements.generatorSuccessState.classList.add("hidden");
+  if (elements.generatorConfirmationState) {
+    elements.generatorConfirmationState.classList.add("hidden");
+  }
   if (elements.generatorFailureState) {
     elements.generatorFailureState.classList.add("hidden");
   }
   if (elements.generatorFailureImportUrl) {
     elements.generatorFailureImportUrl.value = "";
   }
+  pendingGeneratedRecipe = null;
   resetGeneratorStepsUI();
 }
 

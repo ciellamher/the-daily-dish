@@ -1,7 +1,8 @@
 // AI Recipe Generator Component (Client-side Simulation)
 
 import { store } from "../store.js";
-import { getGourmetFoodImage, extractEquipment } from "../utils.js";
+import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy } from "../utils.js";
+import { simulateRecipeImport } from "./importer.js?v=1.5";
 
 // Rich recipes templates for popular keyword matches
 const PREDEFINED_AI_TEMPLATES = {
@@ -740,6 +741,8 @@ function generateDynamicFallback(query) {
     category,
     tags: ["Generated", "AI Chef", "On The Spot"],
     image: "", // Generates placeholder card icon
+    sourceUrl: `https://www.google.com/search?q=${encodeURIComponent(cleanQuery)}+recipe`,
+    sourceName: "Google Search Reference",
     equipment: extractEquipment(title, ingredients, instructions),
     ingredients,
     instructions
@@ -796,12 +799,12 @@ export function generateRecipeOnSpot(query, onStepChange, onComplete) {
     recipe.id = `generated-${Date.now()}`;
     recipe.sourceUrl = "https://sallysbakingaddiction.com/simply-perfect-vanilla-cupcakes/";
     recipe.sourceName = "Sally's Baking Addiction";
-  } else if (normalizedQuery.includes("cake") || normalizedQuery.includes("brownie") || normalizedQuery.includes("lava cake")) {
+  } else if (normalizedQuery === "cake" || normalizedQuery.includes("chocolate cake") || normalizedQuery.includes("lava cake") || normalizedQuery.includes("brownie")) {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.cake));
     recipe.id = `generated-${Date.now()}`;
     recipe.sourceUrl = "https://sallysbakingaddiction.com/chocolate-lava-cakes/";
     recipe.sourceName = "Sally's Baking Addiction";
-  } else if (normalizedQuery.includes("soup") || normalizedQuery.includes("broth")) {
+  } else if (normalizedQuery === "soup" || normalizedQuery === "chicken soup" || normalizedQuery.includes("chicken noodle soup") || normalizedQuery === "broth") {
     recipe = JSON.parse(JSON.stringify(PREDEFINED_AI_TEMPLATES.soup));
     recipe.id = `generated-${Date.now()}`;
     recipe.sourceUrl = "https://www.seriouseats.com/easy-chicken-noodle-soup-recipe";
@@ -869,14 +872,93 @@ export function generateRecipeOnSpot(query, onStepChange, onComplete) {
             }, 150);
           }, 150);
         } else {
-          onComplete(null);
+          // Fallback to web search
+          searchAndScrapeOnline(query, onStepChange, onComplete);
         }
       })
       .catch(err => {
-        console.error("Meal search API failed", err);
-        onComplete(null);
+        console.error("Meal search API failed, falling back to web search...", err);
+        searchAndScrapeOnline(query, onStepChange, onComplete);
       });
   }
+}
+
+/**
+ * Searches the web via a DuckDuckGo static HTML scrape, extracts the first link,
+ * and automatically tries to scrape and import it, falling back to a dynamic template.
+ */
+function searchAndScrapeOnline(query, onStepChange, onComplete) {
+  onStepChange({ step: "connect", status: "Searching the web for organic recipes...", progress: 40 });
+  
+  const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query + ' recipe')}`;
+  
+  fetchHtmlThroughProxy(searchUrl)
+    .then(html => {
+      let firstLink = null;
+      if (html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const links = doc.querySelectorAll(".result__a");
+        for (const link of links) {
+          let href = link.getAttribute("href");
+          if (href) {
+            if (href.includes("uddg=")) {
+              const match = href.match(/uddg=([^&]+)/);
+              if (match) {
+                href = decodeURIComponent(match[1]);
+              }
+            }
+            if (href.startsWith("//")) {
+              href = "https:" + href;
+            }
+            if (href.startsWith("http") && !href.includes("duckduckgo.com")) {
+              firstLink = href;
+              break;
+            }
+          }
+        }
+      }
+      
+      if (firstLink) {
+        onStepChange({ step: "extract", status: "Found recipe online! Scraping content...", progress: 60 });
+        
+        simulateRecipeImport(
+          firstLink,
+          onStepChange,
+          (scrapedRecipe) => {
+            if (scrapedRecipe) {
+              onComplete({ isConfirmationPending: true, recipe: scrapedRecipe });
+            } else {
+              // Failed to extract anything, generate fallback locally
+              generateAndSaveDynamicRecipe(query, onStepChange, onComplete);
+            }
+          },
+          true // skipSave
+        );
+      } else {
+        generateAndSaveDynamicRecipe(query, onStepChange, onComplete);
+      }
+    })
+    .catch(err => {
+      console.warn("Search engine query failed, generating local fallback...", err);
+      generateAndSaveDynamicRecipe(query, onStepChange, onComplete);
+    });
+}
+
+/**
+ * Helper to generate a dynamic recipe on the fly and save it directly.
+ */
+function generateAndSaveDynamicRecipe(query, onStepChange, onComplete) {
+  onStepChange({ step: "structure", status: "Formulating customized recipe template...", progress: 80 });
+  const fallbackRecipe = generateDynamicFallback(query);
+  
+  setTimeout(() => {
+    onStepChange({ step: "save", status: "Saving custom recipe...", progress: 100 });
+    setTimeout(() => {
+      store.addRecipe(fallbackRecipe);
+      onComplete(fallbackRecipe);
+    }, 100);
+  }, 200);
 }
 
 /**
