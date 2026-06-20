@@ -1,4 +1,4 @@
-# The Daily Dish 🍳
+# The Daily Dish
 
 Welcome to **The Daily Dish**, a premium, client-side digital recipe box, weekly planner, and smart shopping companion designed for chefs who value verified, real-world culinary references.
 
@@ -6,7 +6,7 @@ Unlike typical recipe generators that fabricate instructions and proportions, **
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
 ### 1. Data-Driven Recipe Generator & Web Crawler
 * **Verified Sourcing First**: When you generate a recipe, the engine first searches **TheMealDB API** or executes a headless static HTML scrape via a DuckDuckGo search crawler to find official recipes on the web.
@@ -56,7 +56,7 @@ Unlike typical recipe generators that fabricate instructions and proportions, **
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 * **Frontend**: Plain HTML5, Vanilla CSS3 (custom CSS variables, glassmorphic styling, animations).
 * **JavaScript**: Modern ES6 Modules.
@@ -66,7 +66,7 @@ Unlike typical recipe generators that fabricate instructions and proportions, **
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 1. Clone or download the repository to your local machine.
 2. Spin up a local static server inside the directory (to allow ES module imports):
