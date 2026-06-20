@@ -1,7 +1,7 @@
 // State Management Store for Cookbook
 
 import { RECIPES as INITIAL_RECIPES } from "./database.js";
-import { isIngredientMatch } from "./utils.js";
+import { isIngredientMatch, getPlausibleRecipeLink } from "./utils.js";
 
 // Seed-based week selection helpers
 function getWeekSeed() {
@@ -176,7 +176,27 @@ class Store {
       const stored = localStorage.getItem(`cookbook_my_recipes${suffix}`);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          let migrated = false;
+          const upgraded = parsed.map(recipe => {
+            if (
+              recipe &&
+              (!recipe.sourceUrl ||
+                recipe.sourceUrl.includes("google.com/search") ||
+                recipe.sourceName === "Google Search Reference")
+            ) {
+              const linkInfo = getPlausibleRecipeLink(recipe.title, recipe.category);
+              recipe.sourceUrl = linkInfo.url;
+              recipe.sourceName = linkInfo.name;
+              migrated = true;
+            }
+            return recipe;
+          });
+          if (migrated) {
+            localStorage.setItem(`cookbook_my_recipes${suffix}`, JSON.stringify(upgraded));
+          }
+          return upgraded;
+        }
       }
     } catch (e) {
       console.error("Failed to parse stored myRecipes", e);
