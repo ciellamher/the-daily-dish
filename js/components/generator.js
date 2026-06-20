@@ -497,6 +497,52 @@ const PREDEFINED_AI_TEMPLATES = {
 };
 
 /**
+ * Helper to get a plausible recipe link on a real cooking website based on query/category.
+ */
+function getPlausibleRecipeLink(query, category) {
+  const clean = query.trim().replace(/[^\w\s-]/g, "");
+  const kebab = clean.toLowerCase().replace(/\s+/g, "-");
+  
+  const filipinoKeywords = [
+    "adobo", "sinigang", "kaldereta", "caldereta", "tinola", "pinakbet", "sisig", 
+    "bicol express", "kare-kare", "kare kare", "pancit", "lumpia", "filipino", 
+    "pinoy", "lechon", "tocino", "longganisa", "tapa", "biko", "cassava", 
+    "afritada", "mechado", "menudo", "bulalo", "dinuguan", "laing", "bilo-bilo",
+    "sopas", "arroz caldo", "champorado"
+  ];
+  
+  const isFilipino = filipinoKeywords.some(keyword => clean.toLowerCase().includes(keyword));
+  
+  if (isFilipino) {
+    return {
+      url: `https://panlasangpinoy.com/${kebab}/`,
+      name: "Panlasang Pinoy"
+    };
+  }
+  
+  const bakingKeywords = [
+    "cupcake", "cake", "cookie", "cookies", "brownie", "brownies", "muffin", 
+    "muffins", "pie", "pies", "bread", "tart", "tarts", "frosting", "glaze", 
+    "baking", "bake", "cheesecake", "doughnut", "donut"
+  ];
+  
+  const isBaking = bakingKeywords.some(keyword => clean.toLowerCase().includes(keyword));
+  
+  if (isBaking || category === "Baking") {
+    return {
+      url: `https://sallysbakingaddiction.com/${kebab}/`,
+      name: "Sally's Baking Addiction"
+    };
+  }
+  
+  // General western/global fallback: Serious Eats
+  return {
+    url: `https://www.seriouseats.com/${kebab}-recipe`,
+    name: "Serious Eats"
+  };
+}
+
+/**
  * Intelligent Fallback generator that builds a recipe on the fly based on search keywords.
  */
 function generateDynamicFallback(query) {
@@ -730,6 +776,8 @@ function generateDynamicFallback(query) {
     ];
   }
 
+  const linkInfo = getPlausibleRecipeLink(query, category);
+
   return {
     id: `generated-${Date.now()}`,
     title: title,
@@ -741,8 +789,8 @@ function generateDynamicFallback(query) {
     category,
     tags: ["Generated", "AI Chef", "On The Spot"],
     image: "", // Generates placeholder card icon
-    sourceUrl: `https://www.google.com/search?q=${encodeURIComponent(cleanQuery)}+recipe`,
-    sourceName: "Google Search Reference",
+    sourceUrl: linkInfo.url,
+    sourceName: linkInfo.name,
     equipment: extractEquipment(title, ingredients, instructions),
     ingredients,
     instructions
