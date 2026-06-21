@@ -39,8 +39,8 @@ function validatePasswordStrength(password, username = "", email = "") {
   if (password.length < 8) {
     return "Password is too short (must be at least 8 characters).";
   }
-  if (password.length > 128) {
-    return "Password is too long (maximum 128 characters).";
+  if (password.length > 32) {
+    return "Password is too long (maximum 32 characters).";
   }
   
   const lowerPassword = password.toLowerCase();
@@ -54,6 +54,40 @@ function validatePasswordStrength(password, username = "", email = "") {
     return "Password is too common and can be guessed easily.";
   }
   
+  // Check for repeating characters (e.g. aaaa, 1111)
+  for (let i = 0; i <= password.length - 4; i++) {
+    const char = password[i];
+    if (password[i+1] === char && password[i+2] === char && password[i+3] === char) {
+      return "Password cannot contain repeating characters like '" + char.repeat(4) + "'.";
+    }
+  }
+
+  // Check for sequential character runs (e.g. 12345, abcde)
+  for (let i = 0; i <= password.length - 5; i++) {
+    const code0 = password.charCodeAt(i);
+    const code1 = password.charCodeAt(i+1);
+    const code2 = password.charCodeAt(i+2);
+    const code3 = password.charCodeAt(i+3);
+    const code4 = password.charCodeAt(i+4);
+    
+    // Ascending sequence check
+    if (code1 === code0 + 1 && code2 === code1 + 1 && code3 === code2 + 1 && code4 === code3 + 1) {
+      return "Password cannot contain sequential characters like '" + password.substr(i, 5) + "'.";
+    }
+    // Descending sequence check
+    if (code1 === code0 - 1 && code2 === code1 - 1 && code3 === code2 - 1 && code4 === code3 - 1) {
+      return "Password cannot contain sequential characters like '" + password.substr(i, 5) + "'.";
+    }
+  }
+
+  // Check for app-related keywords (e.g. dailydish, cookbook, recipe)
+  const appKeywords = ["dailydish", "cookbook", "recipe", "password"];
+  for (const keyword of appKeywords) {
+    if (lowerPassword.includes(keyword)) {
+      return "Password cannot contain easily guessed words like '" + keyword + "'.";
+    }
+  }
+
   // Check if it's too similar to username
   if (username) {
     const lowerUsername = username.toLowerCase().trim();

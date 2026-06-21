@@ -2,6 +2,7 @@
 
 import { store } from "../store.js";
 import { formatQuantity, scaleQuantity, escapeHtml, ICONS, getGourmetFoodImage, isIngredientMatch } from "../utils.js";
+import { renderRecipeChatbot } from "./recipe-chatbot.js?v=1.5";
 
 // Database of common ingredient substitutions
 const INGREDIENT_SUBSTITUTIONS = {
@@ -310,6 +311,7 @@ export function renderRecipeDetail(recipe, state) {
         </div>
 
       </div>
+      ${renderRecipeChatbot(recipe)}
     </div>
   `;
 }

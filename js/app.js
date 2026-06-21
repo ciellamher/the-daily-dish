@@ -7,6 +7,7 @@ import { renderShoppingList, exportShoppingList } from "./components/shopping-li
 import { simulateRecipeImport, parseSchemaIngredients } from "./components/importer.js?v=1.5";
 import { generateRecipeOnSpot } from "./components/generator.js?v=1.5";
 import { escapeHtml, ICONS, startAmbientAudio, stopAmbientAudio } from "./utils.js";
+import { initRecipeChatbot } from "./components/recipe-chatbot.js?v=1.5";
 
 // DOM Selector Elements
 const elements = {
@@ -2908,6 +2909,7 @@ function renderUI(state) {
     const activeRecipe = state.recipes.find(r => r.id === state.selectedRecipeId);
     if (activeRecipe) {
       elements.modalRecipeContent.innerHTML = renderRecipeDetail(activeRecipe, state);
+      initRecipeChatbot(activeRecipe);
     }
   }
 }
@@ -3259,6 +3261,7 @@ function bindPremiumFeatures() {
       const activeRecipe = store.state.recipes.find(r => r.id === store.state.selectedRecipeId);
       if (activeRecipe) {
         elements.modalRecipeContent.innerHTML = renderRecipeDetail(activeRecipe, store.state);
+        initRecipeChatbot(activeRecipe);
       }
     }
   });
@@ -3464,6 +3467,7 @@ function bindPremiumFeatures() {
 
       // Render updated details view
       elements.modalRecipeContent.innerHTML = renderRecipeDetail(updatedRecipe, store.state);
+      initRecipeChatbot(updatedRecipe);
     }
   });
 
