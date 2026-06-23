@@ -142,13 +142,28 @@ const MOCK_IMPORTED_RECIPES = {
  * Simulates importing a recipe from a URL by fetching its HTML via a CORS proxy,
  * extracting Recipe schema metadata (JSON-LD), or falling back to search API / stubs.
  */
-export function simulateRecipeImport(url, onStepChange, onComplete, skipSave = false) {
+export function simulateRecipeImport(url, onStepChange, onComplete, skipSave = false, onError = null) {
   onStepChange({ step: "connect", status: "Connecting to recipe server...", progress: 15 });
   
   // Clean URL to ensure it starts with http
   let targetUrl = url.trim();
   if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
     targetUrl = "https://" + targetUrl;
+  }
+
+  // Intercept TikTok Video URLs for AI Culinary analysis
+  if (targetUrl.toLowerCase().includes("tiktok.com")) {
+    const apiKey = localStorage.getItem("cookbook_gemini_api_key") || "";
+    if (!apiKey) {
+      if (onError) {
+        onError("API Key missing");
+      } else {
+        alert("Gemini API key is required to analyze TikTok recipes. Please configure it in Settings.");
+      }
+      return;
+    }
+    importTikTokRecipe(targetUrl, apiKey, onStepChange, onComplete, onError, skipSave);
+    return;
   }
   
   // Use public CORS proxy fallback logic
@@ -747,5 +762,129 @@ function extractDomain(url) {
     return parsed.hostname.replace("www.", "");
   } catch (e) {
     return "external website";
+  }
+}
+
+/**
+ * Calls Google Gemini AI to analyze a TikTok video url / metadata and extract a structured recipe.
+ */
+export async function importTikTokRecipe(url, apiKey, onStepChange, onComplete, onError, skipSave = false) {
+  onStepChange({ step: "connect", status: "Tuning into TikTok video...", progress: 15 });
+  
+  try {
+    onStepChange({ step: "extract", status: "Extracting video metadata...", progress: 40 });
+    let pageHtml = "";
+    let extractedText = "";
+    
+    try {
+      pageHtml = await fetchHtmlThroughProxy(url);
+    } catch (e) {
+      console.warn("Failed to fetch TikTok page HTML via proxy, proceeding with URL keywords", e);
+    }
+    
+    if (pageHtml) {
+      const titleMatch = pageHtml.match(/<title>([\s\S]*?)<\/title>/i);
+      const ogDescMatch = pageHtml.match(/<meta\b[^>]*?(?:property|name)=["']og:description["'][^>]*?content=["']([^"']+)["']/i) ||
+                          pageHtml.match(/<meta\b[^>]*?content=["']([^"']+)["'][^>]*?(?:property|name)=["']og:description["']/i);
+      
+      const title = titleMatch ? titleMatch[1] : "";
+      const description = ogDescMatch ? ogDescMatch[1] : "";
+      extractedText = `Title: ${title}\nDescription: ${description}`;
+    }
+    
+    onStepChange({ step: "structure", status: "Running Gemini Culinary AI Analysis...", progress: 70 });
+    
+    const prompt = `
+You are an expert Chef and Culinary AI. Analyze the following TikTok cooking video metadata or URL and generate a complete, structured recipe.
+
+TikTok URL: ${url}
+${extractedText ? `Scraped Web Details:\n${extractedText}\n` : ""}
+
+Reconstruct the culinary recipe represented in this TikTok video.
+If the scraped description contains details of ingredients or steps, structure them accurately.
+If the details are brief, identify the dish being made (e.g. from the title or URL keywords) and generate a high-quality, verified version of that specific viral/popular TikTok dish (e.g. Baked Feta Pasta, Big Mac Tacos, Pesto Eggs, etc.) using your culinary knowledge.
+
+Provide the response in the following strict JSON schema (no extra text, no markdown wrappers like \`\`\`json):
+{
+  "title": "A short descriptive recipe title (e.g., Viral Baked Feta Pasta)",
+  "description": "A 1-2 sentence description explaining the dish and its TikTok origin",
+  "prepTime": 10,
+  "cookTime": 15,
+  "servings": 4,
+  "difficulty": "Easy",
+  "category": "Pasta",
+  "tags": ["TikTok", "Viral", "Easy"],
+  "ingredients": [
+    { "name": "pasta (e.g. penne)", "quantity": 400, "unit": "g", "category": "Pantry" }
+  ],
+  "instructions": [
+    { "step": 1, "text": "Step description...", "tip": "Chef's tip for this step" }
+  ]
+}
+
+Make sure categories for ingredients are one of: "Meat", "Seafood", "Produce", "Dairy", "Pantry".
+Difficulty should be "Easy", "Medium", or "Hard".
+Category should be one of "Pasta", "Seafood", "Baking", "Mains", "Salad", "Breakfast", "Soup".
+Ensure all properties are completed.
+`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          responseMimeType: "application/json"
+        }
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    
+    const responseData = await response.json();
+    const generatedText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!generatedText) {
+      throw new Error("Empty response returned from Gemini API");
+    }
+    
+    let recipeData;
+    try {
+      recipeData = JSON.parse(generatedText.trim());
+    } catch (parseError) {
+      console.error("Failed to parse Gemini response as JSON", generatedText, parseError);
+      const cleanJson = generatedText.replace(/```json/g, "").replace(/```/g, "").trim();
+      recipeData = JSON.parse(cleanJson);
+    }
+    
+    recipeData.id = `imported-tiktok-${Date.now()}`;
+    recipeData.sourceUrl = url;
+    recipeData.sourceName = "TikTok";
+    recipeData.image = getGourmetFoodImage(recipeData.title, recipeData.category);
+    recipeData.equipment = extractEquipment(recipeData.title, recipeData.ingredients, recipeData.instructions);
+    
+    onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
+    
+    setTimeout(() => {
+      if (!skipSave) {
+        store.addRecipe(recipeData);
+      }
+      onComplete(recipeData);
+    }, 100);
+    
+  } catch (error) {
+    console.error("TikTok recipe import error:", error);
+    if (onError) {
+      onError(error.message || "An unknown error occurred during AI analysis.");
+    }
   }
 }

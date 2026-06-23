@@ -60,6 +60,10 @@ const elements = {
   importerSuccessState: document.getElementById("importer-success-state"),
   importedRecipeTitlePreview: document.getElementById("imported-recipe-title-preview"),
   btnViewImported: document.getElementById("btn-view-imported"),
+  importerGeminiKeyConfigBtn: document.getElementById("btn-importer-config-key"),
+  tiktokKeyFormGroup: document.getElementById("tiktok-key-form-group"),
+  importerGeminiKeyInput: document.getElementById("importer-gemini-key-input"),
+  btnSaveKeyAnalyze: document.getElementById("btn-save-key-analyze"),
   
   // Shopping Cart Drawer
   shoppingListDrawer: document.getElementById("shopping-list-drawer"),
@@ -203,6 +207,7 @@ const elements = {
   settingsCloseBtn: document.getElementById("settings-close-btn"),
   settingsForm: document.getElementById("settings-form"),
   settingsWeekStartSelect: document.getElementById("settings-week-start"),
+  settingsGeminiKeyInput: document.getElementById("settings-gemini-key"),
   settingsCurrentPasswordInput: document.getElementById("settings-current-password"),
   settingsNewPasswordInput: document.getElementById("settings-new-password"),
   settingsConfirmPasswordInput: document.getElementById("settings-confirm-password"),
@@ -669,6 +674,35 @@ function bindGlobalEvents() {
       openModal(elements.recipeDetailModal);
     }
   });
+
+  if (elements.importerGeminiKeyConfigBtn) {
+    elements.importerGeminiKeyConfigBtn.addEventListener("click", () => {
+      if (elements.tiktokKeyFormGroup) {
+        elements.tiktokKeyFormGroup.classList.toggle("hidden");
+        if (!elements.tiktokKeyFormGroup.classList.contains("hidden") && elements.importerGeminiKeyInput) {
+          elements.importerGeminiKeyInput.value = localStorage.getItem("cookbook_gemini_api_key") || "";
+          elements.importerGeminiKeyInput.focus();
+        }
+      }
+    });
+  }
+
+  if (elements.btnSaveKeyAnalyze) {
+    elements.btnSaveKeyAnalyze.addEventListener("click", () => {
+      if (elements.importerGeminiKeyInput) {
+        const key = elements.importerGeminiKeyInput.value.trim();
+        if (!key) {
+          alert("Please enter a valid Gemini API Key.");
+          return;
+        }
+        localStorage.setItem("cookbook_gemini_api_key", key);
+        if (elements.tiktokKeyFormGroup) {
+          elements.tiktokKeyFormGroup.classList.add("hidden");
+        }
+        handleRecipeImport();
+      }
+    });
+  }
 
   /* --- 13. AI Recipe Generator --- */
   elements.generatorCloseBtn.addEventListener("click", () => {
@@ -1524,6 +1558,9 @@ function bindGlobalEvents() {
       if (elements.settingsForm) {
         elements.settingsForm.reset();
         elements.settingsWeekStartSelect.value = weekStart;
+        if (elements.settingsGeminiKeyInput) {
+          elements.settingsGeminiKeyInput.value = localStorage.getItem("cookbook_gemini_api_key") || "";
+        }
       }
 
       openModal(elements.settingsModal);
@@ -1547,6 +1584,11 @@ function bindGlobalEvents() {
       const confirmPassword = elements.settingsConfirmPasswordInput.value;
 
       store.updateWeekStartDay(weekStart);
+
+      if (elements.settingsGeminiKeyInput) {
+        const geminiKey = elements.settingsGeminiKeyInput.value.trim();
+        localStorage.setItem("cookbook_gemini_api_key", geminiKey);
+      }
 
       if (currentPassword || newPassword || confirmPassword) {
         if (!currentPassword || !newPassword || !confirmPassword) {
@@ -2430,9 +2472,36 @@ function handleRecipeImport() {
     return;
   }
 
+  // Check for TikTok URL and missing API key
+  const isTikTok = url.toLowerCase().includes("tiktok.com");
+  if (isTikTok) {
+    const apiKey = localStorage.getItem("cookbook_gemini_api_key") || "";
+    if (!apiKey) {
+      if (elements.tiktokKeyFormGroup) {
+        elements.tiktokKeyFormGroup.classList.remove("hidden");
+        if (elements.importerGeminiKeyInput) {
+          elements.importerGeminiKeyInput.value = "";
+          elements.importerGeminiKeyInput.focus();
+        }
+      }
+      return;
+    }
+  }
+
+  // Ensure key form group is hidden if proceeding
+  if (elements.tiktokKeyFormGroup) {
+    elements.tiktokKeyFormGroup.classList.add("hidden");
+  }
+
   // UI state transition
   elements.importUrlInput.disabled = true;
   elements.btnSubmitImport.disabled = true;
+  
+  if (isTikTok) {
+    elements.importerLoadingState.classList.add("tiktok-mode");
+  } else {
+    elements.importerLoadingState.classList.remove("tiktok-mode");
+  }
   elements.importerLoadingState.classList.remove("hidden");
   
   // Clear step highlighting
@@ -2468,6 +2537,25 @@ function handleRecipeImport() {
       elements.importerLoadingState.classList.add("hidden");
       elements.importerSuccessState.classList.remove("hidden");
       elements.importedRecipeTitlePreview.innerText = importedRecipe.title;
+    },
+    false,
+    // Error callback
+    (errorMsg) => {
+      elements.importUrlInput.disabled = false;
+      elements.btnSubmitImport.disabled = false;
+      elements.importerLoadingState.classList.add("hidden");
+      elements.importerLoadingState.classList.remove("tiktok-mode");
+      
+      if (errorMsg === "API Key missing") {
+        if (elements.tiktokKeyFormGroup) {
+          elements.tiktokKeyFormGroup.classList.remove("hidden");
+          if (elements.importerGeminiKeyInput) {
+            elements.importerGeminiKeyInput.focus();
+          }
+        }
+      } else {
+        alert(`Failed to import recipe: ${errorMsg}`);
+      }
     }
   );
 }
@@ -2488,7 +2576,14 @@ function resetImporterState() {
   elements.importUrlInput.disabled = false;
   elements.btnSubmitImport.disabled = false;
   elements.importerLoadingState.classList.add("hidden");
+  elements.importerLoadingState.classList.remove("tiktok-mode");
   elements.importerSuccessState.classList.add("hidden");
+  if (elements.tiktokKeyFormGroup) {
+    elements.tiktokKeyFormGroup.classList.add("hidden");
+  }
+  if (elements.importerGeminiKeyInput) {
+    elements.importerGeminiKeyInput.value = "";
+  }
   resetImportStepsUI();
 }
 

@@ -259,3 +259,31 @@
     padding: 14px;
   }
 }
+
+/* TikTok Video Analyzer Branded Theme */
+.importer-loader.tiktok-mode {
+  background: radial-gradient(circle at center, rgba(0, 242, 254, 0.04) 0%, rgba(254, 9, 121, 0.04) 100%);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+}
+
+.importer-loader.tiktok-mode .loader-spinner {
+  border-top-color: #00f2fe;
+  border-left-color: #fe0979;
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+}
+
+.importer-loader.tiktok-mode .progress-bar-fill {
+  background: linear-gradient(90deg, #00f2fe, #fe0979);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+}
+
+.importer-loader.tiktok-mode .loader-status {
+  background: linear-gradient(90deg, #00f2fe, #fe0979);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
