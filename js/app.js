@@ -60,7 +60,6 @@ const elements = {
   importerSuccessState: document.getElementById("importer-success-state"),
   importedRecipeTitlePreview: document.getElementById("imported-recipe-title-preview"),
   btnViewImported: document.getElementById("btn-view-imported"),
-  importerGeminiKeyConfigBtn: document.getElementById("btn-importer-config-key"),
   tiktokKeyFormGroup: document.getElementById("tiktok-key-form-group"),
   importerGeminiKeyInput: document.getElementById("importer-gemini-key-input"),
   btnSaveKeyAnalyze: document.getElementById("btn-save-key-analyze"),
@@ -674,18 +673,6 @@ function bindGlobalEvents() {
       openModal(elements.recipeDetailModal);
     }
   });
-
-  if (elements.importerGeminiKeyConfigBtn) {
-    elements.importerGeminiKeyConfigBtn.addEventListener("click", () => {
-      if (elements.tiktokKeyFormGroup) {
-        elements.tiktokKeyFormGroup.classList.toggle("hidden");
-        if (!elements.tiktokKeyFormGroup.classList.contains("hidden") && elements.importerGeminiKeyInput) {
-          elements.importerGeminiKeyInput.value = localStorage.getItem("cookbook_gemini_api_key") || "";
-          elements.importerGeminiKeyInput.focus();
-        }
-      }
-    });
-  }
 
   if (elements.btnSaveKeyAnalyze) {
     elements.btnSaveKeyAnalyze.addEventListener("click", () => {
