@@ -752,6 +752,117 @@ function generateDynamicFallback(query) {
 }
 
 export function generateRecipeOnSpot(query, onStepChange, onComplete) {
+  const apiKey = localStorage.getItem("cookbook_gemini_api_key") || "";
+  if (apiKey) {
+    generateRecipeWithGemini(query, apiKey, onStepChange, onComplete);
+    return;
+  }
+  
+  runGeneratorFallback(query, onStepChange, onComplete);
+}
+
+async function generateRecipeWithGemini(query, apiKey, onStepChange, onComplete) {
+  onStepChange({ step: "connect", status: "Formulating gourmet flavor profiles with Gemini AI...", progress: 25 });
+  
+  try {
+    const prompt = `
+You are an expert Chef and Culinary AI. Generate a complete, high-quality, authentic recipe for the following dish:
+
+Dish Name: ${query}
+
+Make sure the recipe has correct ingredients, steps, category, and matching cooking times. For example, if it is a soup like Bulalo, make sure it has beef shanks, bone marrow, fish sauce, cabbage, corn, peppercorns, and is simmered slowly. If it is a chicken adobo, make sure it has soy sauce, vinegar, garlic, peppercorns, and bay leaves.
+
+Provide the response in the following strict JSON schema (no extra text, no markdown wrappers like \`\`\`json):
+{
+  "title": "A short descriptive recipe title (e.g., Traditional Beef Bulalo Soup)",
+  "description": "A 1-2 sentence description explaining the dish and its culinary origins",
+  "prepTime": 15,
+  "cookTime": 90,
+  "servings": 4,
+  "difficulty": "Medium",
+  "category": "Soup",
+  "tags": ["Traditional", "Comfort Food"],
+  "ingredients": [
+    { "name": "beef shank with bone marrow", "quantity": 1, "unit": "kg", "category": "Meat" }
+  ],
+  "instructions": [
+    { "step": 1, "text": "Step description...", "tip": "Chef's tip for this step" }
+  ]
+}
+
+Make sure categories for ingredients are one of: "Meat", "Seafood", "Produce", "Dairy", "Pantry".
+Difficulty should be "Easy", "Medium", or "Hard".
+Category should be one of "Pasta", "Seafood", "Baking", "Mains", "Salad", "Breakfast", "Soup".
+Ensure all properties are completed.
+`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          responseMimeType: "application/json"
+        }
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.status}`);
+    }
+    
+    const responseData = await response.json();
+    const generatedText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!generatedText) {
+      throw new Error("Empty response from Gemini API");
+    }
+    
+    let recipeData;
+    try {
+      recipeData = JSON.parse(generatedText.trim());
+    } catch (parseError) {
+      const cleanJson = generatedText.replace(/```json/g, "").replace(/```/g, "").trim();
+      recipeData = JSON.parse(cleanJson);
+    }
+    
+    recipeData.id = `generated-gemini-${Date.now()}`;
+    
+    // Auto-fill reference link mapping
+    const linkInfo = getPlausibleRecipeLink(query, recipeData.category);
+    recipeData.sourceUrl = linkInfo.url;
+    recipeData.sourceName = linkInfo.name;
+    recipeData.image = getGourmetFoodImage(recipeData.title, recipeData.category);
+    recipeData.equipment = extractEquipment(recipeData.title, recipeData.ingredients, recipeData.instructions);
+    
+    onStepChange({ step: "extract", status: "Calculating ingredient proportions...", progress: 60 });
+    
+    setTimeout(() => {
+      onStepChange({ step: "structure", status: "Structuring step-by-step procedure & chef tips...", progress: 85 });
+      
+      setTimeout(() => {
+        onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
+        
+        setTimeout(() => {
+          store.addRecipe(recipeData);
+          onComplete(recipeData);
+        }, 100);
+      }, 150);
+    }, 150);
+    
+  } catch (error) {
+    console.error("Gemini recipe generation failed, falling back to local simulation:", error);
+    runGeneratorFallback(query, onStepChange, onComplete);
+  }
+}
+
+export function runGeneratorFallback(query, onStepChange, onComplete) {
   const normalizedQuery = query.toLowerCase().trim();
   let recipe = null;
 
