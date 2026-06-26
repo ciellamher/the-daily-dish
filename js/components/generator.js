@@ -1,8 +1,8 @@
 // AI Recipe Generator Component (Client-side Simulation)
 
 import { store } from "../store.js";
-import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy, getPlausibleRecipeLink, generateDynamicFallback } from "../utils.js?v=2.0";
-import { simulateRecipeImport } from "./importer.js?v=2.0";
+import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy, getPlausibleRecipeLink, generateDynamicFallback } from "../utils.js?v=2.1";
+import { simulateRecipeImport } from "./importer.js?v=2.1";
 
 // Rich recipes templates for popular keyword matches
 const PREDEFINED_AI_TEMPLATES = {
@@ -541,7 +541,8 @@ Category should be one of "Pasta", "Seafood", "Baking", "Mains", "Salad", "Break
 Ensure all properties are completed.
 `;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const endpoint = atob("aHR0cHM6Ly9nZW5lcmF0aXZlbGFuZ3VhZ2UuZ29vZ2xlYXBpcy5jb20vdjFiZXRhL21vZGVscy9nZW1pbmktMS41LWZsYXNoOmdlbmVyYXRlQ29udGVudA==");
+    const response = await fetch(`${endpoint}?key=${apiKey}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

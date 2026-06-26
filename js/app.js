@@ -4,10 +4,10 @@ import { store } from "./store.js";
 import { renderRecipeCard } from "./components/recipe-card.js";
 import { renderRecipeDetail, handleDetailModalClick, INGREDIENT_SUBSTITUTIONS, renderRecipeEditForm } from "./components/recipe-detail.js";
 import { renderShoppingList, exportShoppingList } from "./components/shopping-list.js";
-import { simulateRecipeImport, parseSchemaIngredients } from "./components/importer.js?v=2.0";
-import { generateRecipeOnSpot } from "./components/generator.js?v=2.0";
-import { escapeHtml, ICONS, startAmbientAudio, stopAmbientAudio } from "./utils.js?v=2.0";
-import { initRecipeChatbot } from "./components/recipe-chatbot.js?v=2.0";
+import { simulateRecipeImport, parseSchemaIngredients } from "./components/importer.js?v=2.1";
+import { generateRecipeOnSpot } from "./components/generator.js?v=2.1";
+import { escapeHtml, ICONS, startAmbientAudio, stopAmbientAudio } from "./utils.js?v=2.1";
+import { initRecipeChatbot } from "./components/recipe-chatbot.js?v=2.1";
 
 // DOM Selector Elements
 const elements = {

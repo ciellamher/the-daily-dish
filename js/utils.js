@@ -203,6 +203,12 @@ export function getGourmetFoodImage(query, category) {
   if (q.includes("rice") || q.includes("fried rice") || q.includes("paella")) {
     return "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop&q=80";
   }
+  if (q.includes("croquette") || q.includes("croquetas")) {
+    return "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600&auto=format&fit=crop&q=80";
+  }
+  if (q.includes("chicken") || cat.includes("chicken")) {
+    return "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=600&auto=format&fit=crop&q=80";
+  }
   
   // Default fallback
   return "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=600&auto=format&fit=crop&q=80";
