@@ -1,7 +1,7 @@
 // URL Recipe Importer Logic & Scraper Simulator
 
 import { store } from "../store.js";
-import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy } from "../utils.js";
+import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy, generateDynamicFallback } from "../utils.js?v=2.0";
 
 // Mock database of recipes to return based on URL keyword searches
 const MOCK_IMPORTED_RECIPES = {
@@ -139,6 +139,45 @@ const MOCK_IMPORTED_RECIPES = {
 };
 
 /**
+ * Extracts and cleans the recipe/dish name from a title or URL.
+ */
+function getCleanDishName(title, url) {
+  let name = (title || "").trim();
+  const domain = extractDomain(url);
+  const lowercaseName = name.toLowerCase();
+  
+  if (
+    !name || 
+    lowercaseName.includes("just a moment") || 
+    lowercaseName.includes("cloudflare") || 
+    lowercaseName.includes("security") || 
+    lowercaseName.includes("attention required") ||
+    lowercaseName.includes("enable javascript") ||
+    lowercaseName.includes("simple page") ||
+    lowercaseName === domain.toLowerCase() ||
+    lowercaseName === `recipe from ${domain.toLowerCase()}`
+  ) {
+    // Extract from URL
+    try {
+      const parsed = new URL(url);
+      const path = parsed.pathname;
+      const lastSegment = path.split("/").filter(Boolean).pop() || "";
+      const cleanSegment = lastSegment
+        .replace(/[\-_]/g, " ")
+        .replace(/\.html?$/i, "")
+        .replace(/\d+/g, "")
+        .trim();
+      
+      if (cleanSegment) {
+        return cleanSegment.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+      }
+    } catch (e) {}
+    return "Gourmet Dish";
+  }
+  return name;
+}
+
+/**
  * Simulates importing a recipe from a URL by fetching its HTML via a CORS proxy,
  * extracting Recipe schema metadata (JSON-LD), or falling back to search API / stubs.
  */
@@ -236,6 +275,12 @@ export function simulateRecipeImport(url, onStepChange, onComplete, skipSave = f
       
       // Fallback 1: Keyword template match if schema fails
       if (!importedRecipe) {
+        const apiKey = localStorage.getItem("cookbook_gemini_api_key") || "";
+        if (apiKey) {
+          importRecipeWithGemini(targetUrl, html, meta, apiKey, onStepChange, onComplete, onError, skipSave);
+          return;
+        }
+
         let matchedTemplate = null;
         const lowercaseUrl = targetUrl.toLowerCase();
         
@@ -274,11 +319,31 @@ export function simulateRecipeImport(url, onStepChange, onComplete, skipSave = f
                 onComplete(parsedRecipe);
               }, 100);
             } else {
-              serveFinalMetaFallback(meta, targetUrl, onStepChange, onComplete, skipSave);
+              const cleanTitle = getCleanDishName(meta.title, targetUrl);
+              const fallbackRecipe = generateDynamicFallback(cleanTitle);
+              fallbackRecipe.sourceUrl = targetUrl;
+              fallbackRecipe.sourceName = extractDomain(targetUrl);
+              fallbackRecipe.image = meta.image || getGourmetFoodImage(fallbackRecipe.title, fallbackRecipe.category);
+              
+              onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
+              setTimeout(() => {
+                if (!skipSave) store.addRecipe(fallbackRecipe);
+                onComplete(fallbackRecipe);
+              }, 100);
             }
           })
           .catch(() => {
-            serveFinalMetaFallback(meta, targetUrl, onStepChange, onComplete, skipSave);
+            const cleanTitle = getCleanDishName(meta.title, targetUrl);
+            const fallbackRecipe = generateDynamicFallback(cleanTitle);
+            fallbackRecipe.sourceUrl = targetUrl;
+            fallbackRecipe.sourceName = extractDomain(targetUrl);
+            fallbackRecipe.image = meta.image || getGourmetFoodImage(fallbackRecipe.title, fallbackRecipe.category);
+            
+            onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
+            setTimeout(() => {
+              if (!skipSave) store.addRecipe(fallbackRecipe);
+              onComplete(fallbackRecipe);
+            }, 100);
           });
       } else {
         onStepChange({ step: "structure", status: "Formulating cooking instructions...", progress: 90 });
@@ -299,7 +364,23 @@ export function simulateRecipeImport(url, onStepChange, onComplete, skipSave = f
         description: `Imported recipe from ${targetUrl}`,
         image: getGourmetFoodImage(domain, "Mains")
       };
-      serveFinalMetaFallback(fallbackMeta, targetUrl, onStepChange, onComplete, skipSave);
+      
+      const apiKey = localStorage.getItem("cookbook_gemini_api_key") || "";
+      if (apiKey) {
+        importRecipeWithGemini(targetUrl, "", fallbackMeta, apiKey, onStepChange, onComplete, onError, skipSave);
+      } else {
+        const cleanTitle = getCleanDishName(fallbackMeta.title, targetUrl);
+        const fallbackRecipe = generateDynamicFallback(cleanTitle);
+        fallbackRecipe.sourceUrl = targetUrl;
+        fallbackRecipe.sourceName = domain;
+        fallbackRecipe.image = fallbackMeta.image;
+        
+        onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
+        setTimeout(() => {
+          if (!skipSave) store.addRecipe(fallbackRecipe);
+          onComplete(fallbackRecipe);
+        }, 100);
+      }
     });
 }
 
@@ -887,4 +968,131 @@ Ensure all properties are completed.
       onError(error.message || "An unknown error occurred during AI analysis.");
     }
   }
+}
+
+/**
+ * Calls Google Gemini AI to extract/infer a structured recipe from standard webpage text snippet or URL.
+ */
+async function importRecipeWithGemini(url, html, meta, apiKey, onStepChange, onComplete, onError, skipSave = false) {
+  onStepChange({ step: "structure", status: "Running Gemini Culinary AI extraction...", progress: 75 });
+  
+  try {
+    const cleanedText = cleanHtmlToText(html);
+    const domain = extractDomain(url);
+    const cleanTitle = getCleanDishName(meta.title, url);
+    
+    const prompt = `
+You are an expert Chef and Culinary AI. Extract a complete, structured recipe from the webpage content or URL.
+
+Webpage URL: ${url}
+Scraped Title: ${cleanTitle}
+Scraped Description: ${meta.description || ""}
+
+${cleanedText ? `Cleaned Webpage Text Snippet:\n${cleanedText}\n` : ""}
+
+Reconstruct the culinary recipe represented on this page. 
+If the webpage text snippet contains the ingredients and steps, extract them accurately.
+If the webpage text snippet is incomplete or missing, infer the correct ingredients, steps, categories, and prep/cook times for the dish ("${cleanTitle}") using your culinary knowledge, ensuring it is authentic to this style of cooking.
+
+Provide the response in the following strict JSON schema (no extra text, no markdown wrappers like \`\`\`json):
+{
+  "title": "Recipe Title",
+  "description": "A 1-2 sentence description explaining the dish",
+  "prepTime": 15,
+  "cookTime": 20,
+  "servings": 4,
+  "difficulty": "Easy",
+  "category": "Mains",
+  "tags": ["Imported"],
+  "ingredients": [
+    { "name": "ingredient name", "quantity": 1, "unit": "pc", "category": "Pantry" }
+  ],
+  "instructions": [
+    { "step": 1, "text": "Step description...", "tip": "Chef's tip for this step" }
+  ]
+}
+
+Make sure categories for ingredients are one of: "Meat", "Seafood", "Produce", "Dairy", "Pantry".
+Difficulty should be "Easy", "Medium", or "Hard".
+Category should be one of "Pasta", "Seafood", "Baking", "Mains", "Salad", "Breakfast", "Soup".
+Ensure all properties are completed.
+`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          responseMimeType: "application/json"
+        }
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.status}`);
+    }
+    
+    const responseData = await response.json();
+    const generatedText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!generatedText) {
+      throw new Error("Empty response from Gemini API");
+    }
+    
+    let recipeData;
+    try {
+      recipeData = JSON.parse(generatedText.trim());
+    } catch (parseError) {
+      const cleanJson = generatedText.replace(/```json/g, "").replace(/```/g, "").trim();
+      recipeData = JSON.parse(cleanJson);
+    }
+    
+    recipeData.id = `imported-gemini-${Date.now()}`;
+    recipeData.sourceUrl = url;
+    recipeData.sourceName = domain;
+    recipeData.image = meta.image || getGourmetFoodImage(recipeData.title, recipeData.category);
+    recipeData.equipment = extractEquipment(recipeData.title, recipeData.ingredients, recipeData.instructions);
+    
+    onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
+    
+    setTimeout(() => {
+      if (!skipSave) {
+        store.addRecipe(recipeData);
+      }
+      onComplete(recipeData);
+    }, 100);
+    
+  } catch (error) {
+    console.error("Gemini fallback extraction failed, serving fallback:", error);
+    const domain = extractDomain(url);
+    const cleanTitle = getCleanDishName(meta.title, url);
+    const fallbackRecipe = generateDynamicFallback(cleanTitle);
+    fallbackRecipe.sourceUrl = url;
+    fallbackRecipe.sourceName = domain;
+    fallbackRecipe.image = meta.image || getGourmetFoodImage(fallbackRecipe.title, fallbackRecipe.category);
+    
+    onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
+    setTimeout(() => {
+      if (!skipSave) {
+        store.addRecipe(fallbackRecipe);
+      }
+      onComplete(fallbackRecipe);
+    }, 100);
+  }
+}
+
+function cleanHtmlToText(html) {
+  if (!html) return "";
+  let text = html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, "");
+  text = text.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, "");
+  text = text.replace(/<[^>]*>/g, " ");
+  text = text.replace(/\s+/g, " ").trim();
+  return text.substring(0, 8000);
 }

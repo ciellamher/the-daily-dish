@@ -532,4 +532,355 @@ export function getPlausibleRecipeLink(query, category) {
   };
 }
 
+/**
+ * Intelligent Fallback generator that builds a recipe on the fly based on search keywords.
+ */
+export function generateDynamicFallback(query) {
+  const cleanQuery = query.trim().replace(/[^\w\s-]/g, "");
+  
+  // Title formatting: capitalize first letters
+  let title = cleanQuery
+    .split(" ")
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+
+  const lowerQuery = cleanQuery.toLowerCase();
+  
+  let category = "Mains";
+  let prepTime = 15;
+  let cookTime = 20;
+  let difficulty = "Medium";
+  let ingredients = [];
+  let equipment = [
+    { name: "Chef's Knife", icon: "knife" },
+    { name: "Cutting Board", icon: "board" },
+    { name: "Mixing Bowl", icon: "bowl" }
+  ];
+  let instructions = [];
+
+  // Determine main protein/ingredient
+  let protein = "vegetables";
+  let proteinName = "mixed vegetables";
+  let proteinCat = "Produce";
+  let proteinQty = 3;
+  let proteinUnit = "cups";
+  
+  if (lowerQuery.includes("chicken")) {
+    protein = "chicken";
+    proteinName = "boneless chicken breast, cubed";
+    proteinCat = "Meat";
+    proteinQty = 500;
+    proteinUnit = "g";
+    category = "Mains";
+  } else if (lowerQuery.includes("beef") || lowerQuery.includes("steak") || lowerQuery.includes("stroganoff") || lowerQuery.includes("bulalo")) {
+    protein = "beef";
+    proteinName = "beef sirloin or flank steak, sliced";
+    proteinCat = "Meat";
+    proteinQty = 500;
+    proteinUnit = "g";
+    category = "Mains";
+  } else if (lowerQuery.includes("pork") || lowerQuery.includes("bacon")) {
+    protein = "pork";
+    proteinName = "pork loin chops, cubed";
+    proteinCat = "Meat";
+    proteinQty = 450;
+    proteinUnit = "g";
+    category = "Mains";
+  } else if (lowerQuery.includes("shrimp") || lowerQuery.includes("prawn")) {
+    protein = "shrimp";
+    proteinName = "shrimp, peeled and deveined";
+    proteinCat = "Seafood";
+    proteinQty = 400;
+    proteinUnit = "g";
+    category = "Seafood";
+  } else if (lowerQuery.includes("salmon") || lowerQuery.includes("fish") || lowerQuery.includes("tuna")) {
+    protein = "fish";
+    proteinName = "salmon or white fish fillets";
+    proteinCat = "Seafood";
+    proteinQty = 2;
+    proteinUnit = "pcs";
+    category = "Seafood";
+  } else if (lowerQuery.includes("chocolate") || lowerQuery.includes("cocoa") || lowerQuery.includes("brownie") || lowerQuery.includes("cake") || lowerQuery.includes("cookie")) {
+    protein = "chocolate";
+    proteinName = "semi-sweet chocolate chips or cocoa";
+    proteinCat = "Pantry";
+    proteinQty = 1;
+    proteinUnit = "cup";
+    category = "Baking";
+  } else if (lowerQuery.includes("potato") || lowerQuery.includes("croquette")) {
+    protein = "potato";
+    proteinName = "russet potatoes, peeled";
+    proteinCat = "Produce";
+    proteinQty = 4;
+    proteinUnit = "pcs";
+    category = "Mains";
+  }
+
+  // Determine style
+  let style = "stir-fry";
+  if (lowerQuery.includes("croquette")) {
+    style = "croquettes";
+  } else if (lowerQuery.includes("soup") || lowerQuery.includes("tinola") || lowerQuery.includes("sinigang") || lowerQuery.includes("bulalo") || lowerQuery.includes("stew")) {
+    style = "soup";
+  } else if (lowerQuery.includes("curry")) {
+    style = "curry";
+  } else if (lowerQuery.includes("pasta") || lowerQuery.includes("spaghetti") || lowerQuery.includes("carbonara")) {
+    style = "pasta";
+  } else if (lowerQuery.includes("taco") || lowerQuery.includes("quesadilla") || lowerQuery.includes("mexican")) {
+    style = "taco";
+  } else if (lowerQuery.includes("cake") || lowerQuery.includes("cookie") || lowerQuery.includes("bake") || lowerQuery.includes("brownie")) {
+    style = "baking";
+  } else if (lowerQuery.includes("salad")) {
+    style = "salad";
+  }
+
+  // Assemble based on protein and style
+  if (style === "croquettes") {
+    difficulty = "Medium";
+    prepTime = 20;
+    cookTime = 15;
+    equipment.push(
+      { name: "Deep Frying Pan or Dutch Oven", icon: "pan" },
+      { name: "Slotted Spoon", icon: "spoon" }
+    );
+    
+    // Customize protein name specifically for croquette mixing
+    let shreddedProtein = "finely shredded cooked chicken";
+    if (protein === "beef") shreddedProtein = "finely shredded cooked beef";
+    else if (protein === "pork") shreddedProtein = "finely shredded cooked pork";
+    else if (protein === "shrimp") shreddedProtein = "finely chopped cooked shrimp";
+    else if (protein === "fish") shreddedProtein = "flaked cooked fish fillets";
+    else if (protein === "potato") shreddedProtein = "well-mashed potatoes";
+    else if (protein === "vegetables") shreddedProtein = "finely minced sautéed vegetables";
+
+    ingredients = [
+      { name: proteinName, quantity: proteinQty, unit: proteinUnit, category: proteinCat },
+      { name: "unsalted butter", quantity: 3, unit: "tbsp", category: "Dairy" },
+      { name: "all-purpose flour", quantity: 0.5, unit: "cup", category: "Pantry" },
+      { name: "whole milk", quantity: 1, unit: "cup", category: "Dairy" },
+      { name: "finely chopped onion", quantity: 0.5, unit: "cup", category: "Produce" },
+      { name: "eggs, beaten", quantity: 2, unit: "pcs", category: "Dairy" },
+      { name: "fine breadcrumbs or Panko", quantity: 1.5, unit: "cups", category: "Pantry" },
+      { name: "cooking oil (for frying)", quantity: 2, unit: "cups", category: "Pantry" },
+      { name: "salt and pepper", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "ground nutmeg", quantity: 0.25, unit: "tsp", category: "Pantry" }
+    ];
+    instructions = [
+      { step: 1, text: `Cook the ${protein === "potato" ? "potatoes" : "protein"} thoroughly. Once cooked and cooled, prepare the main filler (${shreddedProtein}).`, tip: "For a smooth texture inside, shred the chicken or mash the potatoes as finely as possible." },
+      { step: 2, text: "In a saucepan, melt butter over medium heat. Sauté chopped onions for 2 minutes, then stir in flour. Slowly whisk in milk to create a thick white sauce (béchamel). Cook until thick.", tip: "The sauce must be very thick so the croquettes hold their shape." },
+      { step: 3, text: `Stir the prepared ${protein === "potato" ? "potatoes" : "shredded " + protein} and nutmeg, salt, and pepper into the hot sauce. Mix until cohesive. Spread on a baking sheet and chill in the fridge for 1 hour.`, tip: "Chilling is crucial - it solidifies the binder, making the mixture easy to shape." },
+      { step: 4, text: "Divide the chilled mixture and shape into cylinder logs or round patties.", tip: "Keep your hands slightly damp or oiled to prevent sticking while shaping." },
+      { step: 5, text: "Set up three bowls: one with flour, one with beaten eggs, and one with breadcrumbs. Dredge each croquette in flour, dip in egg, and coat fully in breadcrumbs.", tip: "Ensure there are no bald spots in the breadcrumbs, or the croquette might burst open when fried." },
+      { step: 6, text: "Heat frying oil in a pan to 350°F (175°C). Fry the croquettes in small batches for 3-4 minutes until crisp and golden brown. Drain on paper towels.", tip: "Do not overcrowd the pan, or the oil temperature will drop and the croquettes will absorb too much oil." }
+    ];
+  } else if (style === "soup") {
+    difficulty = "Easy";
+    prepTime = 15;
+    cookTime = 30;
+    equipment.push(
+      { name: "Large Soup Pot", icon: "pot" },
+      { name: "Ladle", icon: "spoon" }
+    );
+    ingredients = [
+      { name: proteinName, quantity: proteinQty, unit: proteinUnit, category: proteinCat },
+      { name: "chicken or beef broth", quantity: 4, unit: "cups", category: "Pantry" },
+      { name: "yellow onion, chopped", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "garlic cloves, minced", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "carrots, sliced", quantity: 2, unit: "pcs", category: "Produce" },
+      { name: "celery stalks, sliced", quantity: 2, unit: "pcs", category: "Produce" },
+      { name: "olive oil", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "salt and pepper", quantity: 0.5, unit: "tsp", category: "Pantry" },
+      { name: "chopped fresh parsley", quantity: 2, unit: "tbsp", category: "Produce" }
+    ];
+    instructions = [
+      { step: 1, text: "Prepare all your ingredients: chop the onions, carrots, and celery, and mince the garlic. Slice the protein into bite-sized pieces.", tip: "Cutting ingredients to uniform size ensures even cooking." },
+      { step: 2, text: "Heat olive oil in a large soup pot over medium heat. Add onions, carrots, and celery, and cook for 5 minutes until soft.", tip: "Sweating the vegetables first builds a rich flavor base." },
+      { step: 3, text: "Add minced garlic and cook for 1 minute until fragrant. Add the protein and cook for 3 minutes.", tip: "Blooming garlic and lightly searing the protein locks in flavor." },
+      { step: 4, text: "Pour in the broth and bring to a boil. Reduce heat to low, cover, and simmer for 20 minutes until protein is tender.", tip: "Simmering slowly extracts nutrients and flavors." },
+      { step: 5, text: "Season the soup with salt and pepper to taste.", tip: "Always taste the soup before serving and adjust seasoning as needed." },
+      { step: 6, text: "Stir in the fresh parsley, ladle into bowls, and serve piping hot.", tip: "Serve with crusty warm bread or crackers." }
+    ];
+  } else if (style === "curry") {
+    difficulty = "Medium";
+    prepTime = 15;
+    cookTime = 25;
+    equipment.push(
+      { name: "Deep Skillet or Dutch Oven", icon: "pan" },
+      { name: "Wooden Spoon", icon: "spoon" }
+    );
+    ingredients = [
+      { name: proteinName, quantity: proteinQty, unit: proteinUnit, category: proteinCat },
+      { name: "coconut milk, canned", quantity: 400, unit: "ml", category: "Pantry" },
+      { name: "curry powder or paste", quantity: 1.5, unit: "tbsp", category: "Pantry" },
+      { name: "onion, chopped", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "garlic cloves, minced", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "bell pepper, sliced", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "carrots, sliced", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "cooking oil", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "salt and pepper", quantity: 0.5, unit: "tsp", category: "Pantry" }
+    ];
+    instructions = [
+      { step: 1, text: "Chop all vegetables and prepare the protein. Set aside.", tip: "Having all ingredients ready beforehand (mise en place) makes cooking smooth." },
+      { step: 2, text: "Heat oil in a skillet over medium heat. Sauté the chopped onion, garlic, and curry powder/paste for 2 minutes.", tip: "Sautéing the curry powder in oil releases its essential oils and maximizes flavor." },
+      { step: 3, text: "Add protein to the skillet, cooking for 5 minutes until browned on the outside.", tip: "Searing the protein keeps it juicy." },
+      { step: 4, text: "Add carrots and bell pepper, then pour in the coconut milk. Stir well to mix.", tip: "Use full-fat coconut milk for a rich, creamy sauce." },
+      { step: 5, text: "Bring to a boil, then simmer on medium-low for 15 minutes until the sauce has thickened and vegetables are tender.", tip: "Keep skillet uncovered during simmer to let sauce reduce." },
+      { step: 6, text: "Taste and adjust salt and pepper, then serve warm over steamed jasmine rice.", tip: "A squeeze of fresh lime juice at the end adds a nice brightness." }
+    ];
+  } else if (style === "pasta") {
+    difficulty = "Easy";
+    prepTime = 10;
+    cookTime = 15;
+    equipment.push(
+      { name: "Large Pasta Pot", icon: "pot" },
+      { name: "Skillet", icon: "pan" }
+    );
+    ingredients = [
+      { name: proteinName, quantity: proteinQty, unit: proteinUnit, category: proteinCat },
+      { name: "pasta (spaghetti or penne)", quantity: 300, unit: "g", category: "Pantry" },
+      { name: "crushed or marinara tomatoes", quantity: 400, unit: "g", category: "Pantry" },
+      { name: "garlic cloves, minced", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "olive oil", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "grated parmesan cheese", quantity: 0.5, unit: "cup", category: "Dairy" },
+      { name: "fresh basil leaves", quantity: 0.25, unit: "cup", category: "Produce" },
+      { name: "salt and pepper", quantity: 0.5, unit: "tsp", category: "Pantry" }
+    ];
+    instructions = [
+      { step: 1, text: "Bring a large pot of salted water to a boil. Cook pasta according to package instructions until al dente.", tip: "Salting water is key to flavoring the pasta." },
+      { step: 2, text: "While pasta cooks, heat olive oil in a skillet. Sauté garlic and protein until protein is fully cooked.", tip: "Keep heat medium so garlic doesn't burn." },
+      { step: 3, text: "Pour in crushed tomatoes, season with salt and pepper, and simmer on low for 10 minutes.", tip: "Let the tomato sauce thicken slightly." },
+      { step: 4, text: "Drain pasta, reserving 1/2 cup of the warm pasta water.", tip: "Reserved water helps emulsify the sauce." },
+      { step: 5, text: "Toss pasta and basil into the skillet with sauce, adding splashes of pasta water to coat properly.", tip: "Tossing pasta in sauce blends them together." },
+      { step: 6, text: "Serve immediately with a generous topping of grated parmesan cheese.", tip: "Garnish with a fresh basil leaf." }
+    ];
+  } else if (style === "taco") {
+    difficulty = "Easy";
+    prepTime = 10;
+    cookTime = 10;
+    equipment.push(
+      { name: "Large Skillet", icon: "pan" }
+    );
+    ingredients = [
+      { name: proteinName, quantity: proteinQty, unit: proteinUnit, category: proteinCat },
+      { name: "taco shells or tortillas", quantity: 8, unit: "pcs", category: "Pantry" },
+      { name: "taco seasoning mix", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "diced yellow onion", quantity: 0.5, unit: "cup", category: "Produce" },
+      { name: "chopped fresh cilantro", quantity: 0.25, unit: "cup", category: "Produce" },
+      { name: "lime wedges", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "cooking oil", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "shredded cheese", quantity: 0.5, unit: "cup", category: "Dairy" }
+    ];
+    instructions = [
+      { step: 1, text: "Heat oil in a skillet over medium heat. Sauté onion and protein until fully cooked.", tip: "Break up meat with a spatula if using ground beef." },
+      { step: 2, text: "Stir in taco seasoning and 3 tablespoons of water. Simmer on low for 3 minutes until sauce is absorbed.", tip: "Seasoning binds with moisture to glaze the meat." },
+      { step: 3, text: "Warm the tortillas in a dry pan for 30 seconds per side.", tip: "Warming makes tortillas soft and flavorful." },
+      { step: 4, text: "Assemble tacos by spooning meat onto warmed tortillas.", tip: "Use double tortillas for street style strength." },
+      { step: 5, text: "Top with cheese, diced onion, and fresh chopped cilantro.", tip: "Toppings add a fresh, cooling crunch." },
+      { step: 6, text: "Serve immediately with fresh lime wedges for squeezing.", tip: "Lime juice cuts through grease and brightens flavor." }
+    ];
+  } else if (style === "baking") {
+    difficulty = "Medium";
+    prepTime = 15;
+    cookTime = 25;
+    category = "Baking";
+    equipment.push(
+      { name: "Baking Pan", icon: "sheet" },
+      { name: "Mixing Bowls", icon: "bowl" },
+      { name: "Whisk", icon: "bowl" }
+    );
+    ingredients = [
+      { name: proteinName, quantity: proteinQty, unit: proteinUnit, category: proteinCat },
+      { name: "all-purpose flour", quantity: 1.5, unit: "cups", category: "Pantry" },
+      { name: "sugar", quantity: 1, unit: "cup", category: "Pantry" },
+      { name: "unsalted butter, melted", quantity: 0.5, unit: "cup", category: "Dairy" },
+      { name: "large eggs", quantity: 2, unit: "pcs", category: "Dairy" },
+      { name: "baking powder", quantity: 1.5, listStyleType: "tsp", category: "Pantry" },
+      { name: "whole milk", quantity: 0.5, unit: "cup", category: "Dairy" },
+      { name: "vanilla extract", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "salt", quantity: 0.25, unit: "tsp", category: "Pantry" }
+    ];
+    instructions = [
+      { step: 1, text: "Preheat oven to 350°F (175°C) and line baking pan with parchment paper.", tip: "Preheating ensures even rise from the start." },
+      { step: 2, text: "Whisk flour, baking powder, and salt together in a bowl.", tip: "Sift dry ingredients to prevent lumps." },
+      { step: 3, text: "In a larger bowl, whisk melted butter, sugar, eggs, vanilla extract, and milk together.", tip: "Whisk until smooth and slightly pale." },
+      { step: 4, text: `Gently fold the dry ingredients and ${proteinName} into the wet ingredients using a spatula just until combined.`, tip: "Do not overmix or the bake will be dense." },
+      { step: 5, text: "Spread batter evenly into the prepared pan.", tip: "Tap pan on counter to release air bubbles." },
+      { step: 6, text: "Bake for 22-25 minutes until toothpick inserted in center comes out clean. Cool before serving.", tip: "Let it cool in the pan on a rack." }
+    ];
+  } else if (style === "salad") {
+    difficulty = "Easy";
+    prepTime = 10;
+    cookTime = 0;
+    category = "Salad";
+    equipment.push(
+      { name: "Salad Tongs", icon: "tongs" }
+    );
+    ingredients = [
+      { name: "mixed salad greens", quantity: 4, unit: "cups", category: "Produce" },
+      { name: "cherry tomatoes, halved", quantity: 1, unit: "cup", category: "Produce" },
+      { name: "cucumber, sliced", quantity: 1, unit: "pc", category: "Produce" },
+      { name: "extra virgin olive oil", quantity: 3, unit: "tbsp", category: "Pantry" },
+      { name: "fresh lemon juice", quantity: 1, unit: "tbsp", category: "Produce" },
+      { name: "grated parmesan cheese", quantity: 0.25, unit: "cup", category: "Dairy" },
+      { name: "salt and pepper", quantity: 0.25, unit: "tsp", category: "Pantry" }
+    ];
+    instructions = [
+      { step: 1, text: "Wash and dry the greens thoroughly.", tip: "Dry leaves help the dressing stick." },
+      { step: 2, text: "Chop tomatoes and cucumber.", tip: "Bite-sized pieces make eating easy." },
+      { step: 3, text: "In a jar, shake olive oil, lemon juice, salt, and pepper until emulsified.", tip: "Vigorous shaking blends oil and acid." },
+      { step: 4, text: "Combine greens, tomatoes, and cucumber in a large bowl.", tip: "Use a wide bowl for easy tossing." },
+      { step: 5, text: "Drizzle dressing over salad and toss with tongs.", tip: "Toss gently so you don't bruise the leaves." },
+      { step: 6, text: "Top with parmesan cheese and serve cold.", tip: "Serve immediately." }
+    ];
+  } else {
+    // stir-fry (Default)
+    difficulty = "Easy";
+    prepTime = 10;
+    cookTime = 12;
+    equipment.push(
+      { name: "Wok or Large Skillet", icon: "pan" },
+      { name: "Cooking Spatula", icon: "spoon" }
+    );
+    ingredients = [
+      { name: proteinName, quantity: proteinQty, unit: proteinUnit, category: proteinCat },
+      { name: "mixed fresh vegetables", quantity: 3, unit: "cups", category: "Produce" },
+      { name: "garlic cloves, minced", quantity: 3, unit: "pcs", category: "Produce" },
+      { name: "ginger, grated", quantity: 1, unit: "tsp", category: "Produce" },
+      { name: "soy sauce", quantity: 2, unit: "tbsp", category: "Pantry" },
+      { name: "cooking oil", quantity: 1, unit: "tbsp", category: "Pantry" },
+      { name: "sesame oil", quantity: 1, unit: "tsp", category: "Pantry" },
+      { name: "salt and pepper", quantity: 0.5, unit: "tsp", category: "Pantry" }
+    ];
+    instructions = [
+      { step: 1, text: "Slice protein and vegetables into uniform bite-sized pieces.", tip: "Uniform cuts cook at the same rate." },
+      { step: 2, text: "Heat cooking oil in wok over high heat. Sauté garlic and ginger for 30 seconds.", tip: "High heat gives nice wok sear flavor." },
+      { step: 3, text: "Add protein and stir-fry for 4-5 minutes until cooked.", tip: "Toss frequently to prevent sticking." },
+      { step: 4, text: "Add vegetables and cook for 3 minutes until tender-crisp.", tip: "Add hard vegetables first." },
+      { step: 5, text: "Drizzle soy sauce and sesame oil over stir-fry.", tip: "Sauce will caramelize on hot wok." },
+      { step: 6, text: "Toss to combine, season with salt and pepper, and serve hot.", tip: "Serve with warm rice." }
+    ];
+  }
+
+  const linkInfo = getPlausibleRecipeLink(query, category);
+
+  return {
+    id: `generated-${Date.now()}`,
+    title: title,
+    description: `A delicious custom-crafted recipe for ${title}, generated instantly on the spot. Designed to be quick, simple, and perfect for beginners.`,
+    prepTime,
+    cookTime,
+    servings: 4,
+    difficulty,
+    category,
+    tags: ["Generated", "AI Chef", "On The Spot"],
+    image: "", // Generates placeholder card icon
+    sourceUrl: linkInfo.url,
+    sourceName: linkInfo.name,
+    equipment: extractEquipment(title, ingredients, instructions),
+    ingredients,
+    instructions
+  };
+}
+
+
 
