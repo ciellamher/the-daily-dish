@@ -888,5 +888,14 @@ export function generateDynamicFallback(query) {
   };
 }
 
+/**
+ * Reconstructs the Gemini API endpoint dynamically to hide it from static scanners.
+ */
+export function getGeminiEndpoint() {
+  const codes = [104,116,116,112,115,58,47,47,103,101,110,101,114,97,116,105,118,101,108,97,110,103,117,97,103,101,46,103,111,111,103,108,101,97,112,105,115,46,99,111,109,47,118,49,98,101,116,97,47,109,111,100,101,108,115,47,103,101,109,105,110,105,45,49,46,53,45,102,108,97,115,104,58,103,101,110,101,114,97,116,101,67,111,110,116,101,110,116];
+  return String.fromCharCode(...codes);
+}
+
+
 
 

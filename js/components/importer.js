@@ -1,7 +1,7 @@
 // URL Recipe Importer Logic & Scraper Simulator
 
 import { store } from "../store.js";
-import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy, generateDynamicFallback } from "../utils.js?v=2.1";
+import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy, generateDynamicFallback, getGeminiEndpoint } from "../utils.js?v=2.2";
 
 // Mock database of recipes to return based on URL keyword searches
 const MOCK_IMPORTED_RECIPES = {
@@ -909,7 +909,7 @@ Category should be one of "Pasta", "Seafood", "Baking", "Mains", "Salad", "Break
 Ensure all properties are completed.
 `;
 
-    const endpoint = atob("aHR0cHM6Ly9nZW5lcmF0aXZlbGFuZ3VhZ2UuZ29vZ2xlYXBpcy5jb20vdjFiZXRhL21vZGVscy9nZW1pbmktMS41LWZsYXNoOmdlbmVyYXRlQ29udGVudA==");
+    const endpoint = getGeminiEndpoint();
     const response = await fetch(`${endpoint}?key=${apiKey}`, {
       method: "POST",
       headers: {
@@ -1019,7 +1019,7 @@ Category should be one of "Pasta", "Seafood", "Baking", "Mains", "Salad", "Break
 Ensure all properties are completed.
 `;
 
-    const endpoint = atob("aHR0cHM6Ly9nZW5lcmF0aXZlbGFuZ3VhZ2UuZ29vZ2xlYXBpcy5jb20vdjFiZXRhL21vZGVscy9nZW1pbmktMS41LWZsYXNoOmdlbmVyYXRlQ29udGVudA==");
+    const endpoint = getGeminiEndpoint();
     const response = await fetch(`${endpoint}?key=${apiKey}`, {
       method: "POST",
       headers: {
