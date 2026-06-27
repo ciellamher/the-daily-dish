@@ -185,8 +185,17 @@ export function getGourmetFoodImage(query, category) {
     }
     return "https://images.unsplash.com/photo-1550617931-e17a7b70dce2?w=600&auto=format&fit=crop&q=80";
   }
+  if (q.includes("ice cream") || q.includes("icecream") || q.includes("gelato") || q.includes("sorbet") || q.includes("sundae")) {
+    return "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=600&auto=format&fit=crop&q=80";
+  }
+  if (q.includes("chocolate") || q.includes("cocoa") || q.includes("fudge")) {
+    return "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&auto=format&fit=crop&q=80";
+  }
+  if (q.includes("drink") || q.includes("beverage") || q.includes("coffee") || q.includes("tea") || q.includes("smoothie") || q.includes("cocktail") || q.includes("juice") || cat.includes("drinks") || cat.includes("beverage")) {
+    return "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&auto=format&fit=crop&q=80";
+  }
   if (q.includes("cake") || q.includes("cookie") || q.includes("brownie") || q.includes("sweet") || cat.includes("baking")) {
-    return "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80";
+    return "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=600&auto=format&fit=crop&q=80";
   }
   if (q.includes("toast") || q.includes("egg") || cat.includes("breakfast")) {
     return "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&auto=format&fit=crop&q=80";
