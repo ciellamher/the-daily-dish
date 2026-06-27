@@ -1,8 +1,8 @@
 // AI Recipe Generator Component (Client-side Simulation)
 
 import { store } from "../store.js";
-import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy, getPlausibleRecipeLink, generateDynamicFallback, getGeminiEndpoint } from "../utils.js?v=2.2";
-import { simulateRecipeImport } from "./importer.js?v=2.2";
+import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy, getPlausibleRecipeLink, generateDynamicFallback, getGeminiEndpoint } from "../utils.js?v=2.3";
+import { simulateRecipeImport } from "./importer.js?v=2.3";
 
 // Rich recipes templates for popular keyword matches
 const PREDEFINED_AI_TEMPLATES = {

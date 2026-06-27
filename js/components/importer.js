@@ -1,7 +1,7 @@
 // URL Recipe Importer Logic & Scraper Simulator
 
 import { store } from "../store.js";
-import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy, generateDynamicFallback, getGeminiEndpoint } from "../utils.js?v=2.2";
+import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy, generateDynamicFallback, getGeminiEndpoint } from "../utils.js?v=2.3";
 
 // Mock database of recipes to return based on URL keyword searches
 const MOCK_IMPORTED_RECIPES = {

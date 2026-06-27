@@ -493,48 +493,15 @@ export function fetchHtmlThroughProxy(url) {
 }
 
 /**
- * Helper to get a plausible recipe link on a real cooking website based on query/category.
+ * Helper to get a search link on Google to find matching recipes on the web.
+ * This avoids fabricating exact URLs that might lead to 404 errors.
  */
 export function getPlausibleRecipeLink(query, category) {
   const clean = (query || "").trim().replace(/[^\w\s-]/g, "");
-  const kebab = clean.toLowerCase().replace(/\s+/g, "-");
   
-  const filipinoKeywords = [
-    "adobo", "sinigang", "kaldereta", "caldereta", "tinola", "pinakbet", "sisig", 
-    "bicol express", "kare-kare", "kare kare", "pancit", "lumpia", "filipino", 
-    "pinoy", "lechon", "tocino", "longganisa", "tapa", "biko", "cassava", 
-    "afritada", "mechado", "menudo", "bulalo", "dinuguan", "laing", "bilo-bilo",
-    "sopas", "arroz caldo", "champorado"
-  ];
-  
-  const isFilipino = filipinoKeywords.some(keyword => clean.toLowerCase().includes(keyword));
-  
-  if (isFilipino) {
-    return {
-      url: `https://panlasangpinoy.com/${kebab}/`,
-      name: "Panlasang Pinoy"
-    };
-  }
-  
-  const bakingKeywords = [
-    "cupcake", "cake", "cookie", "cookies", "brownie", "brownies", "muffin", 
-    "muffins", "pie", "pies", "bread", "tart", "tarts", "frosting", "glaze", 
-    "baking", "bake", "cheesecake", "doughnut", "donut"
-  ];
-  
-  const isBaking = bakingKeywords.some(keyword => clean.toLowerCase().includes(keyword));
-  
-  if (isBaking || (category && category.toLowerCase() === "baking")) {
-    return {
-      url: `https://sallysbakingaddiction.com/${kebab}/`,
-      name: "Sally's Baking Addiction"
-    };
-  }
-  
-  // General western/global fallback: Serious Eats
   return {
-    url: `https://www.seriouseats.com/${kebab}-recipe`,
-    name: "Serious Eats"
+    url: `https://www.google.com/search?q=${encodeURIComponent(clean + ' recipe')}`,
+    name: "Google Search"
   };
 }
 
