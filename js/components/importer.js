@@ -1,7 +1,7 @@
 // URL Recipe Importer Logic & Scraper Simulator
 
 import { store } from "../store.js";
-import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy, generateDynamicFallback, getGeminiEndpoint } from "../utils.js?v=2.4";
+import { getGourmetFoodImage, extractEquipment, fetchHtmlThroughProxy, generateDynamicFallback, getGeminiEndpoint } from "../utils.js?v=2.5";
 
 // Mock database of recipes to return based on URL keyword searches
 const MOCK_IMPORTED_RECIPES = {
@@ -214,7 +214,7 @@ export function simulateRecipeImport(url, onStepChange, onComplete, skipSave = f
       onStepChange({ step: "extract", status: "Downloading HTML & searching metadata...", progress: 50 });
       
       const schemaRecipe = extractRecipeSchema(html);
-      const meta = extractMetaFallbacks(html);
+      const meta = extractMetaFallbacks(html, targetUrl);
       
       let importedRecipe = null;
       
@@ -223,6 +223,9 @@ export function simulateRecipeImport(url, onStepChange, onComplete, skipSave = f
         let desc = schemaRecipe.description || meta.description || `Sourced from online article.`;
         
         let imageUrl = extractImage(schemaRecipe.image);
+        if (imageUrl) {
+          imageUrl = resolveUrl(targetUrl, imageUrl);
+        }
         if (!imageUrl) imageUrl = meta.image || getGourmetFoodImage(title, schemaRecipe.recipeCategory || "Mains");
         
         let servings = 4;
@@ -586,7 +589,27 @@ function parseISO8601Duration(duration) {
   return 15;
 }
 
-function extractMetaFallbacks(html) {
+function resolveUrl(baseUrl, targetUrl) {
+  if (!targetUrl) return "";
+  try {
+    return new URL(targetUrl, baseUrl).href;
+  } catch (e) {
+    if (targetUrl.startsWith("//")) {
+      return "https:" + targetUrl;
+    }
+    if (targetUrl.startsWith("/")) {
+      try {
+        const origin = new URL(baseUrl).origin;
+        return origin + targetUrl;
+      } catch (urlErr) {
+        return targetUrl;
+      }
+    }
+    return targetUrl;
+  }
+}
+
+function extractMetaFallbacks(html, baseUrl) {
   const meta = { title: "", image: "", description: "" };
   
   // Extract <title>
@@ -610,7 +633,7 @@ function extractMetaFallbacks(html) {
   if (ogTitle) meta.title = ogTitle;
   
   const ogImage = getMetaTagContent(html, "og:image");
-  if (ogImage) meta.image = ogImage;
+  if (ogImage) meta.image = resolveUrl(baseUrl, ogImage);
   
   const ogDesc = getMetaTagContent(html, "og:description");
   if (ogDesc) meta.description = ogDesc;
@@ -863,14 +886,22 @@ export async function importTikTokRecipe(url, apiKey, onStepChange, onComplete, 
       console.warn("Failed to fetch TikTok page HTML via proxy, proceeding with URL keywords", e);
     }
     
+    let tiktokImage = "";
     if (pageHtml) {
       const titleMatch = pageHtml.match(/<title>([\s\S]*?)<\/title>/i);
       const ogDescMatch = pageHtml.match(/<meta\b[^>]*?(?:property|name)=["']og:description["'][^>]*?content=["']([^"']+)["']/i) ||
                           pageHtml.match(/<meta\b[^>]*?content=["']([^"']+)["'][^>]*?(?:property|name)=["']og:description["']/i);
       
+      const ogImageMatch = pageHtml.match(/<meta\b[^>]*?(?:property|name)=["']og:image["'][^>]*?content=["']([^"']+)["']/i) ||
+                           pageHtml.match(/<meta\b[^>]*?content=["']([^"']+)["'][^>]*?(?:property|name)=["']og:image["']/i);
+      
       const title = titleMatch ? titleMatch[1] : "";
       const description = ogDescMatch ? ogDescMatch[1] : "";
       extractedText = `Title: ${title}\nDescription: ${description}`;
+      
+      if (ogImageMatch) {
+        tiktokImage = resolveUrl(url, ogImageMatch[1].trim());
+      }
     }
     
     onStepChange({ step: "structure", status: "Running Gemini Culinary AI Analysis...", progress: 70 });
@@ -951,7 +982,7 @@ Ensure all properties are completed.
     recipeData.id = `imported-tiktok-${Date.now()}`;
     recipeData.sourceUrl = url;
     recipeData.sourceName = "TikTok";
-    recipeData.image = getGourmetFoodImage(recipeData.title, recipeData.category);
+    recipeData.image = tiktokImage || getGourmetFoodImage(recipeData.title, recipeData.category);
     recipeData.equipment = extractEquipment(recipeData.title, recipeData.ingredients, recipeData.instructions);
     
     onStepChange({ step: "save", status: "Saving to your Recipe Box...", progress: 100 });
